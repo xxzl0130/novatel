@@ -38,7 +38,7 @@
 
 #ifndef NOVATEL_H
 #define NOVATEL_H
-
+#pragma warnind( disable: 4251 )
 #include <string>
 #include <cstring> // for size_t
 
