@@ -471,9 +471,9 @@ void Novatel::PDPModeConfigure(PDPMode mode, PDPDynamics dynamics) {
         std::stringstream pdp_cmd;
 
         pdp_cmd << "PDPMODE ";
-        if (mode == NORMAL)
+        if (mode == PDP_NORMAL)
             pdp_cmd << "NORMAL ";
-        else if (mode == RELATIVE)
+        else if (mode == PDP_RELATIVE)
             pdp_cmd << "RELATIVE ";
         else {
             log_error_("PDPModeConfigure() input 'mode'' is not valid!");
@@ -576,6 +576,7 @@ bool Novatel::InjectAlmanac(Almanac almanac) {
             cout << "Sent ALMANAC." << endl;
             return true;
         }
+        return false;
     } catch (std::exception &e){
         std::stringstream output;
         output << "Error in Novatel::InjectAlmanac(): " << e.what();
@@ -1474,9 +1475,9 @@ void Novatel::ParseBinary(unsigned char *message, size_t length, BINARY_LOG_TYPE
             payload_length = (((uint16_t) *(message+9)) << 8) + ((uint16_t) *(message+8));
 
             // Copy header and unrepeated part of message
-            memcpy(&sat_pos, message, header_length+12);
+            memcpy(&sat_vis, message, header_length+12);
             //Copy repeated fields
-            memcpy(&sat_vis.data, message+header_length+12, (40*sat_vis.number_of_satellites));
+            memcpy(&sat_vis.data, message+header_length+12, (40* sat_vis.number_of_satellites));
             //Copy CRC
             memcpy(&ranges.crc, message+header_length+payload_length, 4);
 

@@ -2,6 +2,12 @@
 #ifndef NOVATELENUMS_H
 #define NOVATELENUMS_H
 
+#ifdef NOVATEL_DLL
+#define NOVATEL_EXPORT __declspec(dllexport)
+#else
+#define NOVATEL_EXPORT __declspec(dllimport)
+#endif
+
 #include <stdint.h>  // use fixed size integer types, rather than standard c++ types
 
 namespace novatel {
@@ -11,27 +17,27 @@ namespace novatel {
 // USER-DEFINED ENUMS
 //*******************************************************************************
 
-enum true_false {
+enum NOVATEL_EXPORT true_false {
     FALSE = 0,
     TRUE = 1
 };
 
-enum return_type {
+enum NOVATEL_EXPORT return_type {
     success,
     fail
 };
 
-enum base_type {
+enum NOVATEL_EXPORT base_type {
     stationary,
     dynamic
 };
 
-enum yes_no {
+enum NOVATEL_EXPORT yes_no {
     no,
     yes
 };
 
-enum rec_type {
+enum NOVATEL_EXPORT rec_type {
     stand_alone,
     rover_with_static_base,
     static_base_station,
@@ -44,7 +50,7 @@ enum rec_type {
 // NOVATEL ENUMS
 //*******************************************************************************
 
-enum RangeRejectCode { //!< Used in TRACKSTAT
+enum NOVATEL_EXPORT RangeRejectCode { //!< Used in TRACKSTAT
     GOOD = 0,               //!< Observation is good
     BADHEALTH = 1,          //!< Bad SV health indicated by ephemeris
     OLDEPHEMERIS = 2,       //!< Ephemeris not updated during the las 3 hours
@@ -64,7 +70,7 @@ enum RangeRejectCode { //!< Used in TRACKSTAT
     BAD_INTEGRITY = 100,    //!< Integrity of the pseudorange is bad
 };
 
-enum AMBIGUITY_TYPE {
+enum NOVATEL_EXPORT AMBIGUITY_TYPE {
     UNDEFINED = 0,
     FLOAT_L1 = 1,
     FLOAT_IONOFREE = 2,
@@ -76,7 +82,7 @@ enum AMBIGUITY_TYPE {
     IONOFREE_DISCRETE = 8
 };
 
-enum SEARCHER_TYPE {
+enum NOVATEL_EXPORT SEARCHER_TYPE {
     NONE_REQUESTED = 0,
     BUFFERING_MEASUREMENTS = 1,
     SEARCHING = 2,
@@ -85,7 +91,7 @@ enum SEARCHER_TYPE {
 };
 
 
-enum TIME_STATUS  {
+enum NOVATEL_EXPORT TIME_STATUS  {
    GPSTIME_UNKNOWN = 20,
    GPSTIME_APPROXIMATE =60 ,
    GPSTIME_COARSEADJUSTING=80,
@@ -99,7 +105,7 @@ enum TIME_STATUS  {
 };
 
 
-enum LogMode
+enum NOVATEL_EXPORT LogMode
 {
 	ONNEW,			//!< does not output current message, but outputs when message is updated
 	ONCHANGED,		//!< outputs the current message and then continues to output when the message is changed
@@ -111,7 +117,7 @@ enum LogMode
 };
 
 
-enum SolutionStatus
+enum NOVATEL_EXPORT SolutionStatus
 {
 	SOL_COMPUTED,		//!< solution computed
 	INSUFFICIENT_OBS,	//!< insufficient observations
@@ -135,7 +141,7 @@ enum SolutionStatus
 	UNAUTHORIZED
 };
 
-enum MessageFormat //!< Bits 5-6 of MessageType struct
+enum NOVATEL_EXPORT MessageFormat //!< Bits 5-6 of MessageType struct
 {
     BINARY = 0b00,
     ASCII = 0b01,
@@ -143,13 +149,13 @@ enum MessageFormat //!< Bits 5-6 of MessageType struct
     NMEA = 0b11,
 };
 
-enum ResponseBit //!< Last bit (7) of MessageType struct
+enum NOVATEL_EXPORT ResponseBit //!< Last bit (7) of MessageType struct
 {
     ORIGINAL_MESSAGE = 0b0,
     RESPONSE_MESSAGE = 0b1,
 };
 
-enum PositionType
+enum NOVATEL_EXPORT PositionType
 {
     NONE = 0,
     FIXEDPOS = 1,
@@ -181,7 +187,7 @@ enum PositionType
 	CDGPS = 66,
 };
 
-enum DatumID
+enum NOVATEL_EXPORT DatumID
 {
 	ADIND=1,
 	ARC50,
@@ -272,7 +278,7 @@ enum DatumID
 };
 
 
-enum InsStatus
+enum NOVATEL_EXPORT InsStatus
 {
 	INS_STATUS_INACTIVE,
 	INS_STATUS_ALIGNING,
@@ -284,7 +290,7 @@ enum InsStatus
 	INS_ALIGNMENT_COMPLETE
 };
 
-enum StatusWord
+enum NOVATEL_EXPORT StatusWord
 {
 	RCV_ERROR,		//!< Receiver error word
 	RCV_STATUS,		//!< receiver status word
@@ -293,33 +299,33 @@ enum StatusWord
 	AUX3		//!< auxillary 3 status word
 };
 
-enum EventType
+enum NOVATEL_EXPORT EventType
 {
 	CLEAR=0,	//!< bit was cleared
 	SET=1		//!< bit was set
 };
 
-enum PDPSwitch //!< Used in PDPFILTER Command
+enum NOVATEL_EXPORT PDPSwitch //!< Used in PDPFILTER Command
 {
     DISABLE = 0,
     ENABLE = 1,
     RESET = 2,
 };
 
-enum PDPMode
+enum NOVATEL_EXPORT PDPMode
 {
-    NORMAL = 0,
-    RELATIVE = 1,
+    PDP_NORMAL = 0,
+    PDP_RELATIVE = 1,
 };
 
-enum PDPDynamics
+enum NOVATEL_EXPORT PDPDynamics
 {
     AUTO = 0,       //!< Autodetect dynamics mode
     STATIC = 1,     //!< Static Mode
     DYNAMIC = 2,    //!< Dynamic Mode
 };
 
-enum FRESET_TARGET
+enum NOVATEL_EXPORT FRESET_TARGET
 {
     STANDARD = 0,           //!< [DEFAULT] Clears commands, ephemeris, and almanac
     COMMAND = 1,            //!< Clears saved configuration
@@ -334,7 +340,7 @@ enum FRESET_TARGET
     LBAND_TCXO_OFFSET = 38, //!< Removes the TCXO offset information from NVM (not in OEMStar firmware)
 };
 
-enum BINARY_LOG_TYPE
+enum NOVATEL_EXPORT BINARY_LOG_TYPE
 {
   // OEM4 logs
   GPSEPHEMB_LOG_TYPE = 7,
@@ -395,7 +401,7 @@ enum BINARY_LOG_TYPE
   RAWIMUS_LOG_TYPE = 325,
   VEHICLEBODYROTATION_LOG_TYPE = 642
 };
-typedef enum BINARY_LOG_TYPE BINARY_LOG_TYPE;
+typedef enum NOVATEL_EXPORT BINARY_LOG_TYPE BINARY_LOG_TYPE;
 
 }
 

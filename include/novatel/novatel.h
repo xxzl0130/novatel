@@ -107,7 +107,7 @@ typedef boost::function<void(Position&, double&)> BestPseudorangePositionCallbac
 typedef boost::function<void(Position&, double&)> RtkPositionCallback;
 
 
-class Novatel
+class NOVATEL_EXPORT Novatel
 {
 public:
 	Novatel();

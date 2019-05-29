@@ -40,7 +40,6 @@
 
 #include "novatel_enums.h"
 #include <stdint.h>  // use fixed size integer types, rather than standard c++ types
-#include <stdint.h>  // use fixed size integer types, rather than standard c++ types
 
 namespace novatel {
 
@@ -102,7 +101,7 @@ namespace novatel {
  * Message Type
  */
 PACK(
-struct MessageType {
+struct NOVATEL_EXPORT MessageType {
     unsigned reserved:5;
     MessageFormat format:2;
     ResponseBit response:1;
@@ -110,7 +109,7 @@ struct MessageType {
 
 //! Header prepended to OEM4 binary messages
 PACK(
-struct Oem4BinaryHeader
+struct NOVATEL_EXPORT Oem4BinaryHeader
 {
    uint8_t          sync1;          //!< start of packet first byte (0xAA)
    uint8_t          sync2;          //!< start of packet second byte (0x44)
@@ -132,7 +131,7 @@ struct Oem4BinaryHeader
 
 //! Header prepended to OEM4 binary messages
 PACK(
-struct OEM4ShortBinaryHeader
+struct NOVATEL_EXPORT OEM4ShortBinaryHeader
 {
    uint8_t          sync1;          //!< start of packet first byte (0xAA)
    uint8_t          sync2;          //!< start of packet second byte (0x44)
@@ -150,7 +149,7 @@ struct OEM4ShortBinaryHeader
 
 //! IMU status structure that is included in the RAWIMU message
 PACK(
-struct ImuStatus
+struct NOVATEL_EXPORT ImuStatus
 {
    unsigned counter : 4;						//!< 4 byte counter
    unsigned imu_test : 1;						//!< IMU test: Passed=0, Failed=1
@@ -175,7 +174,7 @@ struct ImuStatus
  * of using three separate logs.
  */
 PACK(
-struct InsPositionVelocityAttitude
+struct NOVATEL_EXPORT InsPositionVelocityAttitude
 {
 	Oem4BinaryHeader header;	//!< Message header
 	uint32_t gps_week;			//!< GPS week number
@@ -200,7 +199,7 @@ struct InsPositionVelocityAttitude
  * of using three separate logs. Short header version
  */
 PACK(
-struct InsPositionVelocityAttitudeShort
+struct NOVATEL_EXPORT InsPositionVelocityAttitudeShort
 {
 	OEM4ShortBinaryHeader header;
 	uint32_t gps_week;			//!< GPS week number
@@ -228,7 +227,7 @@ struct InsPositionVelocityAttitudeShort
  * are only available after alignment.
  */
 PACK(
-struct InsCovariance
+struct NOVATEL_EXPORT InsCovariance
 {
 	Oem4BinaryHeader header;	//!< Message header
 	uint32_t gps_week;				//!< GPS week number
@@ -250,7 +249,7 @@ struct InsCovariance
  * header version of INSCOV
  */
 PACK(
-struct InsCovarianceShort
+struct NOVATEL_EXPORT InsCovarianceShort
 {
 	OEM4ShortBinaryHeader header;	//!< Message header
 	uint32_t gps_week;				//!< GPS week number
@@ -270,7 +269,7 @@ struct InsCovarianceShort
  * directions, and includes an INS status indicator.
  */
 PACK(
-struct InsSpeed
+struct NOVATEL_EXPORT InsSpeed
 {
 	Oem4BinaryHeader header;	//!< Message header
 	uint32_t gps_week;			//!< GPS week number
@@ -292,7 +291,7 @@ struct InsSpeed
  * log to reduce the amount of data,
  */
 PACK(
-struct RawImu
+struct NOVATEL_EXPORT RawImu
 {
 	Oem4BinaryHeader header;	//!< Message header
 	uint32_t gps_week;			//!< GPS week number
@@ -319,7 +318,7 @@ struct RawImu
  * frame. It is a short header version of RAWIMU
  */
 PACK(
-struct RawImuShort
+struct NOVATEL_EXPORT RawImuShort
 {
 	OEM4ShortBinaryHeader header;	//!< Message header
 	uint32_t gps_week;				//!< GPS week number
@@ -347,7 +346,7 @@ struct RawImuShort
  *  the same as the SPAN frame.
  */
 PACK(
-struct VehicleBodyRotation
+struct NOVATEL_EXPORT VehicleBodyRotation
 {
 	Oem4BinaryHeader header;//!< Message header
 	double x_angle;			//!< rotation about vehicle frame x axis (deg)
@@ -368,7 +367,7 @@ struct VehicleBodyRotation
  * uncertainties.
  */
 PACK(
-struct BestLeverArm
+struct NOVATEL_EXPORT BestLeverArm
 {
 	Oem4BinaryHeader header;//!< Message header
 	double x_offset;		//!< x offset in IMU enclosure frame (m)
@@ -398,7 +397,7 @@ struct BestLeverArm
  *  - PSRPOS
  */
 PACK(
-struct Position
+struct NOVATEL_EXPORT Position
 {
 	Oem4BinaryHeader header;			//!< Message header
 	SolutionStatus solution_status;		//!< Solution status
@@ -439,7 +438,7 @@ struct Position
  *  - PSRXYZ
  */
 PACK(
-struct PositionEcef
+struct NOVATEL_EXPORT PositionEcef
 {
     Oem4BinaryHeader header;				//!< Message header
     SolutionStatus 	 solution_status;		//!< Solution status
@@ -489,7 +488,7 @@ struct PositionEcef
  *  - PSRVEL
  */
 PACK(
-struct Velocity
+struct NOVATEL_EXPORT Velocity
 {
 	Oem4BinaryHeader header;			//!< Message header
 	SolutionStatus solution_status;		//!< Solution status
@@ -520,7 +519,7 @@ struct Velocity
  *  - RTKDOP
  */
 PACK(
-struct Dop {
+struct NOVATEL_EXPORT Dop {
     Oem4BinaryHeader header;            //!< Message header
     float geometric_dop;                //!< Geometric DOP
     float position_dop;                 //!< Position DOP
@@ -545,7 +544,7 @@ struct Dop {
  * is valid.
  */
 PACK(
-struct BaselineEcef
+struct NOVATEL_EXPORT BaselineEcef
 {
   Oem4BinaryHeader header;				//!< Message header
   SolutionStatus 	 solution_status;		//!< Solution status
@@ -582,7 +581,7 @@ struct BaselineEcef
  * in the log is unusable.
  */
 PACK(
-struct UtmPosition
+struct NOVATEL_EXPORT UtmPosition
 {
     Oem4BinaryHeader header;			//!< Message header
     SolutionStatus solution_status;		//!< Solution status
@@ -618,7 +617,7 @@ struct UtmPosition
  * Coordinated parametres (UTC)
  */
 PACK(
-struct IonosphericModel {
+struct NOVATEL_EXPORT IonosphericModel {
     Oem4BinaryHeader header;				//!< Message header
     double a0; //!< alpha parameter constant term
     double a1; //!< alpha parameter 1st order term
@@ -645,7 +644,7 @@ struct IonosphericModel {
  * Used in logs RANGE and TRACKSTAT
  */
 PACK(
-struct ChannelStatus {
+struct NOVATEL_EXPORT ChannelStatus {
 	unsigned int tracking_state : 5;
 	unsigned int sv_chan_num : 5;
 	unsigned int phase_lock_flag : 1;
@@ -670,7 +669,7 @@ struct ChannelStatus {
  * single channel. Used in the RangeMeasurements structure.
  */
 PACK(
-struct RangeData {
+struct NOVATEL_EXPORT RangeData {
     uint16_t satellite_prn;                  //!< SV PRN number
     uint16_t glonass_frequency;              //!< Frequency number of GLONASS SV (0 for GPS)
     double pseudorange;                      //!<  pseudorange [m]
@@ -692,7 +691,7 @@ struct RangeData {
  * the description.
  */
 PACK(
-struct RangeMeasurements {
+struct NOVATEL_EXPORT RangeMeasurements {
     Oem4BinaryHeader header;			//!< Message header
     int32_t number_of_observations;     //!< Number of ranges observations in the following message
     RangeData range_data[MAX_CHAN];      //!< Range data for each available channel
@@ -706,7 +705,7 @@ struct RangeMeasurements {
  * single channel. Used in the RangeMeasurements structure.
  */
 PACK( 
-struct CompressedRangeRecord {
+struct NOVATEL_EXPORT CompressedRangeRecord {
     int64_t doppler:28;                             //!< Doppler frequency [Hz]; SF = 1/256
     uint64_t pseudorange:36;                         //!<  pseudorange [m]; SF = 1/128
     int32_t accumulated_doppler:32;                //!< accumulated doppler [cycles]; SF = 1/256
@@ -721,7 +720,7 @@ struct CompressedRangeRecord {
 );
 
 PACK(
-struct CompressedRangeData {
+struct NOVATEL_EXPORT CompressedRangeData {
     ChannelStatus channel_status;                   //!< channel tracking status
     CompressedRangeRecord range_record;
 }//;
@@ -732,7 +731,7 @@ struct CompressedRangeData {
  * This log contains the compressed version of the RANGE log.
  */
 PACK(
-struct CompressedRangeMeasurements {
+struct NOVATEL_EXPORT CompressedRangeMeasurements {
     Oem4BinaryHeader header;                        //!< Message header
     int32_t number_of_observations;                 //!< Number of ranges observations in the following message
     CompressedRangeData range_data[MAX_CHAN];       //!< Range data for each available channel
@@ -750,7 +749,7 @@ struct CompressedRangeMeasurements {
  * GPS ephemeris parametres.
  */
 PACK(
-struct GpsEphemeris
+struct NOVATEL_EXPORT GpsEphemeris
 {
     Oem4BinaryHeader header;		//!< Message header
     uint32_t prn;                   //!< PRN number
@@ -795,7 +794,7 @@ struct GpsEphemeris
  * Ephemeris older than 6 hours is not output
  */
 PACK(
-struct RawEphemeris {
+struct NOVATEL_EXPORT RawEphemeris {
     Oem4BinaryHeader header;
     uint32_t prn;                       //!< Satellite PRN number
     uint32_t ephem_reference_week_num;  //!< Ephemeris reference week number
@@ -806,7 +805,7 @@ struct RawEphemeris {
     uint8_t crc[4];                     //!< 32-bit cyclic redundancy check (CRC)
 });
 PACK(
-struct RawEphemerides {
+struct NOVATEL_EXPORT RawEphemerides {
     RawEphemeris ephemeris[MAX_NUM_SAT];
 });
 
@@ -815,13 +814,13 @@ struct RawEphemerides {
  * Contains the undecoded almanac subframes as received from the satellite
  */
 PACK(
-struct RawAlmanacData
+struct NOVATEL_EXPORT RawAlmanacData
 {
 	uint16_t svid;
     uint8_t subframe[30];			// 30 bytes of subframe page data
 });
 PACK(
-struct RawAlmanac
+struct NOVATEL_EXPORT RawAlmanac
 {
 	Oem4BinaryHeader header;
 	uint32_t ref_week;
@@ -838,7 +837,7 @@ struct RawAlmanac
  * info removed.
  */
 PACK(
-struct AlmanacData {
+struct NOVATEL_EXPORT AlmanacData {
 	uint32_t prn;
 	uint32_t ref_week;
 	double ref_time;					//!< [sec]
@@ -858,7 +857,7 @@ struct AlmanacData {
 	true_false anti_spoofing;			//!< 
 });
 PACK(
-struct Almanac {
+struct NOVATEL_EXPORT Almanac {
 	Oem4BinaryHeader header;
 	int32_t number_of_prns;
 	AlmanacData data[MAX_NUM_SAT];
@@ -873,7 +872,7 @@ struct Almanac {
  * up the SatellitePositions structure
  */
 PACK(
-struct SatellitePositionData {
+struct NOVATEL_EXPORT SatellitePositionData {
     uint32_t satellite_prn;             //!< SV PRN number
     double x_position;                  //!< SV X coordinate [m]
     double y_position;                  //!< SV Y coordinate [m]
@@ -893,7 +892,7 @@ struct SatellitePositionData {
  * correction, ionospheric corrections and tropospheric corrections.
  */
 PACK(
-struct SatellitePositions {
+struct NOVATEL_EXPORT SatellitePositions {
     Oem4BinaryHeader header;				//!< Message header
     double dReserved1;                      //!< Reserved
     uint32_t number_of_satellites;          //!< Number of satellites in following message
@@ -908,7 +907,7 @@ struct SatellitePositions {
  * orbital parameters, not the higher precision Ephemeris parameters
  */
 PACK(
-struct SatelliteVisibilityData {
+struct NOVATEL_EXPORT SatelliteVisibilityData {
     int16_t satellite_prn;              //!< SV PRN number
         //!< GPS 1-32
         //!< SBAS 120-138
@@ -922,7 +921,7 @@ struct SatelliteVisibilityData {
 });
 
 PACK(
-struct SatelliteVisibility {
+struct NOVATEL_EXPORT SatelliteVisibility {
     Oem4BinaryHeader header;				//!< Message header
     true_false sat_vis;                     //!< Reserved
     true_false complete_almanac_used;       //!< Was Complete almanac used
@@ -944,7 +943,7 @@ struct SatelliteVisibility {
  * UTC time = GPS time + offset + UTC offset
  */
 PACK(
-struct TimeOffset {
+struct NOVATEL_EXPORT TimeOffset {
     Oem4BinaryHeader header;			//!< Message header
     uint32_t clock_model_status;        //!< ClockModelStatus
     double offset;                      //!< Receiver Offset in seconds from GPS time
@@ -965,7 +964,7 @@ struct TimeOffset {
  * This log provides the Tracking Status information for each
  * receiver channel
  */
-struct TrackStatusData {
+struct NOVATEL_EXPORT TrackStatusData {
     uint16_t prn;                       //!< SV prn
     int16_t glonass_frequency;          //!< GLONASS frequency +7
     ChannelStatus channel_track_status; //!< Channel tracking status
@@ -977,7 +976,7 @@ struct TrackStatusData {
     RangeRejectCode range_reject_code;  //!< Range reject code from pseudorange filter
     float pseudorange_weight;           //!< Pseudorange filter weighting
 };
-struct TrackStatus {
+struct NOVATEL_EXPORT TrackStatus {
     Oem4BinaryHeader header;            //!< Message header
     SolutionStatus solution_status;     //!< Solution status
     PositionType position_type;         //!< Position type
@@ -991,12 +990,12 @@ struct TrackStatus {
 // RTK GPS STRUCTURES
 //*******************************************************************************
 
-//TODO: CONVERT AND CLEANUP THESE STRCUTURES
+//TODO: CONVERT AND CLEANUP THESE STRUCTURES
 
 //********************
 //RTKDATAB
-
-struct rtkdatab_header {
+PACK(
+struct NOVATEL_EXPORT rtkdatab_header {
     uint32_t rtkinfo; //RTK information
     uint8_t num_obs; //Number of observations tracked
     uint8_t gps_l1_ranges; // Number of GPS L1 ranges used
@@ -1022,46 +1021,51 @@ struct rtkdatab_header {
     float sd_z; // Standard deviation of float solution baseline in ECEF - z
     uint32_t ref_prn; // Reference PRN
     int32_t num_svs; // The number of SVs in data portion
-} __attribute__((packed));
+});
 
-struct rtkdatab_data {
+PACK(
+struct NOVATEL_EXPORT rtkdatab_data {
     uint32_t prn; // GPS satellite PRN
     AMBIGUITY_TYPE ambiguity_type; // Type of ambiguity
     float residual; // Satellite health
-} __attribute__((packed));
+});
 
-struct rtkdatab_log {
+PACK(
+struct NOVATEL_EXPORT rtkdatab_log {
     Oem4BinaryHeader hdr;
     SolutionStatus solutionStatus; //Solution status
     PositionType positionType; //Position type
     rtkdatab_header header;
     rtkdatab_data data[MAX_NUM_SAT];
-} __attribute__((packed));
+});
 //********************
 
 
 //********************
 //RTCADATA1B
 
-struct rtcadata1b_header {
+PACK(
+struct NOVATEL_EXPORT rtcadata1b_header {
     double zcount; //Week number from subframe one of the ephemeris
     uint8_t aeb; //Acceleration error bound
     uint32_t num_prn; //Number of satellite corrections with info to follow
-} __attribute__((packed));
+});
 
-struct rtcadata1b_data {
+PACK(
+struct NOVATEL_EXPORT rtcadata1b_data {
     uint32_t prn; //PRN number of range measurement
     double range; //pseudorange correction (m)
     uint8_t iode; //Issue of ephemeris data
     double rrate; //pseudorange rate correction (m/s)
     float udre; //user differential range error
-} __attribute__((packed));
+});
 
-struct rtcadata1b_log {
+PACK(
+struct NOVATEL_EXPORT rtcadata1b_log {
     Oem4BinaryHeader header; //Log header
     rtcadata1b_header info;
     rtcadata1b_data data[MAX_NUM_SAT];
-} __attribute__((packed));
+});
 
 //********************
 
@@ -1069,7 +1073,8 @@ struct rtcadata1b_log {
 //********************
 //RTCADATAEPHEMB
 
-struct rtcadataephemb_data {
+PACK(
+struct NOVATEL_EXPORT rtcadataephemb_data {
     uint8_t des; //Novatel designator
     uint8_t subtype; //RTCA message subtype
     uint32_t week; //GPS week number
@@ -1077,28 +1082,30 @@ struct rtcadataephemb_data {
     uint32_t prn; //PRN number
     int8_t reserved[4];
     int8_t ephem[92]; //Raw ephemeris data
-} __attribute__((packed));
+});
 
-struct rtcadataephemb_log {
+PACK(
+struct NOVATEL_EXPORT rtcadataephemb_log {
     Oem4BinaryHeader header; //Log header
     rtcadataephemb_data data;
-} __attribute__((packed));
+});
 //********************
 
 
 //********************
 //RTCADATAOBSB - CHECK
-
-struct rtcadataobsb_header {
+PACK(
+struct NOVATEL_EXPORT rtcadataobsb_header {
     uint8_t des; //Novatel designator
     uint8_t subtype; //RTCA message subtype
     double min_psr; //minimum pseudorange
     float sec; //seconds into GPS week
     int8_t reserved[4];
     uint32_t num_ids; //Number of transmitter ids with info to follow
-} __attribute__((packed));
+});
 
-struct rtcadataobsb_data //Structure for RTCADATAEPHEM message
+PACK(
+struct NOVATEL_EXPORT rtcadataobsb_data //Structure for RTCADATAEPHEM message
 {
     uint8_t transID; //Transmitter ID
     uint8_t L1lock; //L1 lock flag
@@ -1109,32 +1116,34 @@ struct rtcadataobsb_data //Structure for RTCADATAEPHEM message
     float L2adr; //L2 carrier phase offset, accumulated doppler range
     yes_no L2encrypt; //If L2 is encrypted
     int8_t reserved[4];
-} __attribute__((packed));
+});
 
-struct rtcadataobsb_log {
+PACK(
+struct NOVATEL_EXPORT rtcadataobsb_log {
     Oem4BinaryHeader header; //Log header
     rtcadataobsb_header info;
     rtcadataobsb_data data[MAX_NUM_SAT]; //WT:  This is probably too many... need to verify how many id's can be sent.
-} __attribute__((packed));
+});
 //********************
 
 
 //********************
 //RTCADATAREFB
-
-struct rtcadatarefb_data {
+PACK(
+struct NOVATEL_EXPORT rtcadatarefb_data {
     uint8_t des; //Novatel designator
     uint8_t subtype; //RTCA message subtype
     double posX; //base station X coordinate position (mm)
     double posY; //base station Y coordinate position (mm)
     double posZ; //base station Z coordinate position (mm)
     int8_t reserved[4];
-} __attribute__((packed));
+});
 
-struct rtcadatarefb_log {
+PACK(
+struct NOVATEL_EXPORT rtcadatarefb_log {
     Oem4BinaryHeader header; //Log header
     rtcadatarefb_data data;
-} __attribute__((packed));
+});
 //********************
 
 
@@ -1155,7 +1164,7 @@ struct rtcadatarefb_log {
  *
  */
 PACK(
-struct Version
+struct NOVATEL_EXPORT Version
 {
 	Oem4BinaryHeader header;		//!< Message header
 	int32_t number_of_components;	//!< Number of components (cards, etc..)
@@ -1171,7 +1180,7 @@ struct Version
 });
 
 
-struct ReceiverError
+struct NOVATEL_EXPORT ReceiverError
 {
 	int32_t DRAMStatus :1;
 	int32_t invalidFirmware : 1;
@@ -1198,7 +1207,7 @@ struct ReceiverError
 
 };
 
-struct ReceiverStatus
+struct NOVATEL_EXPORT ReceiverStatus
 {
 	int32_t errorFlag : 1;
 	int32_t temperatureStatus : 1;
@@ -1245,7 +1254,7 @@ struct ReceiverStatus
  * future expansion.
  */
 PACK(
-struct RXStatus
+struct NOVATEL_EXPORT RXStatus
 {
 	Oem4BinaryHeader header;	//!<
 	ReceiverError error;		//!< receiver error field
@@ -1270,7 +1279,7 @@ struct RXStatus
 });
 
 
-struct RXStatusEvent
+struct NOVATEL_EXPORT RXStatusEvent
 {
 	Oem4BinaryHeader header;
 	StatusWord	status;		// the status word that generated the event message
@@ -1283,7 +1292,7 @@ struct RXStatusEvent
  * RXHWLEVELS Message Structure
  * This log contains the receiver environmental and voltage parametres.
  */
-struct ReceiverHardwareStatus
+struct NOVATEL_EXPORT ReceiverHardwareStatus
 {
 	Oem4BinaryHeader header;
     float board_temperature;	//!< board temperature in degrees celcius
