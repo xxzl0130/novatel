@@ -97,7 +97,7 @@ int main(int argc, char* argv[])
     size_t size = file1.tellg();
 
     // Put data into buffer
-    unsigned char buff[size];
+    unsigned char *buff = new unsigned char[size];
 
     file1.seekg(0, file1.beg);
     file1.read((char*)buff, size);
@@ -121,4 +121,5 @@ int main(int argc, char* argv[])
     //{
     //  rx1.ReadFromFile((&buff[kk]), 1);
     //}
+    delete[] buff;
 }

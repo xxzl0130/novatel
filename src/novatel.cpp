@@ -249,8 +249,11 @@ bool Novatel::Connect_(std::string port, int baudrate = 115200)
     {
         //serial::Timeout my_timeout(50, 200, 0, 200, 0); // 115200 working settings
         //serial_port_ = new serial::Serial(port,baudrate,my_timeout);
-
-        serial_port_ = new serial::Serial(port, baudrate, serial::Timeout::simpleTimeout(1000));
+        if (!serial_port_)
+        {
+            //default timeout 200ms
+            serial_port_ = new serial::Serial(port, baudrate, serial::Timeout::simpleTimeout(200));
+        }
 
         if (!serial_port_->isOpen())
         {

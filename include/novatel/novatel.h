@@ -254,7 +254,7 @@ namespace novatel
          * Requests version information from the receiver
          *
          * This requests the VERSION message from the receiver and
-         * uses the result to populate the receiver capapbilities
+         * uses the result to populate the receiver capabilities
          *
          * @return True if the GPS was found, false if it was not.
          */
