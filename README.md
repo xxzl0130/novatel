@@ -31,6 +31,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 # Authors
 
 David Hodo <david.hodo@gmail.com>
+
 xxzl0130 <zaxs0130@gmail.com>
 
 Portions of this library are based on previous code by William Travis and Scott Martin.  Thanks to William Woodall for the serial library.
