@@ -113,7 +113,7 @@ struct NOVATEL_EXPORT Oem4BinaryHeader
    uint8_t sync2; //!< start of packet second byte (0x44)
    uint8_t sync3; //!< start of packet third  byte (0x12)
    uint8_t header_length; //!< Length of the header in bytes ( From start of packet )
-   uint16_t message_id; //!< Message ID number
+   BINARY_LOG_TYPE message_id; //!< Message ID number
    MessageType message_type; //!< Message type - binary, ascii, nmea, etc...
    uint8_t port_address; //!< Address of the data port the log was received on
    uint16_t message_length; //!< Message length (Not including header or CRC)

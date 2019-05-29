@@ -1,4 +1,5 @@
 #include "novatel/novatel.h"
+#include "crc32c/crc32c.h"
 
 #include <cmath>
 #include <iostream>
@@ -22,17 +23,7 @@ Calculate a CRC value to be used by CRC calculation functions.
 -------------------------------------------------------------------------- */
 unsigned long CRC32Value(int i)
 {
-    int j;
-    unsigned long ulCRC;
-    ulCRC = i;
-    for (j = 8; j > 0; j--)
-    {
-        if (ulCRC & 1)
-            ulCRC = (ulCRC >> 1) ^ CRC32_POLYNOMIAL;
-        else
-            ulCRC >>= 1;
-    }
-    return ulCRC;
+    return crc32c::Crc32c((char*)&i,sizeof(i));
 }
 
 
@@ -42,16 +33,7 @@ Calculates the CRC-32 of a block of data all at once
 unsigned long CalculateBlockCRC32(unsigned long ulCount, /* Number of bytes in the data block */
                                   unsigned char* ucBuffer) /* Data block */
 {
-    unsigned long ulTemp1;
-    unsigned long ulTemp2;
-    unsigned long ulCRC = 0;
-    while (ulCount-- != 0)
-    {
-        ulTemp1 = (ulCRC >> 8) & 0x00FFFFFFL;
-        ulTemp2 = CRC32Value(((int)ulCRC ^ *ucBuffer++) & 0xff);
-        ulCRC = ulTemp1 ^ ulTemp2;
-    }
-    return (ulCRC);
+    return crc32c::Crc32c(ucBuffer, ulCount);
 }
 
 
@@ -166,7 +148,6 @@ Novatel::Novatel()
     log_info_ = DefaultInfoMsgCallback;
     log_warning_ = DefaultWarningMsgCallback;
     log_error_ = DefaultErrorMsgCallback;
-    reading_acknowledgement_ = false;
     buffer_index_ = 0;
     read_timestamp_ = 0;
     parse_timestamp_ = 0;
@@ -1245,161 +1226,100 @@ void Novatel::ReadFromFile(unsigned char* buffer, unsigned int length)
 void Novatel::BufferIncomingData(unsigned char* message, unsigned int length)
 {
     // add incoming data to buffer
-    for (unsigned int ii = 0; ii < length; ii++)
+    if(buffer_index_ + length >= MAX_NOUT_SIZE)
     {
-        // make sure bufIndex is not larger than buffer
-        if (buffer_index_ >= MAX_NOUT_SIZE)
+        memset(data_buffer_, 0, sizeof(data_buffer_));
+        log_warning_("Overflowed receive buffer. Buffer cleared.");
+        buffer_index_ = 0;
+    }
+    memcpy(data_buffer_ + buffer_index_, message, length);
+    buffer_index_ += length;
+    for(auto i = 0;i < buffer_index_;++i)
+    {
+        if(data_buffer_[i] == SYNC_BYTE_1 && data_buffer_[i + 1] == SYNC_BYTE_2 && data_buffer_[i + 2] == SYNC_BYTE_3
+            && CheckBinaryFormat(data_buffer_ + i, buffer_index_ - i))
         {
+            ParseBinary(data_buffer_ + i, buffer_index_ - i);
+            memset(data_buffer_, 0, sizeof(data_buffer_));
             buffer_index_ = 0;
-            log_warning_("Overflowed receive buffer. Buffer cleared.");
+            return;
         }
-
-        if (buffer_index_ == 0)
+        if (data_buffer_[i] == '#' && CheckAsciiFormat(message + i, buffer_index_ - i))
         {
-            // looking for beginning of message
-            if (message[ii] == NOVATEL_SYNC_BYTE_1)
-            {
-                // beginning of msg found - add to buffer
-                data_buffer_[buffer_index_++] = message[ii];
-                bytes_remaining_ = 0;
-            }
-            else if (message[ii] == NOVATEL_ACK_BYTE_1)
-            {
-                // received beginning of acknowledgement
-                reading_acknowledgement_ = true;
-                buffer_index_ = 1;
-            }
-            else if ((message[ii] == NOVATEL_RESET_BYTE_1) && waiting_for_reset_complete_)
-            {
-                // received {COM#} acknowledging receiver reset complete
-                reading_reset_complete_ = true;
-                buffer_index_ = 1;
-            }
-            else
-            {
-                //log_debug_("BufferIncomingData::Received unknown data.");
-            }
-        }
-        else if (buffer_index_ == 1)
-        {
-            // verify 2nd character of header
-            if (message[ii] == NOVATEL_SYNC_BYTE_2)
-            {
-                // 2nd byte ok - add to buffer
-                data_buffer_[buffer_index_++] = message[ii];
-            }
-            else if ((message[ii] == NOVATEL_ACK_BYTE_2) && reading_acknowledgement_)
-            {
-                // 2nd byte of acknowledgement
-                buffer_index_ = 2;
-            }
-            else if ((message[ii] == NOVATEL_RESET_BYTE_2) && reading_reset_complete_)
-            {
-                // 2nd byte of receiver reset complete message
-                buffer_index_ = 2;
-            }
-            else
-            {
-                // start looking for new message again
-                buffer_index_ = 0;
-                bytes_remaining_ = 0;
-                reading_acknowledgement_ = false;
-                reading_reset_complete_ = false;
-            } // end if (msg[i]==0x44)
-        }
-        else if (buffer_index_ == 2)
-        {
-            // verify 3rd character of header
-            if (message[ii] == NOVATEL_SYNC_BYTE_3)
-            {
-                // 2nd byte ok - add to buffer
-                data_buffer_[buffer_index_++] = message[ii];
-            }
-            else if ((message[ii] == NOVATEL_ACK_BYTE_3) && (reading_acknowledgement_))
-            {
-                log_info_("RECEIVED AN ACK.");
-                // final byte of acknowledgement received
-                buffer_index_ = 0;
-                reading_acknowledgement_ = false;
-                boost::lock_guard<boost::mutex> lock(ack_mutex_);
-                ack_received_ = true;
-                ack_condition_.notify_all();
-
-                // ACK received
-                handle_acknowledgement_();
-            }
-            else if ((message[ii] == NOVATEL_RESET_BYTE_3) && reading_reset_complete_)
-            {
-                // 3rd byte of receiver reset complete message
-                buffer_index_ = 3;
-            }
-            else
-            {
-                // start looking for new message again
-                buffer_index_ = 0;
-                bytes_remaining_ = 0;
-                reading_acknowledgement_ = false;
-                reading_reset_complete_ = false;
-            } // end if (msg[i]==0x12)
-        }
-        else if (buffer_index_ == 3)
-        {
-            // number of bytes in header - not including sync
-            if ((message[ii] == NOVATEL_RESET_BYTE_4) && (message[ii + 2] == NOVATEL_RESET_BYTE_6)
-                && reading_reset_complete_ && waiting_for_reset_complete_)
-            {
-                // 4th byte of receiver reset complete message
-                //                log_info_("RECEIVER RESET COMPLETE RECEIVED.");
-                buffer_index_ = 0;
-                reading_reset_complete_ = false;
-                boost::lock_guard<boost::mutex> lock(reset_mutex_);
-                waiting_for_reset_complete_ = false;
-                reset_condition_.notify_all();
-            }
-            else
-            {
-                reading_reset_complete_ = false;
-                data_buffer_[buffer_index_++] = message[ii];
-                // length of header is in byte 4
-                header_length_ = message[ii];
-            }
-        }
-        else if (buffer_index_ == 5)
-        {
-            // get message id
-            data_buffer_[buffer_index_++] = message[ii];
-            bytes_remaining_--;
-            message_id_ = BINARY_LOG_TYPE(((data_buffer_[buffer_index_ - 1]) << 8) + data_buffer_[buffer_index_ - 2]);
-            // } else if (buffer_index_ == 8) {	// set number of bytes
-            // 	data_buffer_[buffer_index_++] = message[ii];
-            // 	// length of message is in byte 8
-            // 	// bytes remaining = remainder of header  + 4 byte checksum + length of body
-            // 	// TODO: added a -2 to make things work right, figure out why i need this
-            // 	bytes_remaining_ = message[ii] + 4 + (header_length_-7) - 2;
-        }
-        else if (buffer_index_ == 9)
-        {
-            data_buffer_[buffer_index_++] = message[ii];
-            bytes_remaining_ = (header_length_ - 10) + 4 + (data_buffer_[9] << 8) + data_buffer_[8];
-        }
-        else if (bytes_remaining_ == 1)
-        {
-            // add last byte and parse
-            data_buffer_[buffer_index_++] = message[ii];
-            // BINARY_LOG_TYPE message_id = (BINARY_LOG_TYPE) (((data_buffer_[5]) << 8) + data_buffer_[4]);
-            // log_info_("Sending to ParseBinary");
-            ParseBinary(data_buffer_, buffer_index_, message_id_);
-            // reset counters
+            ParseAscii(data_buffer_ + i, buffer_index_ - i);
+            memset(data_buffer_, 0, sizeof(data_buffer_));
             buffer_index_ = 0;
-            bytes_remaining_ = 0;
+            return;
         }
-        else
+        if(CheckACK(message + i, buffer_index_ - i))
         {
-            // add data to buffer
-            data_buffer_[buffer_index_++] = message[ii];
-            bytes_remaining_--;
+            memset(data_buffer_, 0, sizeof(data_buffer_));
+            buffer_index_ = 0;
+            boost::lock_guard<boost::mutex> lock(ack_mutex_);
+            ack_received_ = true;
+            ack_condition_.notify_all();
+
+            // ACK received
+            handle_acknowledgement_();
+            return;
         }
-    } // end for
+        if(CheckReset(message + i,buffer_index_ - i))
+        {
+            boost::lock_guard<boost::mutex> lock(reset_mutex_);
+            waiting_for_reset_complete_ = false;
+            reset_condition_.notify_all();
+            return;
+        }
+    }
+}
+
+bool Novatel::CheckBinaryFormat(unsigned char* msg, unsigned length)
+{
+    if (length < sizeof(Oem4BinaryHeader))
+        return false;
+    if(msg[0] != SYNC_BYTE_1 || msg[1] != SYNC_BYTE_2 || msg[2] != SYNC_BYTE_3)
+        return false;
+    Oem4BinaryHeader header;
+    memcpy(&header, msg, sizeof(header));
+    if (length < header.message_length + sizeof(Oem4BinaryHeader))
+        return false;
+    length = sizeof(Oem4BinaryHeader) + header.message_length;
+    int32_t crcRes = crc32c::Crc32c(msg, length), crc;
+    memcpy(&crc, msg + length, 4);
+    return crcRes == crc;
+}
+
+bool Novatel::CheckAsciiFormat(unsigned char* msg, unsigned length)
+{
+    if (msg[0] != '#')
+        return false;
+    std::vector<std::string> data;
+    Tokenize(string((char*)msg), data, "*");
+    if (data.size() < 2)
+        return false;
+    int32_t crcRes = crc32c::Crc32c(data[0]), crc;
+    sscanf(data[1].c_str(), "%x", &crc);
+    return crcRes == crc;
+}
+
+bool Novatel::CheckAbbreviatedFormat(unsigned char* msg, unsigned length)
+{
+    return msg[0] == NOVATEL_ACK_BYTE_1;
+}
+
+bool Novatel::CheckACK(unsigned char* msg, unsigned length)
+{
+    if (length < 3)
+        return false;
+    return msg[0] == NOVATEL_ACK_BYTE_1 && msg[1] == NOVATEL_ACK_BYTE_2 && msg[2] == NOVATEL_ACK_BYTE_3;
+}
+
+bool Novatel::CheckReset(unsigned char* msg, unsigned length)
+{
+    if (length < 6)
+        return false;
+    return msg[0] == NOVATEL_RESET_BYTE_1 && msg[1] == NOVATEL_RESET_BYTE_2 && msg[2] == NOVATEL_RESET_BYTE_3
+        && msg[3] == NOVATEL_RESET_BYTE_4 && msg[5] == NOVATEL_RESET_BYTE_6;
 }
 
 void Novatel::ParseBinary(unsigned char* message, size_t length, BINARY_LOG_TYPE message_id)
@@ -1776,6 +1696,22 @@ void Novatel::ParseBinary(unsigned char* message, size_t length, BINARY_LOG_TYPE
     default:
         break;
     }
+}
+
+void Novatel::ParseBinary(unsigned char* message, size_t length)
+{
+    //assume that message has been checked
+    Oem4BinaryHeader header;
+    int32_t id;
+    memcpy(&header, message, sizeof(header));
+    memcpy(&id, message + sizeof(header), sizeof(id));
+    ParseBinary(message, length - sizeof(header) - sizeof(id), header.message_id);
+}
+
+void Novatel::ParseAscii(unsigned char* message, size_t length)
+{
+    //TODO
+    std::cout << message << endl;
 }
 
 void Novatel::UnpackCompressedRangeData(const CompressedRangeData& cmp,

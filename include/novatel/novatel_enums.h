@@ -18,31 +18,31 @@ namespace novatel
     // USER-DEFINED ENUMS
     //*******************************************************************************
 
-    enum NOVATEL_EXPORT true_false
+    enum true_false
     {
         FALSE = 0,
         TRUE = 1
     };
 
-    enum NOVATEL_EXPORT return_type
+    enum return_type
     {
         success,
         fail
     };
 
-    enum NOVATEL_EXPORT base_type
+    enum base_type
     {
         stationary,
         dynamic
     };
 
-    enum NOVATEL_EXPORT yes_no
+    enum yes_no
     {
         no,
         yes
     };
 
-    enum NOVATEL_EXPORT rec_type
+    enum rec_type
     {
         stand_alone,
         rover_with_static_base,
@@ -56,7 +56,7 @@ namespace novatel
     // NOVATEL ENUMS
     //*******************************************************************************
 
-    enum NOVATEL_EXPORT RangeRejectCode
+    enum RangeRejectCode
     {
         //!< Used in TRACKSTAT
         GOOD = 0,
@@ -95,7 +95,7 @@ namespace novatel
         //!< Integrity of the pseudorange is bad
     };
 
-    enum NOVATEL_EXPORT AMBIGUITY_TYPE
+    enum AMBIGUITY_TYPE
     {
         UNDEFINED = 0,
         FLOAT_L1 = 1,
@@ -108,7 +108,7 @@ namespace novatel
         IONOFREE_DISCRETE = 8
     };
 
-    enum NOVATEL_EXPORT SEARCHER_TYPE
+    enum SEARCHER_TYPE
     {
         NONE_REQUESTED = 0,
         BUFFERING_MEASUREMENTS = 1,
@@ -118,7 +118,7 @@ namespace novatel
     };
 
 
-    enum NOVATEL_EXPORT TIME_STATUS
+    enum TIME_STATUS
     {
         GPSTIME_UNKNOWN = 20,
         GPSTIME_APPROXIMATE =60,
@@ -133,7 +133,7 @@ namespace novatel
     };
 
 
-    enum NOVATEL_EXPORT LogMode
+    enum LogMode
     {
         ONNEW,
         //!< does not output current message, but outputs when message is updated
@@ -151,7 +151,7 @@ namespace novatel
     };
 
 
-    enum NOVATEL_EXPORT SolutionStatus
+    enum SolutionStatus
     {
         SOL_COMPUTED,
         //!< solution computed
@@ -194,7 +194,7 @@ namespace novatel
         UNAUTHORIZED
     };
 
-    enum NOVATEL_EXPORT MessageFormat //!< Bits 5-6 of MessageType struct
+    enum MessageFormat //!< Bits 5-6 of MessageType struct
     {
         BINARY = 0b00,
         ASCII = 0b01,
@@ -202,13 +202,13 @@ namespace novatel
         NMEA = 0b11,
     };
 
-    enum NOVATEL_EXPORT ResponseBit //!< Last bit (7) of MessageType struct
+    enum ResponseBit //!< Last bit (7) of MessageType struct
     {
         ORIGINAL_MESSAGE = 0b0,
         RESPONSE_MESSAGE = 0b1,
     };
 
-    enum NOVATEL_EXPORT PositionType
+    enum PositionType
     {
         NONE = 0,
         FIXEDPOS = 1,
@@ -240,7 +240,7 @@ namespace novatel
         CDGPS = 66,
     };
 
-    enum NOVATEL_EXPORT DatumID
+    enum DatumID
     {
         ADIND=1,
         ARC50,
@@ -331,7 +331,7 @@ namespace novatel
     };
 
 
-    enum NOVATEL_EXPORT InsStatus
+    enum InsStatus
     {
         INS_STATUS_INACTIVE,
         INS_STATUS_ALIGNING,
@@ -343,7 +343,7 @@ namespace novatel
         INS_ALIGNMENT_COMPLETE
     };
 
-    enum NOVATEL_EXPORT StatusWord
+    enum StatusWord
     {
         RCV_ERROR,
         //!< Receiver error word
@@ -356,27 +356,27 @@ namespace novatel
         AUX3 //!< auxillary 3 status word
     };
 
-    enum NOVATEL_EXPORT EventType
+    enum EventType
     {
         CLEAR=0,
         //!< bit was cleared
         SET=1 //!< bit was set
     };
 
-    enum NOVATEL_EXPORT PDPSwitch //!< Used in PDPFILTER Command
+    enum PDPSwitch //!< Used in PDPFILTER Command
     {
         DISABLE = 0,
         ENABLE = 1,
         RESET = 2,
     };
 
-    enum NOVATEL_EXPORT PDPMode
+    enum PDPMode
     {
         PDP_NORMAL = 0,
         PDP_RELATIVE = 1,
     };
 
-    enum NOVATEL_EXPORT PDPDynamics
+    enum PDPDynamics
     {
         AUTO = 0,
         //!< Autodetect dynamics mode
@@ -386,7 +386,7 @@ namespace novatel
         //!< Dynamic Mode
     };
 
-    enum NOVATEL_EXPORT FRESET_TARGET
+    enum FRESET_TARGET
     {
         STANDARD = 0,
         //!< [DEFAULT] Clears commands, ephemeris, and almanac
@@ -412,7 +412,7 @@ namespace novatel
         //!< Removes the TCXO offset information from NVM (not in OEMStar firmware)
     };
 
-    enum NOVATEL_EXPORT BINARY_LOG_TYPE
+    enum BINARY_LOG_TYPE : int16_t
     {
         // OEM4 logs
         GPSEPHEMB_LOG_TYPE = 7,
@@ -477,7 +477,7 @@ namespace novatel
         VEHICLEBODYROTATION_LOG_TYPE = 642
     };
 
-    typedef enum NOVATEL_EXPORT BINARY_LOG_TYPE BINARY_LOG_TYPE;
+    typedef enum BINARY_LOG_TYPE BINARY_LOG_TYPE;
 }
 
 #endif

@@ -38,7 +38,8 @@
 
 #ifndef NOVATEL_H
 #define NOVATEL_H
-#pragma warning( disable: 4251 )
+#pragma warning(disable: 4251)
+#define _CRT_SECURE_NO_WARNINGS
 #include <string>
 #include <cstring> // for size_t
 
@@ -458,11 +459,21 @@ namespace novatel
         void ReadSerialPort();
 
         void BufferIncomingData(unsigned char* message, unsigned int length);
+        bool CheckBinaryFormat(unsigned char* msg, unsigned int length);
+        bool CheckAsciiFormat(unsigned char* msg, unsigned int length);
+        bool CheckAbbreviatedFormat(unsigned char* msg, unsigned int length);
+        bool CheckACK(unsigned char* msg, unsigned int length);
+        bool CheckReset(unsigned char* msg, unsigned int length);
 
         /*!
-         * Parses a packet of data from the GPS.  The
+         * Parses a packet of data from the GPS. 
          */
         void ParseBinary(unsigned char* message, size_t length, BINARY_LOG_TYPE message_id);
+        /*
+         * Parses a packet of data from the GPS including header [and CRC32].
+         */
+        void ParseBinary(unsigned char* message, size_t length);
+        void ParseAscii(unsigned char* message, size_t length);
 
         bool ParseVersion(std::string packet);
 
