@@ -140,7 +140,6 @@ public:
      *
      * @param num_attempts The number of times to ping the device
      * before giving up
-     * @param timeout The time in milliseconds to wait for each reponse
      *
      * @return True if the GPS was found, false if it was not.
      */
@@ -151,10 +150,6 @@ public:
       * Pings the GPS to determine if it is properly connected
       *
       * This method sends a ping to the GPS and waits for a response.
-      *
-      * @param num_attempts The number of times to ping the device
-      * before giving up
-      * @param timeout The time in milliseconds to wait for each reponse
       *
       * @return True if the GPS was found, false if it was not.
       */
@@ -190,10 +185,8 @@ public:
 
     void ConfigureBaudRate(std::string com_port, int baudrate);
 
-    void SetBaudRate(int baudrate, std::string com_port="COM1");
-
     bool SendCommand(std::string cmd_msg, bool wait_for_ack=true);
-    bool SendMessage(uint8_t* msg_ptr, size_t length);
+    //bool SendMessage(uint8_t* msg_ptr, size_t length);
 
     /*!
      * SetSvElevationCutoff

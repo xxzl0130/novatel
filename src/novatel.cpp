@@ -225,7 +225,7 @@ bool Novatel::Connect_(std::string port, int baudrate=115200) {
 		//serial::Timeout my_timeout(50, 200, 0, 200, 0); // 115200 working settings
 		//serial_port_ = new serial::Serial(port,baudrate,my_timeout);
 
-		serial_port_ = new serial::Serial(port,baudrate,serial::Timeout::simpleTimeout(10)); 
+		serial_port_ = new serial::Serial(port,baudrate,serial::Timeout::simpleTimeout(1000)); 
 
 		if (!serial_port_->isOpen()){
 	        std::stringstream output;
@@ -1436,7 +1436,7 @@ void Novatel::ParseBinary(unsigned char *message, size_t length, BINARY_LOG_TYPE
             payload_length = (((uint16_t) *(message+9)) << 8) + ((uint16_t) *(message+8));
 
             //Copy header and unrepeated message block
-            memcpy(&almanac.header,message, header_length+4);
+            memcpy(&almanac,message, header_length+4);
             // Copy Repeated portion of message block)
             memcpy(&almanac.data, message+header_length+4, (112*almanac.number_of_prns));
             // Copy the CRC
