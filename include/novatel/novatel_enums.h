@@ -677,8 +677,6 @@ namespace novatel
         GLMLA_LOG_TYPE = 859,	// NMEA GLONASS Almanac Data
         GPHDT_LOG_TYPE = 1045,	// Heading in Degrees True
     };
-
-    typedef enum BINARY_LOG_TYPE BINARY_LOG_TYPE;
 }
 
 #endif

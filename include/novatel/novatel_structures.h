@@ -93,21 +93,21 @@ namespace novatel
 
 
 //*******************************************************************************
-// HEADER STRUCTURES
+// BASE STRUCTURES
 //*******************************************************************************
 /*!
 * Message Type
 */
 PACK(
 struct NOVATEL_EXPORT MessageType {
-    unsigned reserved:5;
+    unsigned source:5;
     MessageFormat format:2;
     ResponseBit response:1;
 });
 
-//! Header prepended to OEM4 binary messages
+//! Header prepended to OEM6 binary messages
 PACK(
-struct NOVATEL_EXPORT OemBinaryHeader
+struct NOVATEL_EXPORT BinaryHeader
 {
    uint8_t sync1; //!< start of packet first byte (0xAA)
    uint8_t sync2; //!< start of packet second byte (0x44)
@@ -127,255 +127,15 @@ struct NOVATEL_EXPORT OemBinaryHeader
    uint16_t version; //!< Receiver software build number (0-65535)
 });
 
-//! Header prepended to OEM4 binary messages
 PACK(
-struct NOVATEL_EXPORT OemShortBinaryHeader
-{
-   uint8_t sync1; //!< start of packet first byte (0xAA)
-   uint8_t sync2; //!< start of packet second byte (0x44)
-   uint8_t sync3; //!< start of packet third  byte (0x12)
-   uint8_t message_length; //!< Message length (Not including header or CRC)
-   uint16_t message_id; //!< Message ID number
-   uint16_t gps_week; //!< GPS Week number
-   uint32_t millisecs; //!< Milliseconds into week
+struct NOVATEL_EXPORT CRC32{
+    int8_t data[4];
 });
 
-
-//*******************************************************************************
-// INS STRUCTURES
-//*******************************************************************************
-
-//! IMU status structure that is included in the RAWIMU message
 PACK(
-struct NOVATEL_EXPORT ImuStatus
+struct NOVATEL_EXPORT BinaryMessageBase
 {
-   unsigned counter : 4; //!< 4 byte counter
-   unsigned imu_test : 1; //!< IMU test: Passed=0, Failed=1
-   unsigned z_axis_path_length_control : 1; //!< Z-axis path length control: Good=0, Reset=1
-   unsigned y_axis_path_length_control : 1; //!< Y-axis path length control: Good=0, Reset=1
-   unsigned x_axis_path_length_control : 1; //!< X-axis path length control: Good=0, Reset=1
-   unsigned accelerometer_temperature : 8; //!< Accelerometer temperature
-   unsigned software_version : 8; //!< IMU software version number
-   unsigned reserved : 3; //!< Reserved
-   unsigned gyro_test : 1; //!< Gyro tests: Passed=0, Failed=1
-   unsigned accel_test : 1; //!< Accelerometer tests: Passed=0, Failed=1
-   unsigned other_tests : 1; //!< Other tests: Passed=0, Failed=1
-   unsigned memory_tests : 1; //!< Memory tests: Passed=0, Failed=1
-   unsigned processor_tests : 1; //!< Processor tests: Passed=0, Failed=1
-});
-
-
-/*!
-* INSPVA Message Structure
-* This log allows INS position, velocity and
-* attitude to be collected in one log, instead
-* of using three separate logs.
-*/
-PACK(
-struct NOVATEL_EXPORT InsPositionVelocityAttitude
-{
-	OemBinaryHeader header; //!< Message header
-	uint32_t gps_week; //!< GPS week number
-	double gps_millisecs; //!< Milliseconds into GPS week
-	double latitude; //!< latitude - WGS84 (deg)
-	double longitude; //!< longitude - WGS84 (deg)
-	double height; //!< Ellipsoidal height - WGS84 (m)
-	double north_velocity; //!< velocity in a northerly direction (m/s)
-	double east_velocity; //!< velocity in an easterly direction (m/s)
-	double up_velocity; //!< velocity in an up direction
-	double roll; //!< right handed rotation around y-axis (degrees)
-	double pitch; //!< right handed rotation aruond x-axis (degrees)
-	double azimuth; //!< right handed rotation around z-axis (degrees)
-	InsStatus status; //!< status of the INS system
-	int8_t crc[4];
-});
-
-/*!
-* INSPVAS Message Structure
-* This log allows INS position, velocity and
-* attitude to be collected in one log, instead
-* of using three separate logs. Short header version
-*/
-PACK(
-struct NOVATEL_EXPORT InsPositionVelocityAttitudeShort
-{
-	OemShortBinaryHeader header;
-	uint32_t gps_week; //!< GPS week number
-	double gps_millisecs; //!< Milliseconds into GPS week
-	double latitude; //!< latitude - WGS84 (deg)
-	double longitude; //!< longitude - WGS84 (deg)
-	double height; //!< Ellipsoidal height - WGS84 (m)
-	double north_velocity; //!< velocity in a northerly direction (m/s)
-	double east_velocity; //!< velocity in an easterly direction (m/s)
-	double up_velocity; //!< velocity in an up direction
-	double roll; //!< right handed rotation around y-axis (degrees)
-	double pitch; //!< right handed rotation aruond x-axis (degrees)
-	double azimuth; //!< right handed rotation around z-axis (degrees)
-	InsStatus status; //!< status of the INS system
-	int8_t crc[4];
-});
-
-/*!
-* INSCOV Message Structure
-* The position, attitude, and velocity matrices
-* in this log each contain 9 covariance values,
-* with respect to the local level frame. For the
-* attitude angles, they are given in the SPAN computation
-* frame. These values are computed once per second and
-* are only available after alignment.
-*/
-PACK(
-struct NOVATEL_EXPORT InsCovariance
-{
-	OemBinaryHeader header; //!< Message header
-	uint32_t gps_week; //!< GPS week number
-	double gps_millisecs; //!< Milliseconds into GPS week
-	double position_covariance[9]; //!< Position covariance matrix [m^2] (xx,xy,xz,yz,yy,...)
-	double attitude_covariance[9]; //!< Attitude covariance matrix [deg^2] (xx,xy,xz,yz,yy,...)
-	double velocity_covariance[9]; //!< Velocity covariance matrix [(m/s)^2] (xx,xy,xz,yz,yy,...)
-	int8_t crc[4];
-});
-
-/*!
-* INSCOVS Message Structure
-* The position, attitude, and velocity matrices
-* in this log each contain 9 covariance values,
-* with respect to the local level frame. For the
-* attitude angles, they are given in the SPAN computation
-* frame. These values are computed once per second and
-* are only available after alignment. This log is a short
-* header version of INSCOV
-*/
-PACK(
-struct NOVATEL_EXPORT InsCovarianceShort
-{
-	OemShortBinaryHeader header; //!< Message header
-	uint32_t gps_week; //!< GPS week number
-	double gps_millisecs; //!< Milliseconds into GPS week
-	double position_covariance[9]; //!< Position covariance matrix [m^2] (xx,xy,xz,yz,yy,...)
-	double attitude_covariance[9]; //!< Attitude covariance matrix [deg^2] (xx,xy,xz,yz,yy,...)
-	double velocity_covariance[9]; //!< Velocity covariance matrix [(m/s)^2] (xx,xy,xz,yz,yy,...)
-	int8_t crc[4];
-});
-
-
-/*!
-* INSSPD Message Structure
-* This log contains the most recent speed
-* measurements in the horizontal and vertical
-* directions, and includes an INS status indicator.
-*/
-PACK(
-struct NOVATEL_EXPORT InsSpeed
-{
-	OemBinaryHeader header; //!< Message header
-	uint32_t gps_week; //!< GPS week number
-	double gps_millisecs; //!< Milliseconds into GPS week
-	double track_over_ground; //!< actual direction of motion over ground (degrees)
-    double horizontal_speed; //!< horizontal speed in m/s
-	double vertical_speed; //!< vertical speed in m/s
-	InsStatus status; //!< status of the INS system
-	int8_t crc[4];
-});
-
-
-/*!
-* RAWIMU Message Structure
-* This log contains an IMU status indicator
-* and the measurements from the accelerometers
-* and gyros with respect to the IMU enclosure
-* frame. If logging this data, consider the RAWIMUS
-* log to reduce the amount of data,
-*/
-PACK(
-struct NOVATEL_EXPORT RawImu
-{
-	OemBinaryHeader header; //!< Message header
-	uint32_t gps_week; //!< GPS week number
-	double gps_millisecs; //!< Milliseconds into GPS week
-	ImuStatus imuStatus; //!< Status of the IMU
-	int32_t z_acceleration; //!< change in velocity along z axis in scaled m/s
-	int32_t y_acceleration_neg; //!< -change in velocity along y axis in scaled m/s
-	int32_t x_acceleration; //!< change in velocity along x axis in scaled m/s
-	int32_t z_gyro_rate; //!< change in angle around z axis in radians
-	int32_t y_gyro_rate_neg; //!< -(change in angle around y axis) in radians
-	int32_t x_gyro_rate; //!< change in angle around x axis in radians
-	int8_t crc[4];
-});
-
-// scale factor for change in angle (1.0/((double)8589934592.0)) for the AG11, AG58, AG17, and AG62
-// scale factor for change in velocity (acceleration)
-//(0.3048/((double)134217728.0)) for the AG11 and AG58
-//(0.3048/((double)67108864.0)) for the AG17 and AG62
-
-/*!
-* RAWIMUS Message Structure
-* This log contains an IMU status indicator
-* and the measurements from the accelerometers
-* and gyros with respect to the IMU enclosure
-* frame. It is a short header version of RAWIMU
-*/
-PACK(
-struct NOVATEL_EXPORT RawImuShort
-{
-	OemShortBinaryHeader header; //!< Message header
-	uint32_t gps_week; //!< GPS week number
-	double gps_millisecs; //!< Milliseconds into GPS week
-	ImuStatus imuStatus; //!< Status of the IMU
-	int32_t z_acceleration; //!< change in velocity along z axis in scaled m/s
-	int32_t y_acceleration_neg; //!< -change in velocity along y axis in scaled m/s
-	int32_t x_acceleration; //!< change in velocity along x axis in scaled m/s
-	int32_t z_gyro_rate; //!< change in angle around z axis in radians
-	int32_t y_gyro_rate_neg; //!< -(change in angle around y axis) in radians
-	int32_t x_gyro_rate; //!< change in angle around x axis in radians
-	int8_t crc[4];
-});
-
-
-/*!
-* VEHICLEBODYROTATION Message Structure
-* The VEHICLEBODYROTATION log reports the angular
-*  offset from the vehicle frame to the SPAN frame.
-*  The SPAN frame is defined by the transformed IMU
-*  enclosure axis with Z pointing up, see the
-*  SETIMUORIENTATION command on page 126. If your
-*  IMU is mounted with the Z axis (as marked on the IMU
-*  enclosure) pointing up, the IMU enclosure frame is
-*  the same as the SPAN frame.
-*/
-PACK(
-struct NOVATEL_EXPORT VehicleBodyRotation
-{
-	OemBinaryHeader header; //!< Message header
-	double x_angle; //!< rotation about vehicle frame x axis (deg)
-	double y_angle; //!< rotation about vehicle frame y axis (deg)
-	double z_angle; //!< rotation about vehicle frame z axis (deg)
-	double x_uncertainty; //!< uncertainty of x axis rotation (deg)
-	double y_uncertainty; //!< uncertainty of y axis rotation (deg)
-	double z_uncertainty; //!< uncertainty of z axis rotation (deg)
-	int8_t crc[4];
-});
-
-
-/*!
-* BESTLEVERARM Message Structure
-* This log contains the distance between the
-* IMU’s centre of navigation and the GPS phase
-* centre in the IMU enclosure frame and its associated
-* uncertainties.
-*/
-PACK(
-struct NOVATEL_EXPORT BestLeverArm
-{
-	OemBinaryHeader header; //!< Message header
-	double x_offset; //!< x offset in IMU enclosure frame (m)
-	double y_offset; //!< y offset in IMU enclosure frame (m)
-	double z_offset; //!< z offset in IMU enclosure frame (m)
-	double x_uncertainty; //!< uncertainty of x offset (m)
-	double y_uncertainty; //!< uncertainty of x offset (m)
-	double z_uncertainty; //!< uncertainty of x offset (m)
-	int32_t mapping; //!< IMU axis mapping setting
-	int8_t crc[4];
+    BinaryHeader header; //!< Message header
 });
 
 
@@ -395,9 +155,8 @@ struct NOVATEL_EXPORT BestLeverArm
 *  - PSRPOS
 */
 PACK(
-struct NOVATEL_EXPORT Position
+struct NOVATEL_EXPORT Position : BinaryMessageBase
 {
-	OemBinaryHeader header; //!< Message header
 	SolutionStatus solution_status; //!< Solution status
 	PositionType position_type; //!< Position type
 	double latitude; //!< latitude (deg)
@@ -419,7 +178,7 @@ struct NOVATEL_EXPORT Position
 	uint8_t extended_solution_status; //!< extended solution status - OEMV and greater only
 	uint8_t reserved2; //!< reserved
 	uint8_t signals_used_mask; //!< signals used mask - OEMV and greater only
-	uint8_t crc[4]; //!< 32-bit cyclic redundancy check (CRC)
+    uint8_t crc[4]; //!< 32-bit cyclic redundancy check (CRC)
 });
 
 /*!
@@ -436,9 +195,8 @@ struct NOVATEL_EXPORT Position
 *  - PSRXYZ
 */
 PACK(
-struct NOVATEL_EXPORT PositionEcef
+struct NOVATEL_EXPORT PositionEcef : BinaryMessageBase
 {
-    OemBinaryHeader header; //!< Message header
     SolutionStatus solution_status; //!< Solution status
     PositionType position_type; //!< Position type
     double x_position; //!< x coordinate in ECEF (m)
@@ -465,7 +223,7 @@ struct NOVATEL_EXPORT PositionEcef
     uint8_t extended_solution_status; //!< extended solution status - OEMV and greater only
     uint8_t reserved2; //!< reserved
     uint8_t signals_used_mask; //!< signals used mask - OEMV and greater only
-    uint8_t crc[4];
+    uint8_t crc[4]; //!< 32-bit cyclic redundancy check (CRC)
 });
 
 
@@ -485,9 +243,8 @@ struct NOVATEL_EXPORT PositionEcef
 *  - PSRVEL
 */
 PACK(
-struct NOVATEL_EXPORT Velocity
+struct NOVATEL_EXPORT Velocity : BinaryMessageBase
 {
-	OemBinaryHeader header; //!< Message header
 	SolutionStatus solution_status; //!< Solution status
 	PositionType position_type; //!< Position type
 	float latency; //!< measure of the latency of the velocity time tag in seconds
@@ -496,7 +253,7 @@ struct NOVATEL_EXPORT Velocity
 	double track_over_ground; //!< direction of travel in degrees
 	double vertical_speed; //!< vertical speed in m/s
 	float reserved;
-	int8_t crc[4];
+    uint8_t crc[4]; //!< 32-bit cyclic redundancy check (CRC)
 });
 
 
@@ -516,9 +273,8 @@ struct NOVATEL_EXPORT Velocity
 *  - RTKDOP
 */
 PACK(
-struct NOVATEL_EXPORT Dop 
+struct NOVATEL_EXPORT Dop : BinaryMessageBase
 {
-    OemBinaryHeader header; //!< Message header
     float geometric_dop; //!< Geometric DOP
     float position_dop; //!< Position DOP
     float horizontal_dop; //!< Horizontal DOP
@@ -542,27 +298,26 @@ struct NOVATEL_EXPORT Dop
 * is valid.
 */
 PACK(
-struct NOVATEL_EXPORT BaselineEcef
+struct NOVATEL_EXPORT BaselineEcef : BinaryMessageBase
 {
-  OemBinaryHeader header; //!< Message header
-  SolutionStatus solution_status; //!< Solution status
-  PositionType position_type; //!< Position type
-  double x_baseline; //!< Baseline x coordinate (m)
-  double y_baseline; //!< Baseline y coordinate (m)
-  double z_baseline; //!< Baseline z coordinate (m)
-  float x_baseline_standard_deviation; //!< Standard deviation of baseline x coordinate (m)
-  float y_baseline_standard_deviation; //!< Standard deviation of baseline y coordinate (m)
-  float z_baseline_standard_deviation; //!< Standard deviation of baseline z coordinate (m)
-  int8_t base_station_id[4]; //!< Base station ID
-  uint8_t number_of_satellites; //!< number of satellites tracked
-  uint8_t number_of_satellites_in_solution; //!< number of satellites used in solution
-  uint8_t num_gps_plus_glonass_l1; //!< number of GPS plus GLONASS L1 satellites used in solution
-  uint8_t num_gps_plus_glonass_l2; //!< number of GPS plus GLONASS L2 satellites used in solution
-  uint8_t reserved; //!< reserved
-  uint8_t extended_solution_status; //!< extended solution status - OEMV and greater only
-  uint8_t reserved2; //!< reserved
-  uint8_t signals_used_mask; //!< signals used mask - OEMV and greater only
-  uint8_t crc[4]; //!< 32-bit cyclic redundancy check (CRC)
+    SolutionStatus solution_status; //!< Solution status
+    PositionType position_type; //!< Position type
+    double x_baseline; //!< Baseline x coordinate (m)
+    double y_baseline; //!< Baseline y coordinate (m)
+    double z_baseline; //!< Baseline z coordinate (m)
+    float x_baseline_standard_deviation; //!< Standard deviation of baseline x coordinate (m)
+    float y_baseline_standard_deviation; //!< Standard deviation of baseline y coordinate (m)
+    float z_baseline_standard_deviation; //!< Standard deviation of baseline z coordinate (m)
+    int8_t base_station_id[4]; //!< Base station ID
+    uint8_t number_of_satellites; //!< number of satellites tracked
+    uint8_t number_of_satellites_in_solution; //!< number of satellites used in solution
+    uint8_t num_gps_plus_glonass_l1; //!< number of GPS plus GLONASS L1 satellites used in solution
+    uint8_t num_gps_plus_glonass_l2; //!< number of GPS plus GLONASS L2 satellites used in solution
+    uint8_t reserved; //!< reserved
+    uint8_t extended_solution_status; //!< extended solution status - OEMV and greater only
+    uint8_t reserved2; //!< reserved
+    uint8_t signals_used_mask; //!< signals used mask - OEMV and greater only
+    uint8_t crc[4]; //!< 32-bit cyclic redundancy check (CRC)
 });
 
 
@@ -579,9 +334,8 @@ struct NOVATEL_EXPORT BaselineEcef
 * in the log is unusable.
 */
 PACK(
-struct NOVATEL_EXPORT UtmPosition
+struct NOVATEL_EXPORT UtmPosition : BinaryMessageBase
 {
-    OemBinaryHeader header; //!< Message header
     SolutionStatus solution_status; //!< Solution status
     PositionType position_type; //!< Position type
     uint32_t longitude_zone_number; //!< longitude utm zone number
@@ -615,8 +369,8 @@ struct NOVATEL_EXPORT UtmPosition
 * Coordinated parametres (UTC)
 */
 PACK(
-struct NOVATEL_EXPORT IonosphericModel {
-    OemBinaryHeader header; //!< Message header
+struct NOVATEL_EXPORT IonosphericModel : BinaryMessageBase
+{
     double a0; //!< alpha parameter constant term
     double a1; //!< alpha parameter 1st order term
     double a2; //!< alpha parameter 2nd order term
@@ -642,7 +396,8 @@ struct NOVATEL_EXPORT IonosphericModel {
 * Used in logs RANGE and TRACKSTAT
 */
 PACK(
-struct NOVATEL_EXPORT ChannelStatus {
+struct NOVATEL_EXPORT ChannelStatus 
+{
 	unsigned int tracking_state : 5;
 	unsigned int sv_chan_num : 5;
 	unsigned int phase_lock_flag : 1;
@@ -667,7 +422,8 @@ struct NOVATEL_EXPORT ChannelStatus {
 * single channel. Used in the RangeMeasurements structure.
 */
 PACK(
-struct NOVATEL_EXPORT RangeData {
+struct NOVATEL_EXPORT RangeData 
+{
     uint16_t satellite_prn; //!< SV PRN number
     uint16_t glonass_frequency; //!< Frequency number of GLONASS SV (0 for GPS)
     double pseudorange; //!<  pseudorange [m]
@@ -689,8 +445,8 @@ struct NOVATEL_EXPORT RangeData {
 * the description.
 */
 PACK(
-struct NOVATEL_EXPORT RangeMeasurements {
-    OemBinaryHeader header; //!< Message header
+struct NOVATEL_EXPORT RangeMeasurements : BinaryMessageBase
+{
     int32_t number_of_observations; //!< Number of ranges observations in the following message
     RangeData range_data[MAX_CHAN]; //!< Range data for each available channel
     uint8_t crc[4]; //!< 32-bit cyclic redundancy check (CRC)
@@ -703,7 +459,8 @@ struct NOVATEL_EXPORT RangeMeasurements {
 * single channel. Used in the RangeMeasurements structure.
 */
 PACK(
-struct NOVATEL_EXPORT CompressedRangeRecord {
+struct NOVATEL_EXPORT CompressedRangeRecord 
+{
     int64_t doppler:28; //!< Doppler frequency [Hz]; SF = 1/256
     uint64_t pseudorange:36; //!<  pseudorange [m]; SF = 1/128
     int32_t accumulated_doppler:32; //!< accumulated doppler [cycles]; SF = 1/256
@@ -718,7 +475,8 @@ struct NOVATEL_EXPORT CompressedRangeRecord {
 );
 
 PACK(
-struct NOVATEL_EXPORT CompressedRangeData {
+struct NOVATEL_EXPORT CompressedRangeData 
+{
     ChannelStatus channel_status; //!< channel tracking status
     CompressedRangeRecord range_record;
 } //;
@@ -729,8 +487,8 @@ struct NOVATEL_EXPORT CompressedRangeData {
 * This log contains the compressed version of the RANGE log.
 */
 PACK(
-struct NOVATEL_EXPORT CompressedRangeMeasurements {
-    OemBinaryHeader header; //!< Message header
+struct NOVATEL_EXPORT CompressedRangeMeasurements : BinaryMessageBase
+{
     int32_t number_of_observations; //!< Number of ranges observations in the following message
     CompressedRangeData range_data[MAX_CHAN]; //!< Range data for each available channel
     uint8_t crc[4]; //!< 32-bit cyclic redundancy check (CRC)
@@ -747,9 +505,8 @@ struct NOVATEL_EXPORT CompressedRangeMeasurements {
 * GPS ephemeris parametres.
 */
 PACK(
-struct NOVATEL_EXPORT GpsEphemeris
+struct NOVATEL_EXPORT GpsEphemeris : BinaryMessageBase
 {
-    OemBinaryHeader header; //!< Message header
     uint32_t prn; //!< PRN number
     double time_of_week; //!< time stamp of subframe 0 (s)
     uint32_t health; //!< health status, defined in ICD-GPS-200
@@ -792,8 +549,8 @@ struct NOVATEL_EXPORT GpsEphemeris
 * Ephemeris older than 6 hours is not output
 */
 PACK(
-struct NOVATEL_EXPORT RawEphemeris {
-    OemBinaryHeader header;
+struct NOVATEL_EXPORT RawEphemeris : BinaryMessageBase
+{
     uint32_t prn; //!< Satellite PRN number
     uint32_t ephem_reference_week_num; //!< Ephemeris reference week number
     uint32_t ephem_reference_seconds; //!< Ephemeris reference time [sec]
@@ -804,7 +561,8 @@ struct NOVATEL_EXPORT RawEphemeris {
 });
 
 PACK(
-struct NOVATEL_EXPORT RawEphemerides {
+struct NOVATEL_EXPORT RawEphemerides 
+{
     RawEphemeris ephemeris[MAX_NUM_SAT];
 });
 
@@ -820,15 +578,13 @@ struct NOVATEL_EXPORT RawAlmanacData
 });
 
 PACK(
-struct NOVATEL_EXPORT RawAlmanac
+struct NOVATEL_EXPORT RawAlmanac : BinaryMessageBase
 {
-	OemBinaryHeader header;
 	uint32_t ref_week;
 	uint32_t ref_time; // [sec]
 	uint32_t num_of_subframes; // numbers of subframes to follow
 	RawAlmanacData subframe_data;
 	uint8_t crc[4];
-
 });
 
 /*!
@@ -837,7 +593,8 @@ struct NOVATEL_EXPORT RawAlmanac
 * info removed.
 */
 PACK(
-struct NOVATEL_EXPORT AlmanacData {
+struct NOVATEL_EXPORT AlmanacData 
+{
 	uint32_t prn;
 	uint32_t ref_week;
 	double ref_time; //!< [sec]
@@ -858,12 +615,11 @@ struct NOVATEL_EXPORT AlmanacData {
 });
 
 PACK(
-struct NOVATEL_EXPORT Almanac {
-	OemBinaryHeader header;
+struct NOVATEL_EXPORT Almanac : BinaryMessageBase
+{
 	int32_t number_of_prns;
 	AlmanacData data[MAX_NUM_SAT];
 	uint8_t crc[4];
-
 });
 
 /*!
@@ -873,7 +629,8 @@ struct NOVATEL_EXPORT Almanac {
 * up the SatellitePositions structure
 */
 PACK(
-struct NOVATEL_EXPORT SatellitePositionData {
+struct NOVATEL_EXPORT SatellitePositionData 
+{
     uint32_t satellite_prn; //!< SV PRN number
     double x_position; //!< SV X coordinate [m]
     double y_position; //!< SV Y coordinate [m]
@@ -893,8 +650,8 @@ struct NOVATEL_EXPORT SatellitePositionData {
 * correction, ionospheric corrections and tropospheric corrections.
 */
 PACK(
-struct NOVATEL_EXPORT SatellitePositions {
-    OemBinaryHeader header; //!< Message header
+struct NOVATEL_EXPORT SatellitePositions : BinaryMessageBase
+{
     double dReserved1; //!< Reserved
     uint32_t number_of_satellites; //!< Number of satellites in following message
     SatellitePositionData data[MAX_CHAN]; //!< Position data for each satellite
@@ -908,7 +665,8 @@ struct NOVATEL_EXPORT SatellitePositions {
 * orbital parameters, not the higher precision Ephemeris parameters
 */
 PACK(
-struct NOVATEL_EXPORT SatelliteVisibilityData {
+struct NOVATEL_EXPORT SatelliteVisibilityData 
+{
     int16_t satellite_prn; //!< SV PRN number
     //!< GPS 1-32
     //!< SBAS 120-138
@@ -922,8 +680,8 @@ struct NOVATEL_EXPORT SatelliteVisibilityData {
 });
 
 PACK(
-struct NOVATEL_EXPORT SatelliteVisibility {
-    OemBinaryHeader header; //!< Message header
+struct NOVATEL_EXPORT SatelliteVisibility : BinaryMessageBase
+{
     true_false sat_vis; //!< Reserved
     true_false complete_almanac_used; //!< Was Complete almanac used
     uint32_t number_of_satellites; //!< Number of satellites in following message
@@ -944,8 +702,8 @@ struct NOVATEL_EXPORT SatelliteVisibility {
 * UTC time = GPS time + offset + UTC offset
 */
 PACK(
-struct NOVATEL_EXPORT TimeOffset {
-    OemBinaryHeader header; //!< Message header
+struct NOVATEL_EXPORT TimeOffset : BinaryMessageBase
+{
     uint32_t clock_model_status; //!< ClockModelStatus
     double offset; //!< Receiver Offset in seconds from GPS time
     double offset_standard_deviation; //!< Instantaneous Standard Deviation of Receiver Clock Offset
@@ -965,30 +723,29 @@ struct NOVATEL_EXPORT TimeOffset {
 * This log provides the Tracking Status information for each
 * receiver channel
 */
-    struct NOVATEL_EXPORT TrackStatusData
-    {
-        uint16_t prn; //!< SV prn
-        int16_t glonass_frequency; //!< GLONASS frequency +7
-        ChannelStatus channel_track_status; //!< Channel tracking status
-        double pseudorange; //!< Pseudorange
-        float doppler_frequency; //!< Doppler frequency [Hz]
-        float cno_ratio; //!< Carrier to noise density ratio [dB-Hz]
-        float lock_time; //!< Number of seconds of continuous tracking (no cycle slips)
-        float pseudorange_residual; //!< Pseudorange residual from pseudorange filter [m]
-        RangeRejectCode range_reject_code; //!< Range reject code from pseudorange filter
-        float pseudorange_weight; //!< Pseudorange filter weighting
-    };
+struct NOVATEL_EXPORT TrackStatusData
+{
+    uint16_t prn; //!< SV prn
+    int16_t glonass_frequency; //!< GLONASS frequency +7
+    ChannelStatus channel_track_status; //!< Channel tracking status
+    double pseudorange; //!< Pseudorange
+    float doppler_frequency; //!< Doppler frequency [Hz]
+    float cno_ratio; //!< Carrier to noise density ratio [dB-Hz]
+    float lock_time; //!< Number of seconds of continuous tracking (no cycle slips)
+    float pseudorange_residual; //!< Pseudorange residual from pseudorange filter [m]
+    RangeRejectCode range_reject_code; //!< Range reject code from pseudorange filter
+    float pseudorange_weight; //!< Pseudorange filter weighting
+};
 
-    struct NOVATEL_EXPORT TrackStatus
-    {
-        OemBinaryHeader header; //!< Message header
-        SolutionStatus solution_status; //!< Solution status
-        PositionType position_type; //!< Position type
-        float elevation_cutoff_angle; //!< Tracking elevation cutoff angle
-        int32_t number_of_channels; //!< Number of channels with information following
-        TrackStatusData data[MAX_CHAN]; //!< Tracking Status data repeated per channel
-        uint8_t crc[4];
-    };
+struct NOVATEL_EXPORT TrackStatus : BinaryMessageBase
+{
+    SolutionStatus solution_status; //!< Solution status
+    PositionType position_type; //!< Position type
+    float elevation_cutoff_angle; //!< Tracking elevation cutoff angle
+    int32_t number_of_channels; //!< Number of channels with information following
+    TrackStatusData data[MAX_CHAN]; //!< Tracking Status data repeated per channe
+    uint8_t crc[4];
+};
 
 //*******************************************************************************
 // RTK GPS STRUCTURES
@@ -999,7 +756,8 @@ struct NOVATEL_EXPORT TimeOffset {
 //********************
 //RTKDATAB
 PACK(
-struct NOVATEL_EXPORT rtkdatab_header {
+struct NOVATEL_EXPORT rtkdatab_header 
+{
     uint32_t rtkinfo; //RTK information
     uint8_t num_obs; //Number of observations tracked
     uint8_t gps_l1_ranges; // Number of GPS L1 ranges used
@@ -1028,15 +786,16 @@ struct NOVATEL_EXPORT rtkdatab_header {
 });
 
 PACK(
-struct NOVATEL_EXPORT rtkdatab_data {
+struct NOVATEL_EXPORT rtkdatab_data 
+{
     uint32_t prn; // GPS satellite PRN
     AMBIGUITY_TYPE ambiguity_type; // Type of ambiguity
     float residual; // Satellite health
 });
 
 PACK(
-struct NOVATEL_EXPORT rtkdatab_log {
-    OemBinaryHeader hdr;
+struct NOVATEL_EXPORT rtkdatab_log : BinaryMessageBase
+{
     SolutionStatus solutionStatus; //Solution status
     PositionType positionType; //Position type
     rtkdatab_header header;
@@ -1050,14 +809,16 @@ struct NOVATEL_EXPORT rtkdatab_log {
 //RTCADATA1B
 
 PACK(
-struct NOVATEL_EXPORT rtcadata1b_header {
+struct NOVATEL_EXPORT rtcadata1b_header 
+{
     double zcount; //Week number from subframe one of the ephemeris
     uint8_t aeb; //Acceleration error bound
     uint32_t num_prn; //Number of satellite corrections with info to follow
 });
 
 PACK(
-struct NOVATEL_EXPORT rtcadata1b_data {
+struct NOVATEL_EXPORT rtcadata1b_data 
+{
     uint32_t prn; //PRN number of range measurement
     double range; //pseudorange correction (m)
     uint8_t iode; //Issue of ephemeris data
@@ -1066,8 +827,8 @@ struct NOVATEL_EXPORT rtcadata1b_data {
 });
 
 PACK(
-struct NOVATEL_EXPORT rtcadata1b_log {
-    OemBinaryHeader header; //Log header
+struct NOVATEL_EXPORT rtcadata1b_log : BinaryMessageBase
+{
     rtcadata1b_header info;
     rtcadata1b_data data[MAX_NUM_SAT];
 });
@@ -1079,7 +840,8 @@ struct NOVATEL_EXPORT rtcadata1b_log {
 //RTCADATAEPHEMB
 
 PACK(
-struct NOVATEL_EXPORT rtcadataephemb_data {
+struct NOVATEL_EXPORT rtcadataephemb_data 
+{
     uint8_t des; //Novatel designator
     uint8_t subtype; //RTCA message subtype
     uint32_t week; //GPS week number
@@ -1090,8 +852,8 @@ struct NOVATEL_EXPORT rtcadataephemb_data {
 });
 
 PACK(
-struct NOVATEL_EXPORT rtcadataephemb_log {
-    OemBinaryHeader header; //Log header
+struct NOVATEL_EXPORT rtcadataephemb_log : BinaryMessageBase
+{
     rtcadataephemb_data data;
 });
 
@@ -1101,7 +863,8 @@ struct NOVATEL_EXPORT rtcadataephemb_log {
 //********************
 //RTCADATAOBSB - CHECK
 PACK(
-struct NOVATEL_EXPORT rtcadataobsb_header {
+struct NOVATEL_EXPORT rtcadataobsb_header 
+{
     uint8_t des; //Novatel designator
     uint8_t subtype; //RTCA message subtype
     double min_psr; //minimum pseudorange
@@ -1125,8 +888,8 @@ struct NOVATEL_EXPORT rtcadataobsb_data //Structure for RTCADATAEPHEM message
 });
 
 PACK(
-struct NOVATEL_EXPORT rtcadataobsb_log {
-    OemBinaryHeader header; //Log header
+struct NOVATEL_EXPORT rtcadataobsb_log : BinaryMessageBase
+{
     rtcadataobsb_header info;
     rtcadataobsb_data data[MAX_NUM_SAT]; //WT:  This is probably too many... need to verify how many id's can be sent.
 });
@@ -1137,7 +900,8 @@ struct NOVATEL_EXPORT rtcadataobsb_log {
 //********************
 //RTCADATAREFB
 PACK(
-struct NOVATEL_EXPORT rtcadatarefb_data {
+struct NOVATEL_EXPORT rtcadatarefb_data 
+{
     uint8_t des; //Novatel designator
     uint8_t subtype; //RTCA message subtype
     double posX; //base station X coordinate position (mm)
@@ -1147,8 +911,8 @@ struct NOVATEL_EXPORT rtcadatarefb_data {
 });
 
 PACK(
-struct NOVATEL_EXPORT rtcadatarefb_log {
-    OemBinaryHeader header; //Log header
+struct NOVATEL_EXPORT rtcadatarefb_log : BinaryMessageBase
+{
     rtcadatarefb_data data;
 });
 
@@ -1172,9 +936,8 @@ struct NOVATEL_EXPORT rtcadatarefb_log {
 *
 */
 PACK(
-struct NOVATEL_EXPORT Version
+struct NOVATEL_EXPORT Version : BinaryMessageBase
 {
-	OemBinaryHeader header; //!< Message header
 	int32_t number_of_components; //!< Number of components (cards, etc..)
 	int32_t component_type; //!< Component type
 	char model[16]; //!< Base model name
@@ -1188,62 +951,62 @@ struct NOVATEL_EXPORT Version
 });
 
 
-    struct NOVATEL_EXPORT ReceiverError
-    {
-        int32_t DRAMStatus :1;
-        int32_t invalidFirmware : 1;
-        int32_t ROMStatus : 1;
-        int32_t reserved1 : 1;
-        int32_t ESNaccessStatus : 1;
-        int32_t authorizationCodeStatus : 1;
-        int32_t slowADCStatus : 1;
-        int32_t supplyVoltageStatus : 1;
-        int32_t thermometerStatus : 1;
-        int32_t temperatusStatus : 1;
-        int32_t MINOS4Status : 1;
-        int32_t PLLRf1Status : 1;
-        int32_t PLLRf2Status : 1;
-        int32_t RF1Status : 1;
-        int32_t RF2Status : 1;
-        int32_t NVMStatus : 1;
-        int32_t softwareResourceLimit : 1;
-        int32_t reserved2 : 3;
-        int32_t remoteLoadingBegun : 1;
-        int32_t exportRestriction : 1;
-        int32_t reserved3 : 9;
-        int32_t componentHardwareFailure : 1;
-    };
+struct NOVATEL_EXPORT ReceiverError
+{
+    int32_t DRAMStatus :1;
+    int32_t invalidFirmware : 1;
+    int32_t ROMStatus : 1;
+    int32_t reserved1 : 1;
+    int32_t ESNaccessStatus : 1;
+    int32_t authorizationCodeStatus : 1;
+    int32_t slowADCStatus : 1;
+    int32_t supplyVoltageStatus : 1;
+    int32_t thermometerStatus : 1;
+    int32_t temperatusStatus : 1;
+    int32_t MINOS4Status : 1;
+    int32_t PLLRf1Status : 1;
+    int32_t PLLRf2Status : 1;
+    int32_t RF1Status : 1;
+    int32_t RF2Status : 1;
+    int32_t NVMStatus : 1;
+    int32_t softwareResourceLimit : 1;
+    int32_t reserved2 : 3;
+    int32_t remoteLoadingBegun : 1;
+    int32_t exportRestriction : 1;
+    int32_t reserved3 : 9;
+    int32_t componentHardwareFailure : 1;
+};
 
-    struct NOVATEL_EXPORT ReceiverStatus
-    {
-        int32_t errorFlag : 1;
-        int32_t temperatureStatus : 1;
-        int32_t voltageSupplyStatus : 1;
-        int32_t antennaPowerStatus : 1;
-        int32_t reserved1 : 1;
-        int32_t antennaOpenFlag : 1;
-        int32_t antennaShortedFlag : 1;
-        int32_t CPUoverloadFlag : 1;
-        int32_t COM1overrunFlag : 1;
-        int32_t COM2overrunFlag : 1;
-        int32_t COM3overrunFlag : 1;
-        int32_t USBoverrun : 1;
-        int32_t reserved2 : 3;
-        int32_t RF1AGCStatus : 1;
-        int32_t reserved3 : 1;
-        int32_t RF2AGCStatus : 1;
-        int32_t almanacFlag : 1;
-        int32_t positionSolutionFlag : 1;
-        int32_t positionFixedFlag : 1;
-        int32_t clockSteeringStatus : 1;
-        int32_t clockModelFlag : 1;
-        int32_t extOscillatorFlag : 1;
-        int32_t softwarerResource : 1;
-        int32_t reserved4 : 4;
-        int32_t AUX3statusEventFlag : 1;
-        int32_t AUX2statusEventFlag : 1;
-        int32_t AUX1statusEventFlag : 1;
-    };
+struct NOVATEL_EXPORT ReceiverStatus
+{
+    int32_t errorFlag : 1;
+    int32_t temperatureStatus : 1;
+    int32_t voltageSupplyStatus : 1;
+    int32_t antennaPowerStatus : 1;
+    int32_t reserved1 : 1;
+    int32_t antennaOpenFlag : 1;
+    int32_t antennaShortedFlag : 1;
+    int32_t CPUoverloadFlag : 1;
+    int32_t COM1overrunFlag : 1;
+    int32_t COM2overrunFlag : 1;
+    int32_t COM3overrunFlag : 1;
+    int32_t USBoverrun : 1;
+    int32_t reserved2 : 3;
+    int32_t RF1AGCStatus : 1;
+    int32_t reserved3 : 1;
+    int32_t RF2AGCStatus : 1;
+    int32_t almanacFlag : 1;
+    int32_t positionSolutionFlag : 1;
+    int32_t positionFixedFlag : 1;
+    int32_t clockSteeringStatus : 1;
+    int32_t clockModelFlag : 1;
+    int32_t extOscillatorFlag : 1;
+    int32_t softwarerResource : 1;
+    int32_t reserved4 : 4;
+    int32_t AUX3statusEventFlag : 1;
+    int32_t AUX2statusEventFlag : 1;
+    int32_t AUX1statusEventFlag : 1;
+};
 
 
 /*!
@@ -1260,9 +1023,8 @@ struct NOVATEL_EXPORT Version
 * future expansion.
 */
 PACK(
-struct NOVATEL_EXPORT RXStatus
+struct NOVATEL_EXPORT RXStatus : BinaryMessageBase
 {
-	OemBinaryHeader header; //!<
 	ReceiverError error; //!< receiver error field
 	uint32_t numStats; //!< number of status messages
 	ReceiverStatus rxStat; //!< receiver status word
@@ -1285,34 +1047,32 @@ struct NOVATEL_EXPORT RXStatus
 });
 
 
-    struct NOVATEL_EXPORT RXStatusEvent
-    {
-        OemBinaryHeader header;
-        StatusWord status; // the status word that generated the event message
-        uint32_t bitPosition; // location of the bit in the status word (Table 81, pg 303
-        EventType type; // event type (Table 86, pg 306)
-        int8_t description[32]; // text description of the event or error
-    };
+struct NOVATEL_EXPORT RXStatusEvent : BinaryMessageBase
+{
+    StatusWord status; // the status word that generated the event message
+    uint32_t bitPosition; // location of the bit in the status word (Table 81, pg 303
+    EventType type; // event type (Table 86, pg 306)
+    int8_t description[32]; // text description of the event or error
+};
 
 /*!
 * RXHWLEVELS Message Structure
 * This log contains the receiver environmental and voltage parametres.
 */
-    struct NOVATEL_EXPORT ReceiverHardwareStatus
-    {
-        OemBinaryHeader header;
-        float board_temperature; //!< board temperature in degrees celcius
-        float antenna_current; //!< antenna current (A)
-        float core_voltage; //!< CPU core voltage (V)
-        float supply_voltage; //!< supply voltage(V)
-        float rf_voltage; //!< 5V RF supply voltage(V)
-        float lna_voltage; //!< internal LNA voltage (V)
-        float GPAI; //!< general purpose analog input
-        float reserved1; //!< Reserved
-        float reserved2; //!< Reserved
-        float lna_card_voltage; //!< LNA voltage (V) at GPSCard output
-        int8_t crc[4]; //!< 32-bit crc
-    };
+struct NOVATEL_EXPORT ReceiverHardwareStatus : BinaryMessageBase
+{
+    float board_temperature; //!< board temperature in degrees celcius
+    float antenna_current; //!< antenna current (A)
+    float core_voltage; //!< CPU core voltage (V)
+    float supply_voltage; //!< supply voltage(V)
+    float rf_voltage; //!< 5V RF supply voltage(V)
+    float lna_voltage; //!< internal LNA voltage (V)
+    float GPAI; //!< general purpose analog input
+    float reserved1; //!< Reserved
+    float reserved2; //!< Reserved
+    float lna_card_voltage; //!< LNA voltage (V) at GPSCard output
+    int8_t crc[4]; //!< 32-bit crc
+};
 }
 
 

@@ -1275,15 +1275,15 @@ void Novatel::BufferIncomingData(unsigned char* message, unsigned int length)
 
 bool Novatel::CheckBinaryFormat(unsigned char* msg, unsigned length)
 {
-    if (length < sizeof(OemBinaryHeader))
+    if (length < sizeof(BinaryHeader))
         return false;
     if(msg[0] != SYNC_BYTE_1 || msg[1] != SYNC_BYTE_2 || msg[2] != SYNC_BYTE_3)
         return false;
-    OemBinaryHeader header;
+    BinaryHeader header;
     memcpy(&header, msg, sizeof(header));
-    if (length < header.message_length + sizeof(OemBinaryHeader))
+    if (length < header.message_length + sizeof(BinaryHeader))
         return false;
-    length = sizeof(OemBinaryHeader) + header.message_length;
+    length = sizeof(BinaryHeader) + header.message_length;
     int32_t crcRes = crc32c::Crc32c(msg, length), crc;
     memcpy(&crc, msg + length, 4);
     return crcRes == crc;
@@ -1705,7 +1705,7 @@ void Novatel::ParseBinary(unsigned char* message, size_t length, BINARY_LOG_TYPE
 void Novatel::ParseBinary(unsigned char* message, size_t length)
 {
     //assume that message has been checked
-    OemBinaryHeader header;
+    BinaryHeader header;
     int32_t id;
     memcpy(&header, message, sizeof(header));
     memcpy(&id, message + sizeof(header), sizeof(id));

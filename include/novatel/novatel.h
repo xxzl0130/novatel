@@ -73,16 +73,7 @@ namespace novatel
     typedef boost::function<void(unsigned char*)> RawMsgCallback;
 
     // INS Specific Callbacks
-    typedef boost::function<void(InsPositionVelocityAttitude&, double&)> InsPositionVelocityAttitudeCallback;
-    typedef boost::function<void(InsPositionVelocityAttitudeShort&, double&)> InsPositionVelocityAttitudeShortCallback;
-    typedef boost::function<void(VehicleBodyRotation&, double&)> VehicleBodyRotationCallback;
-    typedef boost::function<void(InsSpeed&, double&)> InsSpeedCallback;
-    typedef boost::function<void(RawImu&, double&)> RawImuCallback;
-    typedef boost::function<void(RawImuShort&, double&)> RawImuShortCallback;
     typedef boost::function<void(Position&, double&)> BestGpsPositionCallback;
-    typedef boost::function<void(BestLeverArm&, double&)> BestLeverArmCallback;
-    typedef boost::function<void(InsCovariance&, double&)> InsCovarianceCallback;
-    typedef boost::function<void(InsCovarianceShort&, double&)> InsCovarianceShortCallback;
 
     // GPS Callbacks
     typedef boost::function<void(UtmPosition&, double&)> BestUtmPositionCallback;
@@ -271,11 +262,6 @@ namespace novatel
             best_gps_position_callback_ = handler;
         };
 
-        void set_best_lever_arm_callback(BestLeverArmCallback handler)
-        {
-            best_lever_arm_callback_ = handler;
-        };
-
         void set_best_position_callback(BestPositionCallback handler)
         {
             best_position_callback_ = handler;
@@ -294,46 +280,6 @@ namespace novatel
         void set_best_position_ecef_callback(BestPositionEcefCallback handler)
         {
             best_position_ecef_callback_ = handler;
-        };
-
-        void set_ins_position_velocity_attitude_callback(InsPositionVelocityAttitudeCallback handler)
-        {
-            ins_position_velocity_attitude_callback_ = handler;
-        };
-
-        void set_ins_position_velocity_attitude_short_callback(InsPositionVelocityAttitudeShortCallback handler)
-        {
-            ins_position_velocity_attitude_short_callback_ = handler;
-        };
-
-        void set_vehicle_body_rotation_callback(VehicleBodyRotationCallback handler)
-        {
-            vehicle_body_rotation_callback_ = handler;
-        };
-
-        void set_ins_speed_callback(InsSpeedCallback handler)
-        {
-            ins_speed_callback_ = handler;
-        };
-
-        void set_raw_imu_callback(RawImuCallback handler)
-        {
-            raw_imu_callback_ = handler;
-        };
-
-        void set_raw_imu_short_callback(RawImuShortCallback handler)
-        {
-            raw_imu_short_callback_ = handler;
-        };
-
-        void set_ins_covariance_callback(InsCovarianceCallback handler)
-        {
-            ins_covariance_callback_ = handler;
-        };
-
-        void set_ins_covariance_short_callback(InsCovarianceShortCallback handler)
-        {
-            ins_covariance_short_callback_ = handler;
         };
 
         void set_pseudorange_dop_callback(PseudorangeDopCallback handler)
@@ -519,19 +465,10 @@ namespace novatel
         RawMsgCallback raw_msg_callback_;
 
         BestGpsPositionCallback best_gps_position_callback_;
-        BestLeverArmCallback best_lever_arm_callback_;
         BestPositionCallback best_position_callback_;
         BestUtmPositionCallback best_utm_position_callback_;
         BestVelocityCallback best_velocity_callback_;
         BestPositionEcefCallback best_position_ecef_callback_;
-        InsPositionVelocityAttitudeCallback ins_position_velocity_attitude_callback_;
-        InsPositionVelocityAttitudeShortCallback ins_position_velocity_attitude_short_callback_;
-        VehicleBodyRotationCallback vehicle_body_rotation_callback_;
-        InsSpeedCallback ins_speed_callback_;
-        RawImuCallback raw_imu_callback_;
-        RawImuShortCallback raw_imu_short_callback_;
-        InsCovarianceCallback ins_covariance_callback_;
-        InsCovarianceShortCallback ins_covariance_short_callback_;
 
         // GPS Callbacks
         PseudorangeDopCallback pseudorange_dop_callback_;
