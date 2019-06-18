@@ -632,7 +632,7 @@ bool Novatel::InjectAlmanac(Almanac almanac)
         almanac.header.sync2 = NOVATEL_SYNC_BYTE_2;
         almanac.header.sync3 = NOVATEL_SYNC_BYTE_3;
         almanac.header.header_length = HEADER_SIZE;
-        almanac.header.message_id = ALMANACB_LOG_TYPE;
+        almanac.header.message_id = ALMANAC_LOG_TYPE;
         almanac.header.message_type = type;
         almanac.header.port_address = THISPORT;
         almanac.header.message_length = 4 + almanac.number_of_prns * 112;
@@ -1275,15 +1275,15 @@ void Novatel::BufferIncomingData(unsigned char* message, unsigned int length)
 
 bool Novatel::CheckBinaryFormat(unsigned char* msg, unsigned length)
 {
-    if (length < sizeof(Oem4BinaryHeader))
+    if (length < sizeof(OemBinaryHeader))
         return false;
     if(msg[0] != SYNC_BYTE_1 || msg[1] != SYNC_BYTE_2 || msg[2] != SYNC_BYTE_3)
         return false;
-    Oem4BinaryHeader header;
+    OemBinaryHeader header;
     memcpy(&header, msg, sizeof(header));
-    if (length < header.message_length + sizeof(Oem4BinaryHeader))
+    if (length < header.message_length + sizeof(OemBinaryHeader))
         return false;
-    length = sizeof(Oem4BinaryHeader) + header.message_length;
+    length = sizeof(OemBinaryHeader) + header.message_length;
     int32_t crcRes = crc32c::Crc32c(msg, length), crc;
     memcpy(&crc, msg + length, 4);
     return crcRes == crc;
@@ -1333,7 +1333,8 @@ void Novatel::ParseBinary(unsigned char* message, size_t length, BINARY_LOG_TYPE
     // obtain the received crc
     switch (message_id)
     {
-    case BESTGPSPOS_LOG_TYPE:
+        /*
+    case BESTPOS_LOG_TYPE:
         Position best_gps;
         memcpy(&best_gps, message, sizeof(best_gps));
         if (best_gps_position_callback_)
@@ -1344,31 +1345,32 @@ void Novatel::ParseBinary(unsigned char* message, size_t length, BINARY_LOG_TYPE
         memcpy(&best_lever, message, sizeof(best_lever));
         if (best_lever_arm_callback_)
             best_lever_arm_callback_(best_lever, read_timestamp_);
-        break;
-    case BESTPOSB_LOG_TYPE:
+        break;*/
+    case BESTPOS_LOG_TYPE:
         Position best_pos;
         memcpy(&best_pos, message, sizeof(best_pos));
         if (best_position_callback_)
             best_position_callback_(best_pos, read_timestamp_);
         break;
-    case BESTUTMB_LOG_TYPE:
+    case BESTUTM_LOG_TYPE:
         UtmPosition best_utm;
         memcpy(&best_utm, message, sizeof(best_utm));
         if (best_utm_position_callback_)
             best_utm_position_callback_(best_utm, read_timestamp_);
         break;
-    case BESTVELB_LOG_TYPE:
+    case BESTVEL_LOG_TYPE:
         Velocity best_vel;
         memcpy(&best_vel, message, sizeof(best_vel));
         if (best_velocity_callback_)
             best_velocity_callback_(best_vel, read_timestamp_);
         break;
-    case BESTXYZB_LOG_TYPE:
+    case BESTXYZ_LOG_TYPE:
         PositionEcef best_xyz;
         memcpy(&best_xyz, message, sizeof(best_xyz));
         if (best_position_ecef_callback_)
             best_position_ecef_callback_(best_xyz, read_timestamp_);
         break;
+/*
     case INSPVA_LOG_TYPE:
         InsPositionVelocityAttitude ins_pva;
         memcpy(&ins_pva, message, sizeof(ins_pva));
@@ -1417,7 +1419,8 @@ void Novatel::ParseBinary(unsigned char* message, size_t length, BINARY_LOG_TYPE
         if (ins_covariance_short_callback_)
             ins_covariance_short_callback_(ins_cov_s, read_timestamp_);
         break;
-    case PSRDOPB_LOG_TYPE:
+        */
+    case PSRDOP_LOG_TYPE:
         Dop psr_dop;
         header_length = (uint16_t)*(message + 3);
         payload_length = (((uint16_t)*(message + 9)) << 8) +
@@ -1433,7 +1436,7 @@ void Novatel::ParseBinary(unsigned char* message, size_t length, BINARY_LOG_TYPE
         if (pseudorange_dop_callback_)
             pseudorange_dop_callback_(psr_dop, read_timestamp_);
         break;
-    case RTKDOPB_LOG_TYPE:
+    case RTKDOP_LOG_TYPE:
         Dop rtk_dop;
         memcpy(&rtk_dop, message, sizeof(rtk_dop));
         if (rtk_dop_callback_)
@@ -1445,13 +1448,13 @@ void Novatel::ParseBinary(unsigned char* message, size_t length, BINARY_LOG_TYPE
         if (baseline_ecef_callback_)
             baseline_ecef_callback_(baseline_xyz, read_timestamp_);
         break;
-    case IONUTCB_LOG_TYPE:
+    case IONUTC_LOG_TYPE:
         IonosphericModel ion;
         memcpy(&ion, message, sizeof(ion));
         if (ionospheric_model_callback_)
             ionospheric_model_callback_(ion, read_timestamp_);
         break;
-    case RANGEB_LOG_TYPE:
+    case RANGE_LOG_TYPE:
         RangeMeasurements ranges;
         header_length = (uint16_t)*(message + 3);
         payload_length = (((uint16_t)*(message + 9)) << 8) +
@@ -1477,7 +1480,7 @@ void Novatel::ParseBinary(unsigned char* message, size_t length, BINARY_LOG_TYPE
 
         break;
 
-    case RANGECMPB_LOG_TYPE:
+    case RANGECMP_LOG_TYPE:
         {
             CompressedRangeMeasurements cmp_ranges;
             header_length = (uint16_t)*(message + 3);
@@ -1544,7 +1547,7 @@ void Novatel::ParseBinary(unsigned char* message, size_t length, BINARY_LOG_TYPE
 
             break;
         }
-    case GPSEPHEMB_LOG_TYPE:
+    case GPSEPHEM_LOG_TYPE:
         {
             GpsEphemeris ephemeris;
             header_length = (uint16_t)*(message + 3);
@@ -1568,7 +1571,7 @@ void Novatel::ParseBinary(unsigned char* message, size_t length, BINARY_LOG_TYPE
             }
             break;
         }
-    case RAWEPHEMB_LOG_TYPE:
+    case RAWEPHEM_LOG_TYPE:
         {
             RawEphemeris raw_ephemeris;
 
@@ -1585,7 +1588,7 @@ void Novatel::ParseBinary(unsigned char* message, size_t length, BINARY_LOG_TYPE
 
             break;
         }
-    case RAWALMB_LOG_TYPE:
+    case RAWALM_LOG_TYPE:
         RawAlmanac raw_almanac;
         header_length = (uint16_t)*(message + 3);
         payload_length = (((uint16_t)*(message + 9)) << 8) + ((uint16_t)*(message + 8));
@@ -1600,7 +1603,7 @@ void Novatel::ParseBinary(unsigned char* message, size_t length, BINARY_LOG_TYPE
         if (raw_almanac_callback_)
             raw_almanac_callback_(raw_almanac, read_timestamp_);
         break;
-    case ALMANACB_LOG_TYPE:
+    case ALMANAC_LOG_TYPE:
         Almanac almanac;
         header_length = (uint16_t)*(message + 3);
         payload_length = (((uint16_t)*(message + 9)) << 8) + ((uint16_t)*(message + 8));
@@ -1624,7 +1627,7 @@ void Novatel::ParseBinary(unsigned char* message, size_t length, BINARY_LOG_TYPE
         if (almanac_callback_)
             almanac_callback_(almanac, read_timestamp_);
         break;
-    case SATXYZB_LOG_TYPE:
+    case SATXYZ2_LOG_TYPE:
         SatellitePositions sat_pos;
         header_length = (uint16_t)*(message + 3);
         payload_length = (((uint16_t)*(message + 9)) << 8) + ((uint16_t)*(message + 8));
@@ -1639,7 +1642,7 @@ void Novatel::ParseBinary(unsigned char* message, size_t length, BINARY_LOG_TYPE
         if (satellite_positions_callback_)
             satellite_positions_callback_(sat_pos, read_timestamp_);
         break;
-    case SATVISB_LOG_TYPE:
+    case SATVIS_LOG_TYPE:
         SatelliteVisibility sat_vis;
         header_length = (uint16_t)*(message + 3);
         payload_length = (((uint16_t)*(message + 9)) << 8) + ((uint16_t)*(message + 8));
@@ -1654,13 +1657,13 @@ void Novatel::ParseBinary(unsigned char* message, size_t length, BINARY_LOG_TYPE
         if (satellite_visibility_callback_)
             satellite_visibility_callback_(sat_vis, read_timestamp_);
         break;
-    case TIMEB_LOG_TYPE:
+    case TIME_LOG_TYPE:
         TimeOffset time_offset;
         memcpy(&time_offset, message, sizeof(time_offset));
         if (time_offset_callback_)
             time_offset_callback_(time_offset, read_timestamp_);
         break;
-    case TRACKSTATB_LOG_TYPE:
+    case TRACKSTAT_LOG_TYPE:
         TrackStatus tracking_status;
         header_length = (uint16_t)*(message + 3);
         payload_length = (((uint16_t)*(message + 9)) << 8) + ((uint16_t)*(message + 8));
@@ -1675,19 +1678,20 @@ void Novatel::ParseBinary(unsigned char* message, size_t length, BINARY_LOG_TYPE
         if (tracking_status_callback_)
             tracking_status_callback_(tracking_status, read_timestamp_);
         break;
-    case RXHWLEVELSB_LOG_TYPE:
+        /*
+    case RXHWLEVELS_LOG_TYPE:
         ReceiverHardwareStatus hw_levels;
         memcpy(&hw_levels, message, sizeof(hw_levels));
         if (receiver_hardware_status_callback_)
             receiver_hardware_status_callback_(hw_levels, read_timestamp_);
-        break;
-    case PSRPOSB_LOG_TYPE:
+        break;*/
+    case PSRPOS_LOG_TYPE:
         Position psr_pos;
         memcpy(&psr_pos, message, sizeof(psr_pos));
         if (best_pseudorange_position_callback_)
             best_pseudorange_position_callback_(psr_pos, read_timestamp_);
         break;
-    case RTKPOSB_LOG_TYPE:
+    case RTKPOS_LOG_TYPE:
         Position rtk_pos;
         memcpy(&rtk_pos, message, sizeof(rtk_pos));
         if (rtk_position_callback_)
@@ -1701,7 +1705,7 @@ void Novatel::ParseBinary(unsigned char* message, size_t length, BINARY_LOG_TYPE
 void Novatel::ParseBinary(unsigned char* message, size_t length)
 {
     //assume that message has been checked
-    Oem4BinaryHeader header;
+    OemBinaryHeader header;
     int32_t id;
     memcpy(&header, message, sizeof(header));
     memcpy(&id, message + sizeof(header), sizeof(id));

@@ -107,7 +107,7 @@ struct NOVATEL_EXPORT MessageType {
 
 //! Header prepended to OEM4 binary messages
 PACK(
-struct NOVATEL_EXPORT Oem4BinaryHeader
+struct NOVATEL_EXPORT OemBinaryHeader
 {
    uint8_t sync1; //!< start of packet first byte (0xAA)
    uint8_t sync2; //!< start of packet second byte (0x44)
@@ -129,7 +129,7 @@ struct NOVATEL_EXPORT Oem4BinaryHeader
 
 //! Header prepended to OEM4 binary messages
 PACK(
-struct NOVATEL_EXPORT OEM4ShortBinaryHeader
+struct NOVATEL_EXPORT OemShortBinaryHeader
 {
    uint8_t sync1; //!< start of packet first byte (0xAA)
    uint8_t sync2; //!< start of packet second byte (0x44)
@@ -174,7 +174,7 @@ struct NOVATEL_EXPORT ImuStatus
 PACK(
 struct NOVATEL_EXPORT InsPositionVelocityAttitude
 {
-	Oem4BinaryHeader header; //!< Message header
+	OemBinaryHeader header; //!< Message header
 	uint32_t gps_week; //!< GPS week number
 	double gps_millisecs; //!< Milliseconds into GPS week
 	double latitude; //!< latitude - WGS84 (deg)
@@ -199,7 +199,7 @@ struct NOVATEL_EXPORT InsPositionVelocityAttitude
 PACK(
 struct NOVATEL_EXPORT InsPositionVelocityAttitudeShort
 {
-	OEM4ShortBinaryHeader header;
+	OemShortBinaryHeader header;
 	uint32_t gps_week; //!< GPS week number
 	double gps_millisecs; //!< Milliseconds into GPS week
 	double latitude; //!< latitude - WGS84 (deg)
@@ -227,7 +227,7 @@ struct NOVATEL_EXPORT InsPositionVelocityAttitudeShort
 PACK(
 struct NOVATEL_EXPORT InsCovariance
 {
-	Oem4BinaryHeader header; //!< Message header
+	OemBinaryHeader header; //!< Message header
 	uint32_t gps_week; //!< GPS week number
 	double gps_millisecs; //!< Milliseconds into GPS week
 	double position_covariance[9]; //!< Position covariance matrix [m^2] (xx,xy,xz,yz,yy,...)
@@ -249,7 +249,7 @@ struct NOVATEL_EXPORT InsCovariance
 PACK(
 struct NOVATEL_EXPORT InsCovarianceShort
 {
-	OEM4ShortBinaryHeader header; //!< Message header
+	OemShortBinaryHeader header; //!< Message header
 	uint32_t gps_week; //!< GPS week number
 	double gps_millisecs; //!< Milliseconds into GPS week
 	double position_covariance[9]; //!< Position covariance matrix [m^2] (xx,xy,xz,yz,yy,...)
@@ -268,7 +268,7 @@ struct NOVATEL_EXPORT InsCovarianceShort
 PACK(
 struct NOVATEL_EXPORT InsSpeed
 {
-	Oem4BinaryHeader header; //!< Message header
+	OemBinaryHeader header; //!< Message header
 	uint32_t gps_week; //!< GPS week number
 	double gps_millisecs; //!< Milliseconds into GPS week
 	double track_over_ground; //!< actual direction of motion over ground (degrees)
@@ -290,7 +290,7 @@ struct NOVATEL_EXPORT InsSpeed
 PACK(
 struct NOVATEL_EXPORT RawImu
 {
-	Oem4BinaryHeader header; //!< Message header
+	OemBinaryHeader header; //!< Message header
 	uint32_t gps_week; //!< GPS week number
 	double gps_millisecs; //!< Milliseconds into GPS week
 	ImuStatus imuStatus; //!< Status of the IMU
@@ -318,7 +318,7 @@ struct NOVATEL_EXPORT RawImu
 PACK(
 struct NOVATEL_EXPORT RawImuShort
 {
-	OEM4ShortBinaryHeader header; //!< Message header
+	OemShortBinaryHeader header; //!< Message header
 	uint32_t gps_week; //!< GPS week number
 	double gps_millisecs; //!< Milliseconds into GPS week
 	ImuStatus imuStatus; //!< Status of the IMU
@@ -346,7 +346,7 @@ struct NOVATEL_EXPORT RawImuShort
 PACK(
 struct NOVATEL_EXPORT VehicleBodyRotation
 {
-	Oem4BinaryHeader header; //!< Message header
+	OemBinaryHeader header; //!< Message header
 	double x_angle; //!< rotation about vehicle frame x axis (deg)
 	double y_angle; //!< rotation about vehicle frame y axis (deg)
 	double z_angle; //!< rotation about vehicle frame z axis (deg)
@@ -367,7 +367,7 @@ struct NOVATEL_EXPORT VehicleBodyRotation
 PACK(
 struct NOVATEL_EXPORT BestLeverArm
 {
-	Oem4BinaryHeader header; //!< Message header
+	OemBinaryHeader header; //!< Message header
 	double x_offset; //!< x offset in IMU enclosure frame (m)
 	double y_offset; //!< y offset in IMU enclosure frame (m)
 	double z_offset; //!< z offset in IMU enclosure frame (m)
@@ -397,7 +397,7 @@ struct NOVATEL_EXPORT BestLeverArm
 PACK(
 struct NOVATEL_EXPORT Position
 {
-	Oem4BinaryHeader header; //!< Message header
+	OemBinaryHeader header; //!< Message header
 	SolutionStatus solution_status; //!< Solution status
 	PositionType position_type; //!< Position type
 	double latitude; //!< latitude (deg)
@@ -438,7 +438,7 @@ struct NOVATEL_EXPORT Position
 PACK(
 struct NOVATEL_EXPORT PositionEcef
 {
-    Oem4BinaryHeader header; //!< Message header
+    OemBinaryHeader header; //!< Message header
     SolutionStatus solution_status; //!< Solution status
     PositionType position_type; //!< Position type
     double x_position; //!< x coordinate in ECEF (m)
@@ -487,7 +487,7 @@ struct NOVATEL_EXPORT PositionEcef
 PACK(
 struct NOVATEL_EXPORT Velocity
 {
-	Oem4BinaryHeader header; //!< Message header
+	OemBinaryHeader header; //!< Message header
 	SolutionStatus solution_status; //!< Solution status
 	PositionType position_type; //!< Position type
 	float latency; //!< measure of the latency of the velocity time tag in seconds
@@ -516,8 +516,9 @@ struct NOVATEL_EXPORT Velocity
 *  - RTKDOP
 */
 PACK(
-struct NOVATEL_EXPORT Dop {
-    Oem4BinaryHeader header; //!< Message header
+struct NOVATEL_EXPORT Dop 
+{
+    OemBinaryHeader header; //!< Message header
     float geometric_dop; //!< Geometric DOP
     float position_dop; //!< Position DOP
     float horizontal_dop; //!< Horizontal DOP
@@ -543,7 +544,7 @@ struct NOVATEL_EXPORT Dop {
 PACK(
 struct NOVATEL_EXPORT BaselineEcef
 {
-  Oem4BinaryHeader header; //!< Message header
+  OemBinaryHeader header; //!< Message header
   SolutionStatus solution_status; //!< Solution status
   PositionType position_type; //!< Position type
   double x_baseline; //!< Baseline x coordinate (m)
@@ -580,7 +581,7 @@ struct NOVATEL_EXPORT BaselineEcef
 PACK(
 struct NOVATEL_EXPORT UtmPosition
 {
-    Oem4BinaryHeader header; //!< Message header
+    OemBinaryHeader header; //!< Message header
     SolutionStatus solution_status; //!< Solution status
     PositionType position_type; //!< Position type
     uint32_t longitude_zone_number; //!< longitude utm zone number
@@ -615,7 +616,7 @@ struct NOVATEL_EXPORT UtmPosition
 */
 PACK(
 struct NOVATEL_EXPORT IonosphericModel {
-    Oem4BinaryHeader header; //!< Message header
+    OemBinaryHeader header; //!< Message header
     double a0; //!< alpha parameter constant term
     double a1; //!< alpha parameter 1st order term
     double a2; //!< alpha parameter 2nd order term
@@ -689,7 +690,7 @@ struct NOVATEL_EXPORT RangeData {
 */
 PACK(
 struct NOVATEL_EXPORT RangeMeasurements {
-    Oem4BinaryHeader header; //!< Message header
+    OemBinaryHeader header; //!< Message header
     int32_t number_of_observations; //!< Number of ranges observations in the following message
     RangeData range_data[MAX_CHAN]; //!< Range data for each available channel
     uint8_t crc[4]; //!< 32-bit cyclic redundancy check (CRC)
@@ -729,7 +730,7 @@ struct NOVATEL_EXPORT CompressedRangeData {
 */
 PACK(
 struct NOVATEL_EXPORT CompressedRangeMeasurements {
-    Oem4BinaryHeader header; //!< Message header
+    OemBinaryHeader header; //!< Message header
     int32_t number_of_observations; //!< Number of ranges observations in the following message
     CompressedRangeData range_data[MAX_CHAN]; //!< Range data for each available channel
     uint8_t crc[4]; //!< 32-bit cyclic redundancy check (CRC)
@@ -748,7 +749,7 @@ struct NOVATEL_EXPORT CompressedRangeMeasurements {
 PACK(
 struct NOVATEL_EXPORT GpsEphemeris
 {
-    Oem4BinaryHeader header; //!< Message header
+    OemBinaryHeader header; //!< Message header
     uint32_t prn; //!< PRN number
     double time_of_week; //!< time stamp of subframe 0 (s)
     uint32_t health; //!< health status, defined in ICD-GPS-200
@@ -792,7 +793,7 @@ struct NOVATEL_EXPORT GpsEphemeris
 */
 PACK(
 struct NOVATEL_EXPORT RawEphemeris {
-    Oem4BinaryHeader header;
+    OemBinaryHeader header;
     uint32_t prn; //!< Satellite PRN number
     uint32_t ephem_reference_week_num; //!< Ephemeris reference week number
     uint32_t ephem_reference_seconds; //!< Ephemeris reference time [sec]
@@ -821,7 +822,7 @@ struct NOVATEL_EXPORT RawAlmanacData
 PACK(
 struct NOVATEL_EXPORT RawAlmanac
 {
-	Oem4BinaryHeader header;
+	OemBinaryHeader header;
 	uint32_t ref_week;
 	uint32_t ref_time; // [sec]
 	uint32_t num_of_subframes; // numbers of subframes to follow
@@ -858,7 +859,7 @@ struct NOVATEL_EXPORT AlmanacData {
 
 PACK(
 struct NOVATEL_EXPORT Almanac {
-	Oem4BinaryHeader header;
+	OemBinaryHeader header;
 	int32_t number_of_prns;
 	AlmanacData data[MAX_NUM_SAT];
 	uint8_t crc[4];
@@ -893,7 +894,7 @@ struct NOVATEL_EXPORT SatellitePositionData {
 */
 PACK(
 struct NOVATEL_EXPORT SatellitePositions {
-    Oem4BinaryHeader header; //!< Message header
+    OemBinaryHeader header; //!< Message header
     double dReserved1; //!< Reserved
     uint32_t number_of_satellites; //!< Number of satellites in following message
     SatellitePositionData data[MAX_CHAN]; //!< Position data for each satellite
@@ -922,7 +923,7 @@ struct NOVATEL_EXPORT SatelliteVisibilityData {
 
 PACK(
 struct NOVATEL_EXPORT SatelliteVisibility {
-    Oem4BinaryHeader header; //!< Message header
+    OemBinaryHeader header; //!< Message header
     true_false sat_vis; //!< Reserved
     true_false complete_almanac_used; //!< Was Complete almanac used
     uint32_t number_of_satellites; //!< Number of satellites in following message
@@ -944,7 +945,7 @@ struct NOVATEL_EXPORT SatelliteVisibility {
 */
 PACK(
 struct NOVATEL_EXPORT TimeOffset {
-    Oem4BinaryHeader header; //!< Message header
+    OemBinaryHeader header; //!< Message header
     uint32_t clock_model_status; //!< ClockModelStatus
     double offset; //!< Receiver Offset in seconds from GPS time
     double offset_standard_deviation; //!< Instantaneous Standard Deviation of Receiver Clock Offset
@@ -980,7 +981,7 @@ struct NOVATEL_EXPORT TimeOffset {
 
     struct NOVATEL_EXPORT TrackStatus
     {
-        Oem4BinaryHeader header; //!< Message header
+        OemBinaryHeader header; //!< Message header
         SolutionStatus solution_status; //!< Solution status
         PositionType position_type; //!< Position type
         float elevation_cutoff_angle; //!< Tracking elevation cutoff angle
@@ -1035,7 +1036,7 @@ struct NOVATEL_EXPORT rtkdatab_data {
 
 PACK(
 struct NOVATEL_EXPORT rtkdatab_log {
-    Oem4BinaryHeader hdr;
+    OemBinaryHeader hdr;
     SolutionStatus solutionStatus; //Solution status
     PositionType positionType; //Position type
     rtkdatab_header header;
@@ -1066,7 +1067,7 @@ struct NOVATEL_EXPORT rtcadata1b_data {
 
 PACK(
 struct NOVATEL_EXPORT rtcadata1b_log {
-    Oem4BinaryHeader header; //Log header
+    OemBinaryHeader header; //Log header
     rtcadata1b_header info;
     rtcadata1b_data data[MAX_NUM_SAT];
 });
@@ -1090,7 +1091,7 @@ struct NOVATEL_EXPORT rtcadataephemb_data {
 
 PACK(
 struct NOVATEL_EXPORT rtcadataephemb_log {
-    Oem4BinaryHeader header; //Log header
+    OemBinaryHeader header; //Log header
     rtcadataephemb_data data;
 });
 
@@ -1125,7 +1126,7 @@ struct NOVATEL_EXPORT rtcadataobsb_data //Structure for RTCADATAEPHEM message
 
 PACK(
 struct NOVATEL_EXPORT rtcadataobsb_log {
-    Oem4BinaryHeader header; //Log header
+    OemBinaryHeader header; //Log header
     rtcadataobsb_header info;
     rtcadataobsb_data data[MAX_NUM_SAT]; //WT:  This is probably too many... need to verify how many id's can be sent.
 });
@@ -1147,7 +1148,7 @@ struct NOVATEL_EXPORT rtcadatarefb_data {
 
 PACK(
 struct NOVATEL_EXPORT rtcadatarefb_log {
-    Oem4BinaryHeader header; //Log header
+    OemBinaryHeader header; //Log header
     rtcadatarefb_data data;
 });
 
@@ -1173,7 +1174,7 @@ struct NOVATEL_EXPORT rtcadatarefb_log {
 PACK(
 struct NOVATEL_EXPORT Version
 {
-	Oem4BinaryHeader header; //!< Message header
+	OemBinaryHeader header; //!< Message header
 	int32_t number_of_components; //!< Number of components (cards, etc..)
 	int32_t component_type; //!< Component type
 	char model[16]; //!< Base model name
@@ -1261,7 +1262,7 @@ struct NOVATEL_EXPORT Version
 PACK(
 struct NOVATEL_EXPORT RXStatus
 {
-	Oem4BinaryHeader header; //!<
+	OemBinaryHeader header; //!<
 	ReceiverError error; //!< receiver error field
 	uint32_t numStats; //!< number of status messages
 	ReceiverStatus rxStat; //!< receiver status word
@@ -1286,7 +1287,7 @@ struct NOVATEL_EXPORT RXStatus
 
     struct NOVATEL_EXPORT RXStatusEvent
     {
-        Oem4BinaryHeader header;
+        OemBinaryHeader header;
         StatusWord status; // the status word that generated the event message
         uint32_t bitPosition; // location of the bit in the status word (Table 81, pg 303
         EventType type; // event type (Table 86, pg 306)
@@ -1299,7 +1300,7 @@ struct NOVATEL_EXPORT RXStatus
 */
     struct NOVATEL_EXPORT ReceiverHardwareStatus
     {
-        Oem4BinaryHeader header;
+        OemBinaryHeader header;
         float board_temperature; //!< board temperature in degrees celcius
         float antenna_current; //!< antenna current (A)
         float core_voltage; //!< CPU core voltage (V)
