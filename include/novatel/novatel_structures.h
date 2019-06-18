@@ -76,15 +76,15 @@ namespace novatel
 #define NOVATEL_RESET_BYTE_4 'M'
 #define NOVATEL_RESET_BYTE_6 0X5D
 
-    // IMU Constants
-    // scale factor between integer counts and change in velocity in m/s for AG11 and AG58
+// IMU Constants
+// scale factor between integer counts and change in velocity in m/s for AG11 and AG58
 #define VELOCITY_CHANGE_SCALE_FACTOR_11_58 (0.3048/((double)134217728.0))
-    // scale factor between integer counts and change in velocity in m/s for AG17 and AG62
+// scale factor between integer counts and change in velocity in m/s for AG17 and AG62
 #define VELOCITY_CHANGE_SCALE_FACTOR_17_62 (0.3048/((double)67108864.0))
-    // scale factor between integer counts and change in angle in rad for AG11, AG17, AG58, and AG62
+// scale factor between integer counts and change in angle in rad for AG11, AG17, AG58, and AG62
 #define ANGULAR_CHANGE_SCALE_FACTOR (1.0/((double)8589934592.0))
 
-    // define macro to pack structures correctly with both GCC and MSVC compilers
+// define macro to pack structures correctly with both GCC and MSVC compilers
 #ifdef _MSC_VER // using MSVC
 #define PACK( __Declaration__ ) __pragma( pack(push, 1) ) __Declaration__ __pragma( pack(pop) )
 #else
@@ -92,21 +92,21 @@ namespace novatel
 #endif
 
 
-    //*******************************************************************************
-    // HEADER STRUCTURES
-    //*******************************************************************************
-    /*!
-     * Message Type
-     */
-    PACK(
+//*******************************************************************************
+// HEADER STRUCTURES
+//*******************************************************************************
+/*!
+* Message Type
+*/
+PACK(
 struct NOVATEL_EXPORT MessageType {
     unsigned reserved:5;
     MessageFormat format:2;
     ResponseBit response:1;
 });
 
-    //! Header prepended to OEM4 binary messages
-    PACK(
+//! Header prepended to OEM4 binary messages
+PACK(
 struct NOVATEL_EXPORT Oem4BinaryHeader
 {
    uint8_t sync1; //!< start of packet first byte (0xAA)
@@ -127,8 +127,8 @@ struct NOVATEL_EXPORT Oem4BinaryHeader
    uint16_t version; //!< Receiver software build number (0-65535)
 });
 
-    //! Header prepended to OEM4 binary messages
-    PACK(
+//! Header prepended to OEM4 binary messages
+PACK(
 struct NOVATEL_EXPORT OEM4ShortBinaryHeader
 {
    uint8_t sync1; //!< start of packet first byte (0xAA)
@@ -141,12 +141,12 @@ struct NOVATEL_EXPORT OEM4ShortBinaryHeader
 });
 
 
-    //*******************************************************************************
-    // INS STRUCTURES
-    //*******************************************************************************
+//*******************************************************************************
+// INS STRUCTURES
+//*******************************************************************************
 
-    //! IMU status structure that is included in the RAWIMU message
-    PACK(
+//! IMU status structure that is included in the RAWIMU message
+PACK(
 struct NOVATEL_EXPORT ImuStatus
 {
    unsigned counter : 4; //!< 4 byte counter
@@ -165,13 +165,13 @@ struct NOVATEL_EXPORT ImuStatus
 });
 
 
-    /*!
-     * INSPVA Message Structure
-     * This log allows INS position, velocity and
-     * attitude to be collected in one log, instead
-     * of using three separate logs.
-     */
-    PACK(
+/*!
+* INSPVA Message Structure
+* This log allows INS position, velocity and
+* attitude to be collected in one log, instead
+* of using three separate logs.
+*/
+PACK(
 struct NOVATEL_EXPORT InsPositionVelocityAttitude
 {
 	Oem4BinaryHeader header; //!< Message header
@@ -190,13 +190,13 @@ struct NOVATEL_EXPORT InsPositionVelocityAttitude
 	int8_t crc[4];
 });
 
-    /*!
-     * INSPVAS Message Structure
-     * This log allows INS position, velocity and
-     * attitude to be collected in one log, instead
-     * of using three separate logs. Short header version
-     */
-    PACK(
+/*!
+* INSPVAS Message Structure
+* This log allows INS position, velocity and
+* attitude to be collected in one log, instead
+* of using three separate logs. Short header version
+*/
+PACK(
 struct NOVATEL_EXPORT InsPositionVelocityAttitudeShort
 {
 	OEM4ShortBinaryHeader header;
@@ -215,16 +215,16 @@ struct NOVATEL_EXPORT InsPositionVelocityAttitudeShort
 	int8_t crc[4];
 });
 
-    /*!
-     * INSCOV Message Structure
-     * The position, attitude, and velocity matrices
-     * in this log each contain 9 covariance values,
-     * with respect to the local level frame. For the
-     * attitude angles, they are given in the SPAN computation
-     * frame. These values are computed once per second and
-     * are only available after alignment.
-     */
-    PACK(
+/*!
+* INSCOV Message Structure
+* The position, attitude, and velocity matrices
+* in this log each contain 9 covariance values,
+* with respect to the local level frame. For the
+* attitude angles, they are given in the SPAN computation
+* frame. These values are computed once per second and
+* are only available after alignment.
+*/
+PACK(
 struct NOVATEL_EXPORT InsCovariance
 {
 	Oem4BinaryHeader header; //!< Message header
@@ -236,17 +236,17 @@ struct NOVATEL_EXPORT InsCovariance
 	int8_t crc[4];
 });
 
-    /*!
-     * INSCOVS Message Structure
-     * The position, attitude, and velocity matrices
-     * in this log each contain 9 covariance values,
-     * with respect to the local level frame. For the
-     * attitude angles, they are given in the SPAN computation
-     * frame. These values are computed once per second and
-     * are only available after alignment. This log is a short
-     * header version of INSCOV
-     */
-    PACK(
+/*!
+* INSCOVS Message Structure
+* The position, attitude, and velocity matrices
+* in this log each contain 9 covariance values,
+* with respect to the local level frame. For the
+* attitude angles, they are given in the SPAN computation
+* frame. These values are computed once per second and
+* are only available after alignment. This log is a short
+* header version of INSCOV
+*/
+PACK(
 struct NOVATEL_EXPORT InsCovarianceShort
 {
 	OEM4ShortBinaryHeader header; //!< Message header
@@ -259,13 +259,13 @@ struct NOVATEL_EXPORT InsCovarianceShort
 });
 
 
-    /*!
-     * INSSPD Message Structure
-     * This log contains the most recent speed
-     * measurements in the horizontal and vertical
-     * directions, and includes an INS status indicator.
-     */
-    PACK(
+/*!
+* INSSPD Message Structure
+* This log contains the most recent speed
+* measurements in the horizontal and vertical
+* directions, and includes an INS status indicator.
+*/
+PACK(
 struct NOVATEL_EXPORT InsSpeed
 {
 	Oem4BinaryHeader header; //!< Message header
@@ -279,15 +279,15 @@ struct NOVATEL_EXPORT InsSpeed
 });
 
 
-    /*!
-     * RAWIMU Message Structure
-     * This log contains an IMU status indicator
-     * and the measurements from the accelerometers
-     * and gyros with respect to the IMU enclosure
-     * frame. If logging this data, consider the RAWIMUS
-     * log to reduce the amount of data,
-     */
-    PACK(
+/*!
+* RAWIMU Message Structure
+* This log contains an IMU status indicator
+* and the measurements from the accelerometers
+* and gyros with respect to the IMU enclosure
+* frame. If logging this data, consider the RAWIMUS
+* log to reduce the amount of data,
+*/
+PACK(
 struct NOVATEL_EXPORT RawImu
 {
 	Oem4BinaryHeader header; //!< Message header
@@ -303,19 +303,19 @@ struct NOVATEL_EXPORT RawImu
 	int8_t crc[4];
 });
 
-    // scale factor for change in angle (1.0/((double)8589934592.0)) for the AG11, AG58, AG17, and AG62
-    // scale factor for change in velocity (acceleration)
-    //(0.3048/((double)134217728.0)) for the AG11 and AG58
-    //(0.3048/((double)67108864.0)) for the AG17 and AG62
+// scale factor for change in angle (1.0/((double)8589934592.0)) for the AG11, AG58, AG17, and AG62
+// scale factor for change in velocity (acceleration)
+//(0.3048/((double)134217728.0)) for the AG11 and AG58
+//(0.3048/((double)67108864.0)) for the AG17 and AG62
 
-    /*!
-     * RAWIMUS Message Structure
-     * This log contains an IMU status indicator
-     * and the measurements from the accelerometers
-     * and gyros with respect to the IMU enclosure
-     * frame. It is a short header version of RAWIMU
-     */
-    PACK(
+/*!
+* RAWIMUS Message Structure
+* This log contains an IMU status indicator
+* and the measurements from the accelerometers
+* and gyros with respect to the IMU enclosure
+* frame. It is a short header version of RAWIMU
+*/
+PACK(
 struct NOVATEL_EXPORT RawImuShort
 {
 	OEM4ShortBinaryHeader header; //!< Message header
@@ -332,18 +332,18 @@ struct NOVATEL_EXPORT RawImuShort
 });
 
 
-    /*!
-     * VEHICLEBODYROTATION Message Structure
-     * The VEHICLEBODYROTATION log reports the angular
-     *  offset from the vehicle frame to the SPAN frame.
-     *  The SPAN frame is defined by the transformed IMU
-     *  enclosure axis with Z pointing up, see the
-     *  SETIMUORIENTATION command on page 126. If your
-     *  IMU is mounted with the Z axis (as marked on the IMU
-     *  enclosure) pointing up, the IMU enclosure frame is
-     *  the same as the SPAN frame.
-     */
-    PACK(
+/*!
+* VEHICLEBODYROTATION Message Structure
+* The VEHICLEBODYROTATION log reports the angular
+*  offset from the vehicle frame to the SPAN frame.
+*  The SPAN frame is defined by the transformed IMU
+*  enclosure axis with Z pointing up, see the
+*  SETIMUORIENTATION command on page 126. If your
+*  IMU is mounted with the Z axis (as marked on the IMU
+*  enclosure) pointing up, the IMU enclosure frame is
+*  the same as the SPAN frame.
+*/
+PACK(
 struct NOVATEL_EXPORT VehicleBodyRotation
 {
 	Oem4BinaryHeader header; //!< Message header
@@ -357,14 +357,14 @@ struct NOVATEL_EXPORT VehicleBodyRotation
 });
 
 
-    /*!
-     * BESTLEVERARM Message Structure
-     * This log contains the distance between the
-     * IMU’s centre of navigation and the GPS phase
-     * centre in the IMU enclosure frame and its associated
-     * uncertainties.
-     */
-    PACK(
+/*!
+* BESTLEVERARM Message Structure
+* This log contains the distance between the
+* IMU’s centre of navigation and the GPS phase
+* centre in the IMU enclosure frame and its associated
+* uncertainties.
+*/
+PACK(
 struct NOVATEL_EXPORT BestLeverArm
 {
 	Oem4BinaryHeader header; //!< Message header
@@ -379,22 +379,22 @@ struct NOVATEL_EXPORT BestLeverArm
 });
 
 
-    //*******************************************************************************
-    // GENERIC GPS STRUCTURES
-    //*******************************************************************************
+//*******************************************************************************
+// GENERIC GPS STRUCTURES
+//*******************************************************************************
 
-    /*!
-     * Position Message Structure
-     * This log contains the a position received from the receiver
-     * in latitude and longitude as well as status information such as
-     * the solution type and the number of satellites used.
-     *
-     * This structure represents the format of the following messages:
-     *  - BESTPOS
-     *  - RTKPOS
-     *  - PSRPOS
-     */
-    PACK(
+/*!
+* Position Message Structure
+* This log contains the a position received from the receiver
+* in latitude and longitude as well as status information such as
+* the solution type and the number of satellites used.
+*
+* This structure represents the format of the following messages:
+*  - BESTPOS
+*  - RTKPOS
+*  - PSRPOS
+*/
+PACK(
 struct NOVATEL_EXPORT Position
 {
 	Oem4BinaryHeader header; //!< Message header
@@ -422,20 +422,20 @@ struct NOVATEL_EXPORT Position
 	uint8_t crc[4]; //!< 32-bit cyclic redundancy check (CRC)
 });
 
-    /*!
-     * ECEF Position Message Structure
-     * This log contains the receiver’s best
-     * available position and velocity in ECEF
-     * coordinates. The position and velocity status
-     * fields indicate whether or not the corresponding
-     * data is valid.
-     *
-     * This structure represents the format of the following messages:
-     *  - BESTXYZ
-     *  - RTKXYZ
-     *  - PSRXYZ
-     */
-    PACK(
+/*!
+* ECEF Position Message Structure
+* This log contains the receiver’s best
+* available position and velocity in ECEF
+* coordinates. The position and velocity status
+* fields indicate whether or not the corresponding
+* data is valid.
+*
+* This structure represents the format of the following messages:
+*  - BESTXYZ
+*  - RTKXYZ
+*  - PSRXYZ
+*/
+PACK(
 struct NOVATEL_EXPORT PositionEcef
 {
     Oem4BinaryHeader header; //!< Message header
@@ -469,22 +469,22 @@ struct NOVATEL_EXPORT PositionEcef
 });
 
 
-    /*!
-     * Velocity Message Structure
-     * This log contains the best available velocity
-     * information computed by the receiver. In addition,
-     * it reports a velocity status indicator, which is
-     * useful in indicating whether or not the corresponding
-     * data is valid. The velocity measurements sometimes
-     * have a latency associated with them. The time of validity
-     * is the time tag in the log minus the latency value.
-     *
-     * This structure represents the format of the following messages:
-     *  - BESTVEL
-     *  - RTKVEL
-     *  - PSRVEL
-     */
-    PACK(
+/*!
+* Velocity Message Structure
+* This log contains the best available velocity
+* information computed by the receiver. In addition,
+* it reports a velocity status indicator, which is
+* useful in indicating whether or not the corresponding
+* data is valid. The velocity measurements sometimes
+* have a latency associated with them. The time of validity
+* is the time tag in the log minus the latency value.
+*
+* This structure represents the format of the following messages:
+*  - BESTVEL
+*  - RTKVEL
+*  - PSRVEL
+*/
+PACK(
 struct NOVATEL_EXPORT Velocity
 {
 	Oem4BinaryHeader header; //!< Message header
@@ -500,22 +500,22 @@ struct NOVATEL_EXPORT Velocity
 });
 
 
-    /*!
-     * DOP Message Structure
-     * The dilution of precision data is calculated
-     * using the geometry of only those satellites that are
-     * currently being tracked and used in the position
-     * solution by the receiver. This log is updated once
-     * every 60 seconds or whenever a change in the satellite
-     * constellation occurs. Therefore, the total number of
-     * data fields output by the log is variable and depends
-     * on the number of SVs that are being tracked.
-     *
-     * This structure represents the format of the following messages:
-     *  - PSRDOP
-     *  - RTKDOP
-     */
-    PACK(
+/*!
+* DOP Message Structure
+* The dilution of precision data is calculated
+* using the geometry of only those satellites that are
+* currently being tracked and used in the position
+* solution by the receiver. This log is updated once
+* every 60 seconds or whenever a change in the satellite
+* constellation occurs. Therefore, the total number of
+* data fields output by the log is variable and depends
+* on the number of SVs that are being tracked.
+*
+* This structure represents the format of the following messages:
+*  - PSRDOP
+*  - RTKDOP
+*/
+PACK(
 struct NOVATEL_EXPORT Dop {
     Oem4BinaryHeader header; //!< Message header
     float geometric_dop; //!< Geometric DOP
@@ -529,18 +529,18 @@ struct NOVATEL_EXPORT Dop {
     uint8_t crc[4]; //!< 32-bit cyclic redundancy check (CRC)
 });
 
-    //*******************************************************************************
-    // MESSAGE SPECIFIC GPS STRUCTURES
-    //*******************************************************************************
+//*******************************************************************************
+// MESSAGE SPECIFIC GPS STRUCTURES
+//*******************************************************************************
 
-    /*!
-     * BSLNXYZ Message Structure
-     * This log contains the receiver’s RTK baseline
-     * in ECEF coordinates. The position status field
-     * indicates whether or not the corresponding data
-     * is valid.
-     */
-    PACK(
+/*!
+* BSLNXYZ Message Structure
+* This log contains the receiver’s RTK baseline
+* in ECEF coordinates. The position status field
+* indicates whether or not the corresponding data
+* is valid.
+*/
+PACK(
 struct NOVATEL_EXPORT BaselineEcef
 {
   Oem4BinaryHeader header; //!< Message header
@@ -565,19 +565,19 @@ struct NOVATEL_EXPORT BaselineEcef
 });
 
 
-    /*!
-     * UTM Position Message Structure
-     * This log contains the best available position
-     * computed by the receiver in UTM coordinates.
-     *
-     * The latitude limits of the UTM System are 80°S to
-     * 84°N. If your position is outside this range, the
-     * BESTUTM log outputs a northing, easting and height
-     * of 0.0, along with a zone letter of ‘*’and a zone
-     * number of 0, so that it is obvious that the data
-     * in the log is unusable.
-     */
-    PACK(
+/*!
+* UTM Position Message Structure
+* This log contains the best available position
+* computed by the receiver in UTM coordinates.
+*
+* The latitude limits of the UTM System are 80°S to
+* 84°N. If your position is outside this range, the
+* BESTUTM log outputs a northing, easting and height
+* of 0.0, along with a zone letter of ‘*’and a zone
+* number of 0, so that it is obvious that the data
+* in the log is unusable.
+*/
+PACK(
 struct NOVATEL_EXPORT UtmPosition
 {
     Oem4BinaryHeader header; //!< Message header
@@ -607,13 +607,13 @@ struct NOVATEL_EXPORT UtmPosition
     uint8_t crc[4]; //!< 32-bit cyclic redundancy check (CRC)
 });
 
-    /*!
-     * IONUTC Message Structure
-     * This log contains The Ionospheric Model
-     * parametres (ION) and the Universal Time
-     * Coordinated parametres (UTC)
-     */
-    PACK(
+/*!
+* IONUTC Message Structure
+* This log contains The Ionospheric Model
+* parametres (ION) and the Universal Time
+* Coordinated parametres (UTC)
+*/
+PACK(
 struct NOVATEL_EXPORT IonosphericModel {
     Oem4BinaryHeader header; //!< Message header
     double a0; //!< alpha parameter constant term
@@ -636,11 +636,11 @@ struct NOVATEL_EXPORT IonosphericModel {
     uint8_t crc[4]; //!< 32-bit cyclic redundancy check (CRC)
 });
 
-    /*!
-     * Channel Tracking Status
-     * Used in logs RANGE and TRACKSTAT
-     */
-    PACK(
+/*!
+* Channel Tracking Status
+* Used in logs RANGE and TRACKSTAT
+*/
+PACK(
 struct NOVATEL_EXPORT ChannelStatus {
 	unsigned int tracking_state : 5;
 	unsigned int sv_chan_num : 5;
@@ -660,12 +660,12 @@ struct NOVATEL_EXPORT ChannelStatus {
 	unsigned int channel_assignment : 1;
 });
 
-    /*!
-     * Pseudorange Message Structure
-     * This log contains the pseudorange information for a
-     * single channel. Used in the RangeMeasurements structure.
-     */
-    PACK(
+/*!
+* Pseudorange Message Structure
+* This log contains the pseudorange information for a
+* single channel. Used in the RangeMeasurements structure.
+*/
+PACK(
 struct NOVATEL_EXPORT RangeData {
     uint16_t satellite_prn; //!< SV PRN number
     uint16_t glonass_frequency; //!< Frequency number of GLONASS SV (0 for GPS)
@@ -680,14 +680,14 @@ struct NOVATEL_EXPORT RangeData {
 });
 
 
-    /*!
-     * RANGE Message Structure
-     * This log contains the channel measurements for the
-     * currently tracked satellites. When using this log,
-     * please keep in mind the constraints noted along with
-     * the description.
-     */
-    PACK(
+/*!
+* RANGE Message Structure
+* This log contains the channel measurements for the
+* currently tracked satellites. When using this log,
+* please keep in mind the constraints noted along with
+* the description.
+*/
+PACK(
 struct NOVATEL_EXPORT RangeMeasurements {
     Oem4BinaryHeader header; //!< Message header
     int32_t number_of_observations; //!< Number of ranges observations in the following message
@@ -696,12 +696,12 @@ struct NOVATEL_EXPORT RangeMeasurements {
 });
 
 
-    /*!
-     * Compressed Pseudorange Message Structure
-     * This log contains the pseudorange information for a
-     * single channel. Used in the RangeMeasurements structure.
-     */
-    PACK(
+/*!
+* Compressed Pseudorange Message Structure
+* This log contains the pseudorange information for a
+* single channel. Used in the RangeMeasurements structure.
+*/
+PACK(
 struct NOVATEL_EXPORT CompressedRangeRecord {
     int64_t doppler:28; //!< Doppler frequency [Hz]; SF = 1/256
     uint64_t pseudorange:36; //!<  pseudorange [m]; SF = 1/128
@@ -716,18 +716,18 @@ struct NOVATEL_EXPORT CompressedRangeRecord {
 } //;
 );
 
-    PACK(
+PACK(
 struct NOVATEL_EXPORT CompressedRangeData {
     ChannelStatus channel_status; //!< channel tracking status
     CompressedRangeRecord range_record;
 } //;
 );
 
-    /*!
-     * RANGECMP Message Structure
-     * This log contains the compressed version of the RANGE log.
-     */
-    PACK(
+/*!
+* RANGECMP Message Structure
+* This log contains the compressed version of the RANGE log.
+*/
+PACK(
 struct NOVATEL_EXPORT CompressedRangeMeasurements {
     Oem4BinaryHeader header; //!< Message header
     int32_t number_of_observations; //!< Number of ranges observations in the following message
@@ -735,17 +735,17 @@ struct NOVATEL_EXPORT CompressedRangeMeasurements {
     uint8_t crc[4]; //!< 32-bit cyclic redundancy check (CRC)
 });
 
-    //*******************************************************************************
-    // SATELLITE INFORMATION GPS STRUCTURES
-    //*******************************************************************************
+//*******************************************************************************
+// SATELLITE INFORMATION GPS STRUCTURES
+//*******************************************************************************
 
 
-    /*!
-     * GPSEPHEM Message Structure
-     * This log contains a single set of
-     * GPS ephemeris parametres.
-     */
-    PACK(
+/*!
+* GPSEPHEM Message Structure
+* This log contains a single set of
+* GPS ephemeris parametres.
+*/
+PACK(
 struct NOVATEL_EXPORT GpsEphemeris
 {
     Oem4BinaryHeader header; //!< Message header
@@ -784,13 +784,13 @@ struct NOVATEL_EXPORT GpsEphemeris
     uint8_t crc[4]; //!< 32-bit cyclic redundancy check (CRC)
 });
 
-    /*!
-     * RAWEPHEM Message Structure
-     * contains the raw binary information for subframes one, two
-     * and three from the satellite with the parity information removed.
-     * Ephemeris older than 6 hours is not output
-     */
-    PACK(
+/*!
+* RAWEPHEM Message Structure
+* contains the raw binary information for subframes one, two
+* and three from the satellite with the parity information removed.
+* Ephemeris older than 6 hours is not output
+*/
+PACK(
 struct NOVATEL_EXPORT RawEphemeris {
     Oem4BinaryHeader header;
     uint32_t prn; //!< Satellite PRN number
@@ -802,23 +802,23 @@ struct NOVATEL_EXPORT RawEphemeris {
     uint8_t crc[4]; //!< 32-bit cyclic redundancy check (CRC)
 });
 
-    PACK(
+PACK(
 struct NOVATEL_EXPORT RawEphemerides {
     RawEphemeris ephemeris[MAX_NUM_SAT];
 });
 
-    /*!
-     * RAWALM Message Structure
-     * Contains the undecoded almanac subframes as received from the satellite
-     */
-    PACK(
+/*!
+* RAWALM Message Structure
+* Contains the undecoded almanac subframes as received from the satellite
+*/
+PACK(
 struct NOVATEL_EXPORT RawAlmanacData
 {
 	uint16_t svid;
     uint8_t subframe[30]; // 30 bytes of subframe page data
 });
 
-    PACK(
+PACK(
 struct NOVATEL_EXPORT RawAlmanac
 {
 	Oem4BinaryHeader header;
@@ -830,12 +830,12 @@ struct NOVATEL_EXPORT RawAlmanac
 
 });
 
-    /*!
-     * ALMANAC
-     * Contains decoded almanac parameters from Subframes 4 and 5 with parity 
-     * info removed.
-     */
-    PACK(
+/*!
+* ALMANAC
+* Contains decoded almanac parameters from Subframes 4 and 5 with parity 
+* info removed.
+*/
+PACK(
 struct NOVATEL_EXPORT AlmanacData {
 	uint32_t prn;
 	uint32_t ref_week;
@@ -856,7 +856,7 @@ struct NOVATEL_EXPORT AlmanacData {
 	true_false anti_spoofing; //!< 
 });
 
-    PACK(
+PACK(
 struct NOVATEL_EXPORT Almanac {
 	Oem4BinaryHeader header;
 	int32_t number_of_prns;
@@ -865,13 +865,13 @@ struct NOVATEL_EXPORT Almanac {
 
 });
 
-    /*!
-     * Satellite Position Structure
-     * Contains the position of one satellite in ECEF coordinates.
-     * Also contains satellite correction information.  Used to make
-     * up the SatellitePositions structure
-     */
-    PACK(
+/*!
+* Satellite Position Structure
+* Contains the position of one satellite in ECEF coordinates.
+* Also contains satellite correction information.  Used to make
+* up the SatellitePositions structure
+*/
+PACK(
 struct NOVATEL_EXPORT SatellitePositionData {
     uint32_t satellite_prn; //!< SV PRN number
     double x_position; //!< SV X coordinate [m]
@@ -884,14 +884,14 @@ struct NOVATEL_EXPORT SatellitePositionData {
     double dReserved2; //!< reserved
 });
 
-    /*!
-     * SATXYZ Message Structure
-     * When combined with a RANGE log, this data set contains
-     * the decoded satellite information necessary to compute the
-     * solution: satellite coordinates (ECEF WGS84), satellite clock
-     * correction, ionospheric corrections and tropospheric corrections.
-     */
-    PACK(
+/*!
+* SATXYZ Message Structure
+* When combined with a RANGE log, this data set contains
+* the decoded satellite information necessary to compute the
+* solution: satellite coordinates (ECEF WGS84), satellite clock
+* correction, ionospheric corrections and tropospheric corrections.
+*/
+PACK(
 struct NOVATEL_EXPORT SatellitePositions {
     Oem4BinaryHeader header; //!< Message header
     double dReserved1; //!< Reserved
@@ -900,18 +900,18 @@ struct NOVATEL_EXPORT SatellitePositions {
     uint8_t crc[4]; //!< 32-bit cyclic redundancy check (CRC)
 });
 
-    /*!
-     * SATVIS Message Structure
-     * The SATVIS log is meant to provide a brief overview. The satellite positions
-     * and velocities used in the computation of this log are based on Almanac
-     * orbital parameters, not the higher precision Ephemeris parameters
-     */
-    PACK(
+/*!
+* SATVIS Message Structure
+* The SATVIS log is meant to provide a brief overview. The satellite positions
+* and velocities used in the computation of this log are based on Almanac
+* orbital parameters, not the higher precision Ephemeris parameters
+*/
+PACK(
 struct NOVATEL_EXPORT SatelliteVisibilityData {
     int16_t satellite_prn; //!< SV PRN number
-        //!< GPS 1-32
-        //!< SBAS 120-138
-        //!< GLONASS
+    //!< GPS 1-32
+    //!< SBAS 120-138
+    //!< GLONASS
     int16_t glonass_frequency; //!< GLONASS frequency +7
     uint32_t health; //!< Satellite Health
     double elevation; //!< SV elevation [deg]
@@ -920,7 +920,7 @@ struct NOVATEL_EXPORT SatelliteVisibilityData {
     double apparent_doppler; //!< Theoretical Doppler with clock drift correction added [Hz]
 });
 
-    PACK(
+PACK(
 struct NOVATEL_EXPORT SatelliteVisibility {
     Oem4BinaryHeader header; //!< Message header
     true_false sat_vis; //!< Reserved
@@ -931,18 +931,18 @@ struct NOVATEL_EXPORT SatelliteVisibility {
 });
 
 
-    /*!
-     * TIME Message Structure
-     * This log provides several time related pieces of information
-     * including receiver clock offset and UTC time and offset. It
-     * can also be used to determine any offset in the PPS signal
-     * relative to GPS time. To find any offset in the PPS signal,
-     * log the TIME log 'ontime' at the same rate as the PPS output.
-     *
-     * GPS time = receiver time - offset
-     * UTC time = GPS time + offset + UTC offset
-     */
-    PACK(
+/*!
+* TIME Message Structure
+* This log provides several time related pieces of information
+* including receiver clock offset and UTC time and offset. It
+* can also be used to determine any offset in the PPS signal
+* relative to GPS time. To find any offset in the PPS signal,
+* log the TIME log 'ontime' at the same rate as the PPS output.
+*
+* GPS time = receiver time - offset
+* UTC time = GPS time + offset + UTC offset
+*/
+PACK(
 struct NOVATEL_EXPORT TimeOffset {
     Oem4BinaryHeader header; //!< Message header
     uint32_t clock_model_status; //!< ClockModelStatus
@@ -959,11 +959,11 @@ struct NOVATEL_EXPORT TimeOffset {
     uint8_t crc[4]; //!< 32-bit cyclic redundancy check (CRC)
 });
 
-    /*!
-     * TRACKSTAT Message Structure
-     * This log provides the Tracking Status information for each
-     * receiver channel
-     */
+/*!
+* TRACKSTAT Message Structure
+* This log provides the Tracking Status information for each
+* receiver channel
+*/
     struct NOVATEL_EXPORT TrackStatusData
     {
         uint16_t prn; //!< SV prn
@@ -989,15 +989,15 @@ struct NOVATEL_EXPORT TimeOffset {
         uint8_t crc[4];
     };
 
-    //*******************************************************************************
-    // RTK GPS STRUCTURES
-    //*******************************************************************************
+//*******************************************************************************
+// RTK GPS STRUCTURES
+//*******************************************************************************
 
-    //TODO: CONVERT AND CLEANUP THESE STRUCTURES
+//TODO: CONVERT AND CLEANUP THESE STRUCTURES
 
-    //********************
-    //RTKDATAB
-    PACK(
+//********************
+//RTKDATAB
+PACK(
 struct NOVATEL_EXPORT rtkdatab_header {
     uint32_t rtkinfo; //RTK information
     uint8_t num_obs; //Number of observations tracked
@@ -1026,14 +1026,14 @@ struct NOVATEL_EXPORT rtkdatab_header {
     int32_t num_svs; // The number of SVs in data portion
 });
 
-    PACK(
+PACK(
 struct NOVATEL_EXPORT rtkdatab_data {
     uint32_t prn; // GPS satellite PRN
     AMBIGUITY_TYPE ambiguity_type; // Type of ambiguity
     float residual; // Satellite health
 });
 
-    PACK(
+PACK(
 struct NOVATEL_EXPORT rtkdatab_log {
     Oem4BinaryHeader hdr;
     SolutionStatus solutionStatus; //Solution status
@@ -1042,20 +1042,20 @@ struct NOVATEL_EXPORT rtkdatab_log {
     rtkdatab_data data[MAX_NUM_SAT];
 });
 
-    //********************
+//********************
 
 
-    //********************
-    //RTCADATA1B
+//********************
+//RTCADATA1B
 
-    PACK(
+PACK(
 struct NOVATEL_EXPORT rtcadata1b_header {
     double zcount; //Week number from subframe one of the ephemeris
     uint8_t aeb; //Acceleration error bound
     uint32_t num_prn; //Number of satellite corrections with info to follow
 });
 
-    PACK(
+PACK(
 struct NOVATEL_EXPORT rtcadata1b_data {
     uint32_t prn; //PRN number of range measurement
     double range; //pseudorange correction (m)
@@ -1064,20 +1064,20 @@ struct NOVATEL_EXPORT rtcadata1b_data {
     float udre; //user differential range error
 });
 
-    PACK(
+PACK(
 struct NOVATEL_EXPORT rtcadata1b_log {
     Oem4BinaryHeader header; //Log header
     rtcadata1b_header info;
     rtcadata1b_data data[MAX_NUM_SAT];
 });
 
-    //********************
+//********************
 
 
-    //********************
-    //RTCADATAEPHEMB
+//********************
+//RTCADATAEPHEMB
 
-    PACK(
+PACK(
 struct NOVATEL_EXPORT rtcadataephemb_data {
     uint8_t des; //Novatel designator
     uint8_t subtype; //RTCA message subtype
@@ -1088,18 +1088,18 @@ struct NOVATEL_EXPORT rtcadataephemb_data {
     int8_t ephem[92]; //Raw ephemeris data
 });
 
-    PACK(
+PACK(
 struct NOVATEL_EXPORT rtcadataephemb_log {
     Oem4BinaryHeader header; //Log header
     rtcadataephemb_data data;
 });
 
-    //********************
+//********************
 
 
-    //********************
-    //RTCADATAOBSB - CHECK
-    PACK(
+//********************
+//RTCADATAOBSB - CHECK
+PACK(
 struct NOVATEL_EXPORT rtcadataobsb_header {
     uint8_t des; //Novatel designator
     uint8_t subtype; //RTCA message subtype
@@ -1109,7 +1109,7 @@ struct NOVATEL_EXPORT rtcadataobsb_header {
     uint32_t num_ids; //Number of transmitter ids with info to follow
 });
 
-    PACK(
+PACK(
 struct NOVATEL_EXPORT rtcadataobsb_data //Structure for RTCADATAEPHEM message
 {
     uint8_t transID; //Transmitter ID
@@ -1123,19 +1123,19 @@ struct NOVATEL_EXPORT rtcadataobsb_data //Structure for RTCADATAEPHEM message
     int8_t reserved[4];
 });
 
-    PACK(
+PACK(
 struct NOVATEL_EXPORT rtcadataobsb_log {
     Oem4BinaryHeader header; //Log header
     rtcadataobsb_header info;
     rtcadataobsb_data data[MAX_NUM_SAT]; //WT:  This is probably too many... need to verify how many id's can be sent.
 });
 
-    //********************
+//********************
 
 
-    //********************
-    //RTCADATAREFB
-    PACK(
+//********************
+//RTCADATAREFB
+PACK(
 struct NOVATEL_EXPORT rtcadatarefb_data {
     uint8_t des; //Novatel designator
     uint8_t subtype; //RTCA message subtype
@@ -1145,32 +1145,32 @@ struct NOVATEL_EXPORT rtcadatarefb_data {
     int8_t reserved[4];
 });
 
-    PACK(
+PACK(
 struct NOVATEL_EXPORT rtcadatarefb_log {
     Oem4BinaryHeader header; //Log header
     rtcadatarefb_data data;
 });
 
-    //********************
+//********************
 
 
-    //*******************************************************************************
-    // STATUS STRUCTURES
-    //*******************************************************************************
+//*******************************************************************************
+// STATUS STRUCTURES
+//*******************************************************************************
 
 
-    /*!
-     * VERSION Message Structure
-     * This log contains the version information for
-     * all components of a system. When using a standard
-     * receiver, there is only one component in the log. A
-     * component may be hardware (for example, a receiver
-     * or data collector) or firmware in the form of
-     * applications or data (for example, data blocks for
-     * height models or user applications).
-     *
-     */
-    PACK(
+/*!
+* VERSION Message Structure
+* This log contains the version information for
+* all components of a system. When using a standard
+* receiver, there is only one component in the log. A
+* component may be hardware (for example, a receiver
+* or data collector) or firmware in the form of
+* applications or data (for example, data blocks for
+* height models or user applications).
+*
+*/
+PACK(
 struct NOVATEL_EXPORT Version
 {
 	Oem4BinaryHeader header; //!< Message header
@@ -1245,20 +1245,20 @@ struct NOVATEL_EXPORT Version
     };
 
 
-    /*!
-     * RXSTATUS Message Structure
-     * This log conveys various status parameters
-     * of the GNSS receiver system. These include
-     * the Receiver Status and Error words which contain
-     * several flags specifying status and error conditions.
-     * If an error occurs (shown in the Receiver Error word)
-     * the receiver idles all channels, turns off the antenna,
-     * anddisables the RF hardware as these conditions are
-     * considered to be fatal errors. The log contains a variable
-     * number of status words to allow for maximum flexibility and
-     * future expansion.
-     */
-    PACK(
+/*!
+* RXSTATUS Message Structure
+* This log conveys various status parameters
+* of the GNSS receiver system. These include
+* the Receiver Status and Error words which contain
+* several flags specifying status and error conditions.
+* If an error occurs (shown in the Receiver Error word)
+* the receiver idles all channels, turns off the antenna,
+* anddisables the RF hardware as these conditions are
+* considered to be fatal errors. The log contains a variable
+* number of status words to allow for maximum flexibility and
+* future expansion.
+*/
+PACK(
 struct NOVATEL_EXPORT RXStatus
 {
 	Oem4BinaryHeader header; //!<
@@ -1293,10 +1293,10 @@ struct NOVATEL_EXPORT RXStatus
         int8_t description[32]; // text description of the event or error
     };
 
-    /*!
-     * RXHWLEVELS Message Structure
-     * This log contains the receiver environmental and voltage parametres.
-     */
+/*!
+* RXHWLEVELS Message Structure
+* This log contains the receiver environmental and voltage parametres.
+*/
     struct NOVATEL_EXPORT ReceiverHardwareStatus
     {
         Oem4BinaryHeader header;
