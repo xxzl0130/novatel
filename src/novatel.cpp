@@ -142,8 +142,6 @@ Novatel::Novatel()
     reading_status_ = false;
     time_handler_ = DefaultGetTime;
     handle_acknowledgement_ = DefaultAcknowledgementHandler;
-    best_position_callback_ = DefaultBestPositionCallback;
-    raw_ephemeris_callback_ = DefaultRawEphemCallback;
     log_debug_ = DefaultDebugMsgCallback;
     log_info_ = DefaultInfoMsgCallback;
     log_warning_ = DefaultWarningMsgCallback;
@@ -253,9 +251,9 @@ bool Novatel::Connect_(std::string port, int baudrate = 115200)
         }
 
         // stop any incoming data and flush buffers
-        serial_port_->write("UNLOGALL\r\n");
+        //serial_port_->write("UNLOGALL\r\n");
         // wait for data to stop cominig in
-        boost::this_thread::sleep(boost::posix_time::milliseconds(1000));
+        //boost::this_thread::sleep(boost::posix_time::milliseconds(1000));
         // clear serial port buffers
         serial_port_->flush();
 
@@ -1333,372 +1331,272 @@ void Novatel::ParseBinary(unsigned char* message, size_t length, BINARY_LOG_TYPE
     // obtain the received crc
     switch (message_id)
     {
-        /*
     case BESTPOS_LOG_TYPE:
-        Position best_gps;
-        memcpy(&best_gps, message, sizeof(best_gps));
-        if (best_gps_position_callback_)
-            best_gps_position_callback_(best_gps, read_timestamp_);
+    {
+        BinaryMessagePtr data(new Position);
+        memcpy(data.get(), message, sizeof(Position));
+        if (callback_map_[BESTPOS_LOG_TYPE])
+            callback_map_[BESTPOS_LOG_TYPE](data, read_timestamp_);
         break;
-    case BESTLEVERARM_LOG_TYPE:
-        BestLeverArm best_lever;
-        memcpy(&best_lever, message, sizeof(best_lever));
-        if (best_lever_arm_callback_)
-            best_lever_arm_callback_(best_lever, read_timestamp_);
-        break;*/
-    case BESTPOS_LOG_TYPE:
-        Position best_pos;
-        memcpy(&best_pos, message, sizeof(best_pos));
-        if (best_position_callback_)
-            best_position_callback_(best_pos, read_timestamp_);
-        break;
+    }
     case BESTUTM_LOG_TYPE:
-        UtmPosition best_utm;
-        memcpy(&best_utm, message, sizeof(best_utm));
-        if (best_utm_position_callback_)
-            best_utm_position_callback_(best_utm, read_timestamp_);
+    {
+        BinaryMessagePtr data(new UtmPosition);
+        memcpy(data.get(), message, sizeof(UtmPosition));
+        if (callback_map_[BESTUTM_LOG_TYPE])
+            callback_map_[BESTUTM_LOG_TYPE](data, read_timestamp_);
         break;
+    }
     case BESTVEL_LOG_TYPE:
-        Velocity best_vel;
-        memcpy(&best_vel, message, sizeof(best_vel));
-        if (best_velocity_callback_)
-            best_velocity_callback_(best_vel, read_timestamp_);
+    {
+        BinaryMessagePtr data(new Velocity);
+        memcpy(data.get(), message, sizeof(Velocity));
+        if (callback_map_[BESTVEL_LOG_TYPE])
+            callback_map_[BESTVEL_LOG_TYPE](data, read_timestamp_);
         break;
+    }
     case BESTXYZ_LOG_TYPE:
-        PositionEcef best_xyz;
-        memcpy(&best_xyz, message, sizeof(best_xyz));
-        if (best_position_ecef_callback_)
-            best_position_ecef_callback_(best_xyz, read_timestamp_);
+    {
+        BinaryMessagePtr data(new PositionEcef);
+        memcpy(data.get(), message, sizeof(PositionEcef));
+        if (callback_map_[BESTXYZ_LOG_TYPE])
+            callback_map_[BESTXYZ_LOG_TYPE](data, read_timestamp_);
         break;
-/*
-    case INSPVA_LOG_TYPE:
-        InsPositionVelocityAttitude ins_pva;
-        memcpy(&ins_pva, message, sizeof(ins_pva));
-        if (ins_position_velocity_attitude_callback_)
-            ins_position_velocity_attitude_callback_(ins_pva, read_timestamp_);
-        break;
-    case INSPVAS_LOG_TYPE:
-        InsPositionVelocityAttitudeShort ins_pva_short;
-        memcpy(&ins_pva_short, message, sizeof(ins_pva_short));
-        if (ins_position_velocity_attitude_short_callback_)
-            ins_position_velocity_attitude_short_callback_(ins_pva_short, read_timestamp_);
-        break;
-    case VEHICLEBODYROTATION_LOG_TYPE:
-        VehicleBodyRotation vehicle_body_rotation;
-        memcpy(&vehicle_body_rotation, message, sizeof(vehicle_body_rotation));
-        if (vehicle_body_rotation_callback_)
-            vehicle_body_rotation_callback_(vehicle_body_rotation, read_timestamp_);
-        break;
-    case INSSPD_LOG_TYPE:
-        InsSpeed ins_speed;
-        memcpy(&ins_speed, message, sizeof(ins_speed));
-        if (ins_speed_callback_)
-            ins_speed_callback_(ins_speed, read_timestamp_);
-        break;
-    case RAWIMU_LOG_TYPE:
-        RawImu raw_imu;
-        memcpy(&raw_imu, message, sizeof(raw_imu));
-        if (raw_imu_callback_)
-            raw_imu_callback_(raw_imu, read_timestamp_);
-        break;
-    case RAWIMUS_LOG_TYPE:
-        RawImuShort raw_imu_s;
-        memcpy(&raw_imu_s, message, sizeof(raw_imu_s));
-        if (raw_imu_short_callback_)
-            raw_imu_short_callback_(raw_imu_s, read_timestamp_);
-        break;
-    case INSCOV_LOG_TYPE:
-        InsCovariance ins_cov;
-        memcpy(&ins_cov, message, sizeof(ins_cov));
-        if (ins_covariance_callback_)
-            ins_covariance_callback_(ins_cov, read_timestamp_);
-        break;
-    case INSCOVS_LOG_TYPE:
-        InsCovarianceShort ins_cov_s;
-        memcpy(&ins_cov_s, message, sizeof(ins_cov_s));
-        if (ins_covariance_short_callback_)
-            ins_covariance_short_callback_(ins_cov_s, read_timestamp_);
-        break;
-        */
+    }
     case PSRDOP_LOG_TYPE:
-        Dop psr_dop;
+    {
+        BinaryMessagePtr data(new Dop);
+        auto ptr = (Dop*)data.get();
         header_length = (uint16_t)*(message + 3);
         payload_length = (((uint16_t)*(message + 9)) << 8) +
             ((uint16_t)*(message + 8));
 
         // Copy header and unrepeated fields
-        memcpy(&psr_dop, message, header_length + 24);
+        memcpy(ptr, message, header_length + 24);
         //Copy repeated fields
-        memcpy(&psr_dop.prn, message + header_length + 28, (4 * psr_dop.number_of_prns));
+        memcpy(ptr->prn, message + header_length + 28, (4 * ptr->number_of_prns));
         //Copy CRC
-        memcpy(&psr_dop.crc, message + header_length + payload_length, 4);
-
-        if (pseudorange_dop_callback_)
-            pseudorange_dop_callback_(psr_dop, read_timestamp_);
+        memcpy(ptr->crc, message + header_length + payload_length, 4);
+        if (callback_map_[PSRDOP_LOG_TYPE])
+            callback_map_[PSRDOP_LOG_TYPE](data, read_timestamp_);
         break;
+    }
     case RTKDOP_LOG_TYPE:
-        Dop rtk_dop;
-        memcpy(&rtk_dop, message, sizeof(rtk_dop));
-        if (rtk_dop_callback_)
-            rtk_dop_callback_(rtk_dop, read_timestamp_);
+    {
+        BinaryMessagePtr data(new Dop);
+        memcpy(data.get(), message, sizeof(Dop));
+        if (callback_map_[RTKDOP_LOG_TYPE])
+            callback_map_[RTKDOP_LOG_TYPE](data, read_timestamp_);
         break;
+    }
     case BSLNXYZ_LOG_TYPE:
-        BaselineEcef baseline_xyz;
-        memcpy(&baseline_xyz, message, sizeof(baseline_xyz));
-        if (baseline_ecef_callback_)
-            baseline_ecef_callback_(baseline_xyz, read_timestamp_);
+    {
+        BinaryMessagePtr data(new BaselineEcef);
+        memcpy(data.get(), message, sizeof(BaselineEcef));
+        if (callback_map_[BSLNXYZ_LOG_TYPE])
+            callback_map_[BSLNXYZ_LOG_TYPE](data, read_timestamp_);
         break;
+    }
     case IONUTC_LOG_TYPE:
-        IonosphericModel ion;
-        memcpy(&ion, message, sizeof(ion));
-        if (ionospheric_model_callback_)
-            ionospheric_model_callback_(ion, read_timestamp_);
+    {
+        BinaryMessagePtr data(new IonosphericModel);
+        memcpy(data.get(), message, sizeof(IonosphericModel));
+        if (callback_map_[IONUTC_LOG_TYPE])
+            callback_map_[IONUTC_LOG_TYPE](data, read_timestamp_);
         break;
+    }
     case RANGE_LOG_TYPE:
-        RangeMeasurements ranges;
+    {
+        BinaryMessagePtr data(new RangeMeasurements);
+        auto ptr = (RangeMeasurements*)data.get();
         header_length = (uint16_t)*(message + 3);
         payload_length = (((uint16_t)*(message + 9)) << 8) +
             ((uint16_t)*(message + 8));
 
         // Copy header and #observations following
-        memcpy(&ranges, message, header_length + 4);
+        memcpy(ptr, message, header_length + 4);
 
         //Copy repeated fields
-        memcpy(&ranges.range_data,
-               message + header_length + 4,
-               (44 * ranges.number_of_observations));
+        memcpy(ptr->range_data,
+            message + header_length + 4,
+            (44 * ptr->number_of_observations));
 
         //Copy CRC
-        memcpy(&ranges.crc,
-               message + header_length + payload_length,
-               4);
-
-        if (range_measurements_callback_)
-        {
-            range_measurements_callback_(ranges, read_timestamp_);
-        }
-
+        memcpy(&ptr->crc,
+            message + header_length + payload_length,
+            4);
+        if (callback_map_[RANGE_LOG_TYPE])
+            callback_map_[RANGE_LOG_TYPE](data, read_timestamp_);
         break;
-
+    }
     case RANGECMP_LOG_TYPE:
-        {
-            CompressedRangeMeasurements cmp_ranges;
-            header_length = (uint16_t)*(message + 3);
-            payload_length = (((uint16_t)*(message + 9)) << 8) +
-                ((uint16_t)*(message + 8));
-            // unsigned long crc_of_received = CalculateBlockCRC32(length-4, message);
+    {
+        BinaryMessagePtr data(new CompressedRangeMeasurements);
+        header_length = (uint16_t)*(message + 3);
+        payload_length = (((uint16_t)*(message + 9)) << 8) +
+            ((uint16_t)*(message + 8));
 
-            // std::stringstream asdf;
-            // asdf << "------\nheader_length: " << header_length << "\npayload_length: " << payload_length << "\n";
-            // asdf << "length idx: " << length << "\nsizeof: " << sizeof(cmp_ranges) << "\n";
-            //asdf << "crc of received: " << crc_of_received << "\n";
-            // log_info_(asdf.str().c_str()); asdf.str("");
+        auto ptr = (CompressedRangeMeasurements*)data.get();
 
-            //Copy header and unrepeated message block
-            memcpy(&cmp_ranges.header, message, header_length);
-            memcpy(&cmp_ranges.number_of_observations,
-                   message + header_length,
-                   4);
+        //Copy header and unrepeated message block
+        memcpy(ptr, message, header_length);
+        memcpy(&ptr->number_of_observations,
+            message + header_length,
+            4);
 
-            // Copy Repeated portion of message block)
-            memcpy(&cmp_ranges.range_data,
-                   message + header_length + 4,
-                   (24 * cmp_ranges.number_of_observations));
+        // Copy Repeated portion of message block)
+        memcpy(&ptr->range_data,
+            message + header_length + 4,
+            (24 * ptr->number_of_observations));
 
-            // Copy the CRC
-            memcpy(&cmp_ranges.crc,
-                   message + header_length + payload_length,
-                   4);
-
-
-            // asdf << "sizeof after memcpy : " << sizeof(cmp_ranges) << "\n";
-            // asdf << "crc after shoving: " ;
-            // log_info_(asdf.str().c_str()); asdf.str("");
-            // printHex((char*)cmp_ranges.crc,4);
-            // asdf << "\nMessage from BufferIncomingData\n";
-            // log_info_(asdf.str().c_str()); asdf.str("");
-            // printHex((char*)message,length);
-
-
-            //printHex((char*)cmp_ranges.range_data[0],sizeof(24*((int32_t)*(message+header_length))));
-
-            // memcpy(&cmp_ranges, message, length);
-            if (compressed_range_measurements_callback_)
-            {
-                compressed_range_measurements_callback_(cmp_ranges,
-                                                        read_timestamp_);
-            }
-
-            if (range_measurements_callback_)
-            {
-                RangeMeasurements rng;
-
-                rng.header = cmp_ranges.header;
-                rng.number_of_observations = cmp_ranges.number_of_observations;
-                memcpy(rng.crc, cmp_ranges.crc, 4);
-
-                for (size_t kk = 0; kk < cmp_ranges.number_of_observations; ++kk)
-                {
-                    UnpackCompressedRangeData(cmp_ranges.range_data[kk],
-                                              rng.range_data[kk]);
-                }
-                range_measurements_callback_(rng, read_timestamp_);
-            }
-
-            break;
-        }
+        // Copy the CRC
+        memcpy(&ptr->crc,
+            message + header_length + payload_length,
+            4);
+        if (callback_map_[RANGECMP_LOG_TYPE])
+            callback_map_[RANGECMP_LOG_TYPE](data, read_timestamp_);
+        break;
+    }
     case GPSEPHEM_LOG_TYPE:
-        {
-            GpsEphemeris ephemeris;
-            header_length = (uint16_t)*(message + 3);
-            std::cout << "GPSEPHEMB message: " << std::endl
-                << "PRN #: " << (double)*(message + header_length) << std::endl;
-            //printHex(message, length);
-            if (length > sizeof(ephemeris))
-            {
-                std::stringstream ss;
-                ss << "Novatel Driver: GpsEphemeris mismatch\n";
-                ss << "\tlength = " << length << "\n";
-                ss << "\tsizeof msg = " << sizeof(ephemeris);
-                log_warning_(ss.str().c_str());
-            }
-            else
-            {
-                memcpy(&ephemeris, message, sizeof(ephemeris));
-
-                if (gps_ephemeris_callback_)
-                    gps_ephemeris_callback_(ephemeris, read_timestamp_);
-            }
-            break;
-        }
+    {
+        BinaryMessagePtr data(new GpsEphemeris);
+        memcpy(data.get(), message, sizeof(GpsEphemeris));
+        if (callback_map_[GPSEPHEM_LOG_TYPE])
+            callback_map_[GPSEPHEM_LOG_TYPE](data, read_timestamp_);
+        break;
+    }
     case RAWEPHEM_LOG_TYPE:
-        {
-            RawEphemeris raw_ephemeris;
-
-            memcpy(&raw_ephemeris, message, sizeof(raw_ephemeris));
-            //            cout << "Parse Log:" << endl;
-            //            cout << "Length: " << length << endl;
-            //            printHex(message, length);
-            //            test_ephems_.ephemeris[raw_ephemeris.prn] = raw_ephemeris;
-
-            if (raw_ephemeris_callback_)
-                raw_ephemeris_callback_(raw_ephemeris, read_timestamp_);
-
-            //            bool result = SendBinaryDataToReceiver(message, length);
-
-            break;
-        }
+    {
+        BinaryMessagePtr data(new RawEphemeris);
+        memcpy(data.get(), message, sizeof(RawEphemeris));
+        if (callback_map_[RAWEPHEM_LOG_TYPE])
+            callback_map_[RAWEPHEM_LOG_TYPE](data, read_timestamp_);
+        break;
+    }
     case RAWALM_LOG_TYPE:
-        RawAlmanac raw_almanac;
+    {
+        BinaryMessagePtr data(new RawAlmanac);
+        memcpy(data.get(), message, sizeof(RawEphemeris));
+        auto ptr = (RawAlmanac*)data.get();
         header_length = (uint16_t)*(message + 3);
         payload_length = (((uint16_t)*(message + 9)) << 8) + ((uint16_t)*(message + 8));
 
         //Copy header and unrepeated message block
-        memcpy(&raw_almanac.header, message, header_length + 12);
+        memcpy(ptr, message, header_length + 12);
         // Copy Repeated portion of message block)
-        memcpy(&raw_almanac.subframe_data, message + header_length + 12, (32 * raw_almanac.num_of_subframes));
+        memcpy(&ptr->subframe_data, message + header_length + 12, (32 * ptr->num_of_subframes));
         // Copy the CRC
-        memcpy(&raw_almanac.crc, message + header_length + payload_length, 4);
-
-        if (raw_almanac_callback_)
-            raw_almanac_callback_(raw_almanac, read_timestamp_);
+        memcpy(&ptr->crc, message + header_length + payload_length, 4);
+        if (callback_map_[RAWEPHEM_LOG_TYPE])
+            callback_map_[RAWEPHEM_LOG_TYPE](data, read_timestamp_);
         break;
+    }
     case ALMANAC_LOG_TYPE:
-        Almanac almanac;
+    {
+        BinaryMessagePtr data(new Almanac);
+        auto ptr = (Almanac*)data.get();
         header_length = (uint16_t)*(message + 3);
         payload_length = (((uint16_t)*(message + 9)) << 8) + ((uint16_t)*(message + 8));
 
         //Copy header and unrepeated message block
-        memcpy(&almanac, message, header_length + 4);
+        memcpy(ptr, message, header_length + 4);
         // Copy Repeated portion of message block)
-        memcpy(&almanac.data, message + header_length + 4, (112 * almanac.number_of_prns));
+        memcpy(&ptr->data, message + header_length + 4, (112 * ptr->number_of_prns));
         // Copy the CRC
-        memcpy(&raw_almanac.crc, message + header_length + payload_length, 4);
-
-        /*
-        //TODO: Test crc calculation, see if need to flip byte order
-        cout << "Output crc: ";
-        printHex((unsigned char*)almanac.crc,4);
-        uint8_t* msg_ptr = (unsigned char*)&almanac;
-        uint32_t crc = CalculateBlockCRC32 (sizeof(almanac)-4, msg_ptr);
-        cout << "Calculated crc: ";
-        printHex((unsigned char*)crc,4);
-        */
-        if (almanac_callback_)
-            almanac_callback_(almanac, read_timestamp_);
+        memcpy(&ptr->crc, message + header_length + payload_length, 4);
+        if (callback_map_[ALMANAC_LOG_TYPE])
+            callback_map_[ALMANAC_LOG_TYPE](data, read_timestamp_);
         break;
+    }
     case SATXYZ2_LOG_TYPE:
-        SatellitePositions sat_pos;
+    {
+        BinaryMessagePtr data(new SatellitePositions);
+        auto ptr = (SatellitePositions*)data.get();
         header_length = (uint16_t)*(message + 3);
         payload_length = (((uint16_t)*(message + 9)) << 8) + ((uint16_t)*(message + 8));
 
-        // Copy header and unrepeated part of message
-        memcpy(&sat_pos, message, header_length + 12);
+        memcpy(ptr, message, header_length + 12);
         //Copy repeated fields
-        memcpy(&sat_pos.data, message + header_length + 12, (68 * sat_pos.number_of_satellites));
+        memcpy(ptr->data, message + header_length + 12, (68 * ptr->number_of_satellites));
         //Copy CRC
-        memcpy(&ranges.crc, message + header_length + payload_length, 4);
-
-        if (satellite_positions_callback_)
-            satellite_positions_callback_(sat_pos, read_timestamp_);
+        memcpy(&ptr->crc, message + header_length + payload_length, 4);
+        if (callback_map_[SATXYZ2_LOG_TYPE])
+            callback_map_[SATXYZ2_LOG_TYPE](data, read_timestamp_);
         break;
+    }
     case SATVIS_LOG_TYPE:
-        SatelliteVisibility sat_vis;
+    {
+        BinaryMessagePtr data(new SatelliteVisibility);
+        auto ptr = (SatelliteVisibility*)data.get();
         header_length = (uint16_t)*(message + 3);
         payload_length = (((uint16_t)*(message + 9)) << 8) + ((uint16_t)*(message + 8));
 
-        // Copy header and unrepeated part of message
-        memcpy(&sat_vis, message, header_length + 12);
+        memcpy(ptr, message, header_length + 12);
         //Copy repeated fields
-        memcpy(&sat_vis.data, message + header_length + 12, (40 * sat_vis.number_of_satellites));
+        memcpy(&ptr->data, message + header_length + 12, (40 * ptr->number_of_satellites));
         //Copy CRC
-        memcpy(&ranges.crc, message + header_length + payload_length, 4);
-
-        if (satellite_visibility_callback_)
-            satellite_visibility_callback_(sat_vis, read_timestamp_);
+        memcpy(&ptr->crc, message + header_length + payload_length, 4);
+        if (callback_map_[SATVIS_LOG_TYPE])
+            callback_map_[SATVIS_LOG_TYPE](data, read_timestamp_);
         break;
+    }
     case TIME_LOG_TYPE:
-        TimeOffset time_offset;
-        memcpy(&time_offset, message, sizeof(time_offset));
-        if (time_offset_callback_)
-            time_offset_callback_(time_offset, read_timestamp_);
+    {
+        BinaryMessagePtr data(new TimeOffset);
+        memcpy(data.get(), message, sizeof(TimeOffset));
+        if (callback_map_[TIME_LOG_TYPE])
+            callback_map_[TIME_LOG_TYPE](data, read_timestamp_);
         break;
+    }
     case TRACKSTAT_LOG_TYPE:
-        TrackStatus tracking_status;
+    {
+        BinaryMessagePtr data(new TrackStatus);
+        auto ptr = (TrackStatus*)data.get();
         header_length = (uint16_t)*(message + 3);
         payload_length = (((uint16_t)*(message + 9)) << 8) + ((uint16_t)*(message + 8));
 
-        // Copy header and unrepeated part of message
-        memcpy(&tracking_status, message, header_length + 16);
+        memcpy(ptr, message, header_length + 12);
         //Copy repeated fields
-        memcpy(&tracking_status.data, message + header_length + 16, (40 * tracking_status.number_of_channels));
+        memcpy(&ptr->data, message + header_length + 12, (40 * ptr->number_of_channels));
         //Copy CRC
-        memcpy(&tracking_status.crc, message + header_length + payload_length, 4);
-
-        if (tracking_status_callback_)
-            tracking_status_callback_(tracking_status, read_timestamp_);
+        memcpy(&ptr->crc, message + header_length + payload_length, 4);
+        if (callback_map_[TRACKSTAT_LOG_TYPE])
+            callback_map_[TRACKSTAT_LOG_TYPE](data, read_timestamp_);
         break;
-        /*
-    case RXHWLEVELS_LOG_TYPE:
-        ReceiverHardwareStatus hw_levels;
-        memcpy(&hw_levels, message, sizeof(hw_levels));
-        if (receiver_hardware_status_callback_)
-            receiver_hardware_status_callback_(hw_levels, read_timestamp_);
-        break;*/
+    }
     case PSRPOS_LOG_TYPE:
-        Position psr_pos;
-        memcpy(&psr_pos, message, sizeof(psr_pos));
-        if (best_pseudorange_position_callback_)
-            best_pseudorange_position_callback_(psr_pos, read_timestamp_);
+    {
+        BinaryMessagePtr data(new Position);
+        memcpy(data.get(), message, sizeof(Position));
+        if (callback_map_[PSRPOS_LOG_TYPE])
+            callback_map_[PSRPOS_LOG_TYPE](data, read_timestamp_);
         break;
+    }
     case RTKPOS_LOG_TYPE:
-        Position rtk_pos;
-        memcpy(&rtk_pos, message, sizeof(rtk_pos));
-        if (rtk_position_callback_)
-            rtk_position_callback_(rtk_pos, read_timestamp_);
+    {
+        BinaryMessagePtr data(new Position);
+        memcpy(data.get(), message, sizeof(Position));
+        if (callback_map_[RTKPOS_LOG_TYPE])
+            callback_map_[RTKPOS_LOG_TYPE](data, read_timestamp_);
         break;
+    }
     default:
+    {
+        BinaryMessagePtr data(new GeneralData);
+        auto ptr = (GeneralData*)data.get();
+        header_length = (uint16_t)*(message + 3);
+        payload_length = (((uint16_t)*(message + 9)) << 8) + ((uint16_t)*(message + 8));
+
+        memcpy(ptr, message, header_length + 12);
+        //Copy repeated fields
+        ptr->data.reserve(payload_length);
+        memcpy(ptr->data.data(), message + header_length + 12, payload_length);
+        //Copy CRC
+        memcpy(&ptr->crc, message + header_length + payload_length, 4);
+        if (defaultCallback)
+            defaultCallback(data, read_timestamp_);
         break;
+    }
     }
 }
 
@@ -1910,17 +1808,7 @@ Calculate a CRC value to be used by CRC calculation functions.
 -------------------------------------------------------------------------- */
 unsigned long Novatel::CRC32Value(int i)
 {
-    int j;
-    unsigned long ulCRC;
-    ulCRC = i;
-    for (j = 8; j > 0; j--)
-    {
-        if (ulCRC & 1)
-            ulCRC = (ulCRC >> 1) ^ CRC32_POLYNOMIAL;
-        else
-            ulCRC >>= 1;
-    }
-    return ulCRC;
+    return crc32c::Crc32c((char*)&i, sizeof(i));
 }
 
 
@@ -1930,16 +1818,7 @@ Calculates the CRC-32 of a block of data all at once
 unsigned long Novatel::CalculateBlockCRC32(unsigned long ulCount, /* Number of bytes in the data block */
                                            unsigned char* ucBuffer) /* Data block */
 {
-    unsigned long ulTemp1;
-    unsigned long ulTemp2;
-    unsigned long ulCRC = 0;
-    while (ulCount-- != 0)
-    {
-        ulTemp1 = (ulCRC >> 8) & 0x00FFFFFFL;
-        ulTemp2 = CRC32Value(((int)ulCRC ^ *ucBuffer++) & 0xff);
-        ulCRC = ulTemp1 ^ ulTemp2;
-    }
-    return (ulCRC);
+    return crc32c::Crc32c(ucBuffer, ulCount);
 }
 
 // this functions matches the conversion done by the Novatel receivers

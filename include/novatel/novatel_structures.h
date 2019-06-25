@@ -40,6 +40,7 @@
 
 #include "novatel_enums.h"
 #include <stdint.h>  // use fixed size integer types, rather than standard c++ types
+#include <vector>
 
 namespace novatel
 {
@@ -915,6 +916,14 @@ struct NOVATEL_EXPORT rtcadatarefb_log : BinaryMessageBase
 {
     rtcadatarefb_data data;
 });
+
+PACK(
+struct NOVATEL_EXPORT GeneralData : BinaryMessageBase
+{
+    std::vector<uint8_t> data;
+    uint8_t crc[4];
+});
+
 
 //********************
 

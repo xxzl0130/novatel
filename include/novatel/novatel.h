@@ -42,6 +42,8 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include <string>
 #include <cstring> // for size_t
+#include <map>
+#include <memory>
 
 // Structure definition headers
 #include "novatel/novatel_enums.h"
@@ -50,6 +52,7 @@
 #include <boost/function.hpp>
 #include <boost/thread.hpp>
 #include <boost/bind.hpp>
+
 //#include <boost/condition_variable.hpp>
 // Serial Headers
 #include "serial/serial.h"
@@ -72,31 +75,8 @@ namespace novatel
     typedef boost::function<void(const std::string&)> LogMsgCallback;
     typedef boost::function<void(unsigned char*)> RawMsgCallback;
 
-    // INS Specific Callbacks
-    typedef boost::function<void(Position&, double&)> BestGpsPositionCallback;
-
-    // GPS Callbacks
-    typedef boost::function<void(UtmPosition&, double&)> BestUtmPositionCallback;
-    typedef boost::function<void(Velocity&, double&)> BestVelocityCallback;
-    typedef boost::function<void(PositionEcef&, double&)> BestPositionEcefCallback;
-    typedef boost::function<void(Dop&, double&)> PseudorangeDopCallback;
-    typedef boost::function<void(Dop&, double&)> RtkDopCallback;
-    typedef boost::function<void(BaselineEcef&, double&)> BaselineEcefCallback;
-    typedef boost::function<void(IonosphericModel&, double&)> IonosphericModelCallback;
-    typedef boost::function<void(RangeMeasurements&, double&)> RangeMeasurementsCallback;
-    typedef boost::function<void(CompressedRangeMeasurements&, double&)> CompressedRangeMeasurementsCallback;
-    typedef boost::function<void(GpsEphemeris&, double&)> GpsEphemerisCallback;
-    typedef boost::function<void(RawEphemeris&, double&)> RawEphemerisCallback;
-    typedef boost::function<void(RawAlmanac&, double&)> RawAlmanacCallback;
-    typedef boost::function<void(Almanac&, double&)> AlmanacCallback;
-    typedef boost::function<void(SatellitePositions&, double&)> SatellitePositionsCallback;
-    typedef boost::function<void(SatelliteVisibility&, double&)> SatelliteVisibilityCallback;
-    typedef boost::function<void(TimeOffset&, double&)> TimeOffsetCallback;
-    typedef boost::function<void(TrackStatus&, double&)> TrackingStatusCallback;
-    typedef boost::function<void(ReceiverHardwareStatus&, double&)> ReceiverHardwareStatusCallback;
-    typedef boost::function<void(Position&, double&)> BestPositionCallback;
-    typedef boost::function<void(Position&, double&)> BestPseudorangePositionCallback;
-    typedef boost::function<void(Position&, double&)> RtkPositionCallback;
+    typedef std::shared_ptr<BinaryMessageBase> BinaryMessagePtr;
+    typedef boost::function<void(BinaryMessagePtr, double)> BinaryMessageCallback;
 
 
     class NOVATEL_EXPORT Novatel
@@ -256,121 +236,20 @@ namespace novatel
 
         void ReadFromFile(unsigned char* buffer, unsigned int length);
 
-        // Set data callbacks
-        void set_best_gps_position_callback(BestGpsPositionCallback handler)
-        {
-            best_gps_position_callback_ = handler;
-        };
-
-        void set_best_position_callback(BestPositionCallback handler)
-        {
-            best_position_callback_ = handler;
-        };
-
-        void set_best_utm_position_callback(BestUtmPositionCallback handler)
-        {
-            best_utm_position_callback_ = handler;
-        };
-
-        void set_best_velocity_callback(BestVelocityCallback handler)
-        {
-            best_velocity_callback_ = handler;
-        };
-
-        void set_best_position_ecef_callback(BestPositionEcefCallback handler)
-        {
-            best_position_ecef_callback_ = handler;
-        };
-
-        void set_pseudorange_dop_callback(PseudorangeDopCallback handler)
-        {
-            pseudorange_dop_callback_ = handler;
-        };
-
-        void set_rtk_dop_callback(RtkDopCallback handler)
-        {
-            rtk_dop_callback_ = handler;
-        };
-
-        void set_baseline_ecef_callback(BaselineEcefCallback handler)
-        {
-            baseline_ecef_callback_ = handler;
-        };
-
-        void set_ionospheric_model_callback(IonosphericModelCallback handler)
-        {
-            ionospheric_model_callback_ = handler;
-        };
-
-        void set_range_measurements_callback(RangeMeasurementsCallback handler)
-        {
-            range_measurements_callback_ = handler;
-        };
-
-        void set_compressed_range_measurements_callback(CompressedRangeMeasurementsCallback handler)
-        {
-            compressed_range_measurements_callback_ = handler;
-        };
-
-        void set_gps_ephemeris_callback(GpsEphemerisCallback handler)
-        {
-            gps_ephemeris_callback_ = handler;
-        };
-
-        void set_raw_ephemeris_callback(RawEphemerisCallback handler)
-        {
-            raw_ephemeris_callback_ = handler;
-        };
-
-        void set_raw_almanc_callback(RawAlmanacCallback handler)
-        {
-            raw_almanac_callback_ = handler;
-        };
-
-        void set_almanac_callback(AlmanacCallback handler)
-        {
-            almanac_callback_ = handler;
-        };
-
-        void set_satellite_positions_callback(SatellitePositionsCallback handler)
-        {
-            satellite_positions_callback_ = handler;
-        };
-
-        void set_satellite_visibility_callback(SatelliteVisibilityCallback handler)
-        {
-            satellite_visibility_callback_ = handler;
-        };
-
-        void set_time_offset_callback(TimeOffsetCallback handler)
-        {
-            time_offset_callback_ = handler;
-        };
-
-        void set_tracking_status_callback(TrackingStatusCallback handler)
-        {
-            tracking_status_callback_ = handler;
-        };
-
-        void set_receiver_hardware_status_callback(ReceiverHardwareStatusCallback handler)
-        {
-            receiver_hardware_status_callback_ = handler;
-        };
-
-        void set_best_pseudorange_position_callback(BestPseudorangePositionCallback handler)
-        {
-            best_pseudorange_position_callback_ = handler;
-        };
-
-        void set_rtk_position_callback(RtkPositionCallback handler)
-        {
-            rtk_position_callback_ = handler;
-        };
-
         void set_raw_msg_callback(RawMsgCallback handler)
         {
             raw_msg_callback_ = handler;
         };
+
+        void setCallback(BINARY_LOG_TYPE typeId, const BinaryMessageCallback& callback)
+        {
+            callback_map_[typeId] = callback;
+        }
+        void setDefaultCallback(const BinaryMessageCallback& callback)
+        {
+            defaultCallback = callback;
+        }
+
         RawEphemerides test_ephems_;
     private:
 
@@ -464,32 +343,6 @@ namespace novatel
         //////////////////////////////////////////////////////
         RawMsgCallback raw_msg_callback_;
 
-        BestGpsPositionCallback best_gps_position_callback_;
-        BestPositionCallback best_position_callback_;
-        BestUtmPositionCallback best_utm_position_callback_;
-        BestVelocityCallback best_velocity_callback_;
-        BestPositionEcefCallback best_position_ecef_callback_;
-
-        // GPS Callbacks
-        PseudorangeDopCallback pseudorange_dop_callback_;
-        RtkDopCallback rtk_dop_callback_;
-        BaselineEcefCallback baseline_ecef_callback_;
-        IonosphericModelCallback ionospheric_model_callback_;
-        RangeMeasurementsCallback range_measurements_callback_;
-        CompressedRangeMeasurementsCallback compressed_range_measurements_callback_;
-        GpsEphemerisCallback gps_ephemeris_callback_;
-        RawEphemerisCallback raw_ephemeris_callback_;
-        AlmanacCallback almanac_callback_;
-        RawAlmanacCallback raw_almanac_callback_;
-        SatellitePositionsCallback satellite_positions_callback_;
-        SatelliteVisibilityCallback satellite_visibility_callback_;
-        TimeOffsetCallback time_offset_callback_;
-        TrackingStatusCallback tracking_status_callback_;
-        ReceiverHardwareStatusCallback receiver_hardware_status_callback_;
-        BestPseudorangePositionCallback best_pseudorange_position_callback_;
-        RtkPositionCallback rtk_position_callback_;
-
-
         //////////////////////////////////////////////////////
         // Incoming data buffers
         //////////////////////////////////////////////////////
@@ -529,6 +382,9 @@ namespace novatel
         bool rtk_capable_; //!< Can the receiver compute RT2 and/or RT20 positions?
         bool glonass_capable_; //!< Can the receiver receive GLONASS frequencies?
         bool span_capable_; //!< Is the receiver a SPAN unit?
+
+        std::map<BINARY_LOG_TYPE, BinaryMessageCallback> callback_map_;
+        BinaryMessageCallback defaultCallback;
     };
 }
 #endif
