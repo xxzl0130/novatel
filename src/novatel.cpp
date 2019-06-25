@@ -118,8 +118,9 @@ inline void DefaultErrorMsgCallback(const std::string& msg)
     std::cout << "Novatel Error: " << msg << std::endl;
 }
 
-inline void DefaultBestPositionCallback(Position best_position, double time_stamp)
+inline void DefaultBestPositionCallback(BinaryMessagePtr data, double time_stamp)
 {
+    auto best_position = *(Position*)data.get();
     std::cout << "BESTPOS: \nGPS Week: " << best_position.header.gps_week <<
         "  GPS milliseconds: " << best_position.header.gps_millisecs << std::endl <<
         "  Latitude: " << best_position.latitude << std::endl <<
@@ -142,6 +143,7 @@ Novatel::Novatel()
     reading_status_ = false;
     time_handler_ = DefaultGetTime;
     handle_acknowledgement_ = DefaultAcknowledgementHandler;
+    callback_map_[BESTPOS_LOG_TYPE] = DefaultBestPositionCallback;
     log_debug_ = DefaultDebugMsgCallback;
     log_info_ = DefaultInfoMsgCallback;
     log_warning_ = DefaultWarningMsgCallback;
@@ -258,6 +260,7 @@ bool Novatel::Connect_(std::string port, int baudrate = 115200)
         serial_port_->flush();
 
         // look for GPS by sending ping and waiting for response
+        /*
         if (!Ping())
         {
             std::stringstream output;
@@ -268,6 +271,7 @@ bool Novatel::Connect_(std::string port, int baudrate = 115200)
             is_connected_ = false;
             return false;
         }
+        */
     }
     catch (std::exception& e)
     {
