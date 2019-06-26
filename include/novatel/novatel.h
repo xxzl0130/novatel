@@ -60,13 +60,13 @@
 namespace novatel
 {
     // used to convert lat and long to UTM coordinates
-#define GRAD_A_RAD(g) ((g)*0.0174532925199433)
-#define CRC32_POLYNOMIAL 0xEDB88320L
+    #define GRAD_A_RAD(g) ((g)*0.0174532925199433)
+    #define CRC32_POLYNOMIAL 0xEDB88320L
 
     // Constants for unpacking RANGECMP
-#define CMP_MAX_VALUE         8388608.0
-#define CMP_GPS_WAVELENGTH_L1 0.1902936727984
-#define CMP_GPS_WAVELENGTH_L2 0.2442102134246
+    #define CMP_MAX_VALUE         8388608.0
+    #define CMP_GPS_WAVELENGTH_L1 0.1902936727984
+    #define CMP_GPS_WAVELENGTH_L2 0.2442102134246
 
     typedef boost::function<double()> GetTimeCallback;
     typedef boost::function<void()> HandleAcknowledgementCallback;
@@ -94,7 +94,7 @@ namespace novatel
          * @throws ConnectionFailedException connection attempt failed.
          * @throws UnknownErrorCodeException unknown error code returned.
          */
-        bool Connect(std::string port, int baudrate = 115200, bool search = true);
+        bool Connect(const std::string&  port, int baudrate = 115200, bool search = true);
 
         /*!
          * Disconnects from the serial port
@@ -143,8 +143,8 @@ namespace novatel
          *               . [empty]=Abreviated ASCII
          * log_string format: "BESTUTMB ONTIME 1.0; BESTVELB ONTIME 1.0"
          */
-        void ConfigureLogs(std::string log_string);
-        void Unlog(std::string log); //!< Stop logging a specified log
+        void ConfigureLogs(const std::string& log_string);
+        void Unlog(const std::string& log); //!< Stop logging a specified log
         void UnlogAll(); //!< Stop logging all logs that aren't set with HOLD parameter
 
         /*!
@@ -153,12 +153,12 @@ namespace novatel
          */
         void SaveConfiguration();
 
-        void ConfigureInterfaceMode(std::string com_port,
-                                    std::string rx_mode, std::string tx_mode);
+        void ConfigureInterfaceMode(const std::string& com_port,
+            const std::string& rx_mode, const std::string& tx_mode);
 
-        void ConfigureBaudRate(std::string com_port, int baudrate);
+        void ConfigureBaudRate(const std::string& com_port, int baudrate);
 
-        bool SendCommand(std::string cmd_msg, bool wait_for_ack = true);
+        bool SendCommand(const std::string& cmd_msg, bool wait_for_ack = true);
         //bool SendMessage(uint8_t* msg_ptr, size_t length);
 
         /*!
@@ -220,7 +220,7 @@ namespace novatel
          */
         bool ColdStartReset();
 
-        void SendRawEphemeridesToReceiver(RawEphemerides raw_ephemerides);
+        void SendRawEphemeridesToReceiver(const RawEphemerides& raw_ephemerides);
 
         /*!
          * Requests version information from the receiver
@@ -251,9 +251,11 @@ namespace novatel
         }
 
         RawEphemerides test_ephems_;
+
+        void setTimeOut(uint32_t ms);
     private:
 
-        bool Connect_(std::string port, int baudrate);
+        bool Connect_(const std::string& port, int baudrate);
 
 
         /*!

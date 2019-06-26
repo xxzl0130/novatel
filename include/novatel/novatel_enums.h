@@ -644,12 +644,12 @@ namespace novatel
         RTCMOMNI1_LOG_TYPE = 957,	// RTCM1 from OmniSTAR
 
         //RTCMV3 FORMAT LOGS
-        RTCM1005_LOG_TYPE = 765,	// RTK Base Station ARP
-        RTCM1006_LOG_TYPE = 768,	// RTK Base Station ARP with Antenna Height
-        RTCM1004_LOG_TYPE = 770,	// Extended L1/L2 GPS RTK Observables
         RTCM1001_LOG_TYPE = 772,	// L1-Only GPS RTK Observables
         RTCM1002_LOG_TYPE = 774,	// Extended L1-Only GPS RTK Observables
         RTCM1003_LOG_TYPE = 776,	// L1/L2 GPS RTK Observables
+        RTCM1004_LOG_TYPE = 770,	// Extended L1/L2 GPS RTK Observables
+        RTCM1005_LOG_TYPE = 765,	// RTK Base Station ARP
+        RTCM1006_LOG_TYPE = 768,	// RTK Base Station ARP with Antenna Height
         RTCM1007_LOG_TYPE = 852,	// Extended Antenna Descriptor and Setup
         RTCM1008_LOG_TYPE = 854,	// Extended Antenna Reference Station Description and Serial Number
         RTCM1009_LOG_TYPE = 885,	// GLONASS L1-Only RTK
@@ -659,6 +659,41 @@ namespace novatel
         RTCM1019_LOG_TYPE = 893,	// GPS Ephemerides
         RTCM1020_LOG_TYPE = 895,	// GLONASS Ephemerides
         RTCM1033_LOG_TYPE = 1097,	// Receiver and antenna descriptors
+        RTCM1071_LOG_TYPE = 1472,	// MSM1, GPS Code Measurements
+        RTCM1072_LOG_TYPE = 1473,	// MSM2, GPS Phase Measurements
+        RTCM1073_LOG_TYPE = 1474,	// MSM3, GPS Code and Phase Measurements
+        RTCM1074_LOG_TYPE = 1475,	// MSM4, GPS Code, Phase and CNR Measurements
+        RTCM1075_LOG_TYPE = 1476,	// MSM5, GPS Code, Phase, CNR and Doppler Measurements
+        RTCM1076_LOG_TYPE = 1477,	// MSM6, Extended GPS Code, Phase and CNR Measurements
+        RTCM1077_LOG_TYPE = 1478,	// MSM7, Extended GPS Code, Phase, CNR and Doppler Measurements
+        RTCM1081_LOG_TYPE = 1479,	// MSM1, GLONASS Code Measurements
+        RTCM1082_LOG_TYPE = 1480,	// MSM2, GLONASS Phase Measurements
+        RTCM1083_LOG_TYPE = 1481,	// MSM3, GLONASS Code and Phase Measurements
+        RTCM1084_LOG_TYPE = 1482,	// MSM4, GLONASS Code, Phase and CNR Measurements
+        RTCM1085_LOG_TYPE = 1483,	// MSM5, GLONASS Code, Phase, CNR and Doppler Measurements
+        RTCM1086_LOG_TYPE = 1484,	// MSM6, Extended GLONASS Code, Phase and CNR Measurements
+        RTCM1087_LOG_TYPE = 1485,	// MSM7, Extended GLONASS Code, Phase, CNR and Doppler Measurements
+        RTCM1091_LOG_TYPE = 1486,	// MSM1, Galileo Code Measurements
+        RTCM1092_LOG_TYPE = 1487,	// MSM2, Galileo Phase Measurements
+        RTCM1093_LOG_TYPE = 1488,	// MSM3, Galileo Code and Phase Measurements
+        RTCM1094_LOG_TYPE = 1489,	// MSM4, Galileo Code, Phase and CNR Measurements
+        RTCM1095_LOG_TYPE = 1490,	// MSM5, Galileo Code, Phase, CNR and Doppler Measurements
+        RTCM1096_LOG_TYPE = 1491,	// MSM6, Extended Galileo Code, Phase and CNR Measurements
+        RTCM1097_LOG_TYPE = 1492,	// MSM7, Extended Galileo Code, Phase, CNR and Doppler Measurements
+        RTCM1111_LOG_TYPE = 1648,	// MSM1, QZSS Code Measurements
+        RTCM1112_LOG_TYPE = 1649,	// MSM2, QZSS Phase Measurements
+        RTCM1113_LOG_TYPE = 1650,	// MSM3, QZSS Code and Phase Measurements
+        RTCM1114_LOG_TYPE = 1651,	// MSM4, QZSS Code, Phase and CNR Measurements
+        RTCM1115_LOG_TYPE = 1652,	// MSM5, QZSS Code, Phase, CNR and Doppler Measurements
+        RTCM1116_LOG_TYPE = 1653,	// MSM6, Extended QZSS Code, Phase and CNR Measurements
+        RTCM1117_LOG_TYPE = 1654,	// MSM7, Extended QZSS Code, Phase, CNR and Doppler Measurements
+        RTCM1121_LOG_TYPE = 1592,	// MSM1, BeiDou Code Measurements
+        RTCM1122_LOG_TYPE = 1593,	// MSM2, BeiDou Phase Measurements
+        RTCM1123_LOG_TYPE = 1594,	// MSM3, BeiDou Code and Phase Measurements
+        RTCM1124_LOG_TYPE = 1595,	// MSM4, BeiDou Code, Phase and CNR Measurements
+        RTCM1125_LOG_TYPE = 1596,	// MSM5, BeiDou Code, Phase, CNR and Doppler Measurements
+        RTCM1126_LOG_TYPE = 1597,	// MSM6, Extended BeiDou Code, Phase and CNR Measurements
+        RTCM1127_LOG_TYPE = 1598,	// MSM7, Extended BeiDou Code, Phase, CNR and Doppler Measurements
 
         //NMEA Format Data Logs
         GPALM_LOG_TYPE = 217,	// Almanac Data

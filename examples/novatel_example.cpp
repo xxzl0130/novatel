@@ -37,9 +37,11 @@ int main(int argc, char** argv)
         cout << "Failed to connect." << endl;
         return 0;
     }
+    my_gps.setTimeOut(200);
+    my_gps.Ping();
     //    my_gps.UnlogAll();
     //    sleep(2);
-    my_gps.ConfigureLogs("ALMANACB ONCE");
+    //my_gps.ConfigureLogs("ALMANACB ONCE");
     //    sleep(30);
     //    my_gps.ConfigureLogs("GPSEPHEMB ONCHANGED");
     //    my_gps.SaveConfiguration();

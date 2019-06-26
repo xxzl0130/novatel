@@ -161,7 +161,7 @@ Novatel::~Novatel()
     Disconnect();
 }
 
-bool Novatel::Connect(std::string port, int baudrate, bool search)
+bool Novatel::Connect(const std::string& port, int baudrate, bool search)
 {
     bool connected = Connect_(port, baudrate);
 
@@ -224,7 +224,13 @@ bool Novatel::Connect(std::string port, int baudrate, bool search)
     }
 }
 
-bool Novatel::Connect_(std::string port, int baudrate = 115200)
+void Novatel::setTimeOut(uint32_t ms)
+{
+    auto t = serial::Timeout::simpleTimeout(ms);
+    this->serial_port_->setTimeout(t);
+}
+
+bool Novatel::Connect_(const std::string& port, int baudrate = 115200)
 {
     try
     {
@@ -233,7 +239,7 @@ bool Novatel::Connect_(std::string port, int baudrate = 115200)
         if (!serial_port_)
         {
             //default timeout 200ms
-            serial_port_ = new serial::Serial(port, baudrate, serial::Timeout::simpleTimeout(200));
+            serial_port_ = new serial::Serial(port, baudrate, serial::Timeout::simpleTimeout(500));
         }
 
         if (!serial_port_->isOpen())
@@ -260,7 +266,7 @@ bool Novatel::Connect_(std::string port, int baudrate = 115200)
         serial_port_->flush();
 
         // look for GPS by sending ping and waiting for response
-        /*
+        
         if (!Ping())
         {
             std::stringstream output;
@@ -271,7 +277,7 @@ bool Novatel::Connect_(std::string port, int baudrate = 115200)
             is_connected_ = false;
             return false;
         }
-        */
+        
     }
     catch (std::exception& e)
     {
@@ -362,7 +368,7 @@ bool Novatel::Ping(int num_attempts)
     return false;
 }
 
-void Novatel::SendRawEphemeridesToReceiver(RawEphemerides raw_ephemerides)
+void Novatel::SendRawEphemeridesToReceiver(const RawEphemerides& raw_ephemerides)
 {
     try
     {
@@ -427,7 +433,7 @@ bool Novatel::SendBinaryDataToReceiver(uint8_t* msg_ptr, size_t length)
     }
 }
 
-bool Novatel::SendCommand(std::string cmd_msg, bool wait_for_ack)
+bool Novatel::SendCommand(const std::string& cmd_msg, bool wait_for_ack)
 {
     try
     {
@@ -647,14 +653,14 @@ bool Novatel::InjectAlmanac(Almanac almanac)
         almanac.header.Reserved = 0; //!< ignored on input
         almanac.header.version = 0; //!< ignored on input
 
-        cout << "SIZEOF: " << sizeof(almanac) << endl;
+        log_info_(std::string("SIZEOF: ") + std::to_string(sizeof(almanac)));
         uint8_t* msg_ptr = (unsigned char*)&almanac;
         uint32_t crc = CalculateBlockCRC32(sizeof(almanac) - 4, msg_ptr);
         memcpy(almanac.crc, &crc, sizeof(crc)); // TODO: check byte ordering for crc
         bool result = SendBinaryDataToReceiver(msg_ptr, sizeof(almanac));
         if (result)
         {
-            cout << "Sent ALMANAC." << endl;
+            log_info_("Sent ALMANAC.");
             return true;
         }
         return false;
@@ -703,9 +709,7 @@ bool Novatel::HardwareReset()
     // Resets receiver to cold start, does NOT clear non-volatile memory!
     try
     {
-        std::stringstream rst_cmd;
-        rst_cmd << "RESET";
-        bool command_sent = SendCommand(rst_cmd.str(), false);
+        bool command_sent = SendCommand("RESET", false);
         if (command_sent)
         {
             boost::mutex::scoped_lock lock(reset_mutex_);
@@ -742,9 +746,7 @@ bool Novatel::HotStartReset()
 {
     try
     {
-        std::stringstream rst_cmd;
-        rst_cmd << "RESET";
-        bool command_sent = SendCommand(rst_cmd.str(), false);
+        bool command_sent = SendCommand("RESET", false);
         if (command_sent)
         {
             boost::mutex::scoped_lock lock(reset_mutex_);
@@ -823,9 +825,7 @@ bool Novatel::ColdStartReset()
 {
     try
     {
-        std::stringstream rst_cmd;
-        rst_cmd << "FRESET STANDARD";
-        bool command_sent = SendCommand(rst_cmd.str(), false); //!< FRESET doesn't reply with an ACK
+        bool command_sent = SendCommand("FRESET STANDARD", false); //!< FRESET doesn't reply with an ACK
         if (command_sent)
         {
             boost::mutex::scoped_lock lock(reset_mutex_);
@@ -876,7 +876,7 @@ void Novatel::SaveConfiguration()
     }
 }
 
-void Novatel::ConfigureLogs(std::string log_string)
+void Novatel::ConfigureLogs(const std::string& log_string)
 {
     // parse log_string on semicolons (;)
     std::vector<std::string> logs;
@@ -921,13 +921,11 @@ void Novatel::ConfigureLogs(std::string log_string)
     }
 }
 
-void Novatel::Unlog(std::string log)
+void Novatel::Unlog(const std::string& log)
 {
     try
     {
-        std::stringstream unlog_cmd;
-        unlog_cmd << "UNLOG " << log;
-        bool result = SendCommand(unlog_cmd.str());
+        bool result = SendCommand("UNLOG");
     }
     catch (std::exception& e)
     {
@@ -951,8 +949,8 @@ void Novatel::UnlogAll()
     }
 }
 
-void Novatel::ConfigureInterfaceMode(std::string com_port,
-                                     std::string rx_mode, std::string tx_mode)
+void Novatel::ConfigureInterfaceMode(const std::string& com_port,
+    const std::string& rx_mode, const std::string& tx_mode)
 {
     try
     {
@@ -980,15 +978,13 @@ void Novatel::ConfigureInterfaceMode(std::string com_port,
     }
 }
 
-void Novatel::ConfigureBaudRate(std::string com_port, int baudrate)
+void Novatel::ConfigureBaudRate(const std::string& com_port, int baudrate)
 {
     try
     {
         // send command to set baud rate on GPS com port
         // ex: COM com1 9600 n 8 1 n off on
-        std::stringstream cmd;
-        cmd << "COM " << com_port << " " << baudrate << " n 8 1 n off on\r\n";
-        serial_port_->write(cmd.str());
+        serial_port_->write("COM " + com_port + " " + std::to_string(baudrate) + " n 8 1 n off on\r\n");
         // wait for acknowledgement (or 2 seconds)
         boost::mutex::scoped_lock lock(ack_mutex_);
         boost::system_time const timeout = boost::get_system_time() + boost::posix_time::milliseconds(2000);
@@ -1032,7 +1028,7 @@ bool Novatel::UpdateVersion()
         // send request for version
         serial_port_->write("log versiona once\r\n");
         // wait for response from the receiver
-        boost::this_thread::sleep(boost::posix_time::milliseconds(500));
+        //boost::this_thread::sleep(boost::posix_time::milliseconds(200));
         // read from the serial port until a new line character is seen
         std::string gps_response = serial_port_->read(15000);
 
@@ -1089,11 +1085,10 @@ bool Novatel::ParseVersion(std::string packet)
     tokenizer tokens(message, sep);
     // set up iterator to go through token list
     tokenizer::iterator current_token = tokens.begin();
-    string num_comps_string = *(current_token);
-    int number_components = atoi(num_comps_string.c_str());
+    int number_components = atoi((*tokens.begin()).c_str());
     // make sure the correct number of tokens were found
     int token_count = 0;
-    for (current_token = tokens.begin(); current_token != tokens.end(); ++current_token)
+    for (const auto& it : tokens)
     {
         //log_debug_(*current_token);
         token_count++;
