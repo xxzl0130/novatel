@@ -73,7 +73,7 @@ namespace novatel
 
     // Messaging callbacks
     typedef boost::function<void(const std::string&)> LogMsgCallback;
-    typedef boost::function<void(unsigned char*)> RawMsgCallback;
+    typedef boost::function<void(unsigned char*, size_t)> RawMsgCallback;
 
     typedef std::shared_ptr<BinaryMessageBase> BinaryMessagePtr;
     typedef boost::function<void(BinaryMessagePtr, double)> BinaryMessageCallback;
@@ -239,20 +239,33 @@ namespace novatel
         void set_raw_msg_callback(RawMsgCallback handler)
         {
             raw_msg_callback_ = handler;
-        };
+        }
 
         void setCallback(BINARY_LOG_TYPE typeId, const BinaryMessageCallback& callback)
         {
-            callback_map_[typeId] = callback;
+            binary_callback_map_[typeId] = callback;
         }
-        void setDefaultCallback(const BinaryMessageCallback& callback)
+        void setDefaultBinaryCallback(const BinaryMessageCallback& callback)
         {
-            defaultCallback = callback;
+            defaultBinaryCallback = callback;
+        }
+        void setDefaultAsciiCallback(const LogMsgCallback& callback)
+        {
+            defaultAsciiCallback = callback;
+        }
+        void setDefaultRtcmCallback(const RawMsgCallback& callback)
+        {
+            defaultRtcmCallback = callback;
         }
 
         RawEphemerides test_ephems_;
 
         void setTimeOut(uint32_t ms);
+
+        void setEnableRawOutput(bool en = true)
+        {
+            enableRaw = en;
+        }
     private:
 
         bool Connect_(const std::string& port, int baudrate);
@@ -288,6 +301,7 @@ namespace novatel
         void BufferIncomingData(unsigned char* message, unsigned int length);
         bool CheckBinaryFormat(unsigned char* msg, unsigned int length);
         bool CheckAsciiFormat(unsigned char* msg, unsigned int length);
+        bool CheckRtcmFormat(unsigned char* msg, unsigned int length);
         bool CheckAbbreviatedFormat(unsigned char* msg, unsigned int length);
         bool CheckACK(unsigned char* msg, unsigned int length);
         bool CheckReset(unsigned char* msg, unsigned int length);
@@ -301,6 +315,7 @@ namespace novatel
          */
         void ParseBinary(unsigned char* message, size_t length);
         void ParseAscii(unsigned char* message, size_t length);
+        void ParseRtcm(unsigned char* message, size_t length);
 
         bool ParseVersion(std::string packet);
 
@@ -314,10 +329,6 @@ namespace novatel
             const double& uncmpPsr) const;
 
         bool SendBinaryDataToReceiver(uint8_t* msg_ptr, size_t length);
-
-        unsigned long CRC32Value(int i);
-        unsigned long CalculateBlockCRC32(unsigned long ulCount, /* Number of bytes in the data block */
-                                          unsigned char* ucBuffer); /* Data block */
 
         //////////////////////////////////////////////////////
         // Serial port reading members
@@ -385,8 +396,12 @@ namespace novatel
         bool glonass_capable_; //!< Can the receiver receive GLONASS frequencies?
         bool span_capable_; //!< Is the receiver a SPAN unit?
 
-        std::map<BINARY_LOG_TYPE, BinaryMessageCallback> callback_map_;
-        BinaryMessageCallback defaultCallback;
+        std::map<BINARY_LOG_TYPE, BinaryMessageCallback> binary_callback_map_;
+        BinaryMessageCallback defaultBinaryCallback;
+        LogMsgCallback defaultAsciiCallback;
+        RawMsgCallback defaultRtcmCallback;
+
+        bool enableRaw = false;
     };
 }
 #endif

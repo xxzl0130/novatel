@@ -77,6 +77,9 @@ namespace novatel
 #define NOVATEL_RESET_BYTE_4 'M'
 #define NOVATEL_RESET_BYTE_6 0X5D
 
+#define RTCM_SYNC_BYTE_1    0xD3
+#define RTCM_SYNC_BYTE_2    (~0x03)
+
 // IMU Constants
 // scale factor between integer counts and change in velocity in m/s for AG11 and AG58
 #define VELOCITY_CHANGE_SCALE_FACTOR_11_58 (0.3048/((double)134217728.0))
@@ -927,6 +930,35 @@ struct NOVATEL_EXPORT GeneralData : BinaryMessageBase
 
 //********************
 
+
+//********************
+//RTCM DATA TYPE
+
+PACK(
+    struct RTCM3Header
+{
+    uint8_t  preamble : 8;      // must be 11010011b
+    uint8_t lengthHigh : 2;     // Message length in bytes
+    uint8_t  reserved : 6;      // must be 000000b
+    uint8_t lengthLow;
+    uint16_t getLength()
+    {
+        return uint16_t(lengthHigh) << 8 | lengthLow;
+    }
+});
+
+//Contents of the Message Header, Types 1001, 1002, 1003, 1004: GPS RTK Messages
+PACK(
+struct NOVATEL_EXPORT RtkMessageHeader
+{
+    uint16_t number         : 12;   // Message Number
+    uint16_t stationID      : 12;   // Reference Station ID
+    uint32_t TOW            : 30;   // GPS Epoch Time (TOW)
+    uint8_t  flag           : 1;    // Synchronous GNSS Flag
+    uint8_t  noGps          : 5;    // No. of GPS Satellite Signals Processed
+    uint8_t  indicatior     : 1;    // GPS Divergence-free Smoothing Indicator
+    uint8_t  interval       : 3;    // GPS Smoothing Interval
+});
 
 //*******************************************************************************
 // STATUS STRUCTURES

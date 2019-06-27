@@ -36,6 +36,26 @@ unsigned long CalculateBlockCRC32(unsigned long ulCount, /* Number of bytes in t
     return crc32c::Crc32c(ucBuffer, ulCount);
 }
 
+uint32_t CalculateBlockCRC24Q(unsigned long size,unsigned char *buf)
+{
+    const static unsigned long CRC24POLY = 0x01864CFBL;
+    const static unsigned long CRC24MASK = 0x00FFFFFFL;
+    const static unsigned long CRC24BIT =  0x01000000L;
+
+    uint32_t crc = 0x00L;
+    for(auto i = 0;i < size;++i)
+    {
+        crc ^= buf[i] << 16;
+        for (i = 0; i < 8; i++) {
+            crc <<= 1;
+            if (crc & CRC24BIT) {
+                crc ^= CRC24POLY;
+            }
+        }
+    }
+    return crc & CRC24MASK;
+}
+
 
 /*!
  * Default callback method for timestamping data.  Used if a
@@ -143,7 +163,7 @@ Novatel::Novatel()
     reading_status_ = false;
     time_handler_ = DefaultGetTime;
     handle_acknowledgement_ = DefaultAcknowledgementHandler;
-    callback_map_[BESTPOS_LOG_TYPE] = DefaultBestPositionCallback;
+    binary_callback_map_[BESTPOS_LOG_TYPE] = DefaultBestPositionCallback;
     log_debug_ = DefaultDebugMsgCallback;
     log_info_ = DefaultInfoMsgCallback;
     log_warning_ = DefaultWarningMsgCallback;
@@ -1229,21 +1249,32 @@ void Novatel::BufferIncomingData(unsigned char* message, unsigned int length)
         log_warning_("Overflowed receive buffer. Buffer cleared.");
         buffer_index_ = 0;
     }
+    if(enableRaw && raw_msg_callback_)
+    {
+        // new data callback
+        raw_msg_callback_(message, length);
+    }
     memcpy(data_buffer_ + buffer_index_, message, length);
     buffer_index_ += length;
     for(auto i = 0;i < buffer_index_;++i)
     {
-        if(data_buffer_[i] == SYNC_BYTE_1 && data_buffer_[i + 1] == SYNC_BYTE_2 && data_buffer_[i + 2] == SYNC_BYTE_3
-            && CheckBinaryFormat(data_buffer_ + i, buffer_index_ - i))
+        if(CheckBinaryFormat(data_buffer_ + i, buffer_index_ - i))
         {
             ParseBinary(data_buffer_ + i, buffer_index_ - i);
             memset(data_buffer_, 0, sizeof(data_buffer_));
             buffer_index_ = 0;
             return;
         }
-        if (data_buffer_[i] == '#' && CheckAsciiFormat(message + i, buffer_index_ - i))
+        if (CheckAsciiFormat(message + i, buffer_index_ - i))
         {
             ParseAscii(data_buffer_ + i, buffer_index_ - i);
+            memset(data_buffer_, 0, sizeof(data_buffer_));
+            buffer_index_ = 0;
+            return;
+        }
+        if (CheckRtcmFormat(data_buffer_ + i, buffer_index_ - i))
+        {
+            ParseRtcm(data_buffer_ + i, buffer_index_ - i);
             memset(data_buffer_, 0, sizeof(data_buffer_));
             buffer_index_ = 0;
             return;
@@ -1299,6 +1330,24 @@ bool Novatel::CheckAsciiFormat(unsigned char* msg, unsigned length)
     return crcRes == crc;
 }
 
+bool Novatel::CheckRtcmFormat(unsigned char* msg, unsigned length)
+{
+    if (length < 6)
+        return false;
+    //check Preamble
+    if (msg[0] != RTCM_SYNC_BYTE_1 || msg[1] & RTCM_SYNC_BYTE_1 != 0)
+        return false;
+    RTCM3Header header;
+    memcpy(&header, msg, sizeof header);
+    if (length < sizeof(header) + header.getLength() + 3)
+        return false;
+    length = sizeof(header) + header.getLength();
+    auto crcRes = CalculateBlockCRC24Q(length, msg);
+    auto crcValue = uint32_t(msg[length]) << 16 | uint32_t(msg[length + 1]) << 8 | msg[length + 2];
+    return crcRes == crcValue;
+}
+
+
 bool Novatel::CheckAbbreviatedFormat(unsigned char* msg, unsigned length)
 {
     return msg[0] == NOVATEL_ACK_BYTE_1;
@@ -1334,32 +1383,32 @@ void Novatel::ParseBinary(unsigned char* message, size_t length, BINARY_LOG_TYPE
     {
         BinaryMessagePtr data(new Position);
         memcpy(data.get(), message, sizeof(Position));
-        if (callback_map_[BESTPOS_LOG_TYPE])
-            callback_map_[BESTPOS_LOG_TYPE](data, read_timestamp_);
+        if (binary_callback_map_[BESTPOS_LOG_TYPE])
+            binary_callback_map_[BESTPOS_LOG_TYPE](data, read_timestamp_);
         break;
     }
     case BESTUTM_LOG_TYPE:
     {
         BinaryMessagePtr data(new UtmPosition);
         memcpy(data.get(), message, sizeof(UtmPosition));
-        if (callback_map_[BESTUTM_LOG_TYPE])
-            callback_map_[BESTUTM_LOG_TYPE](data, read_timestamp_);
+        if (binary_callback_map_[BESTUTM_LOG_TYPE])
+            binary_callback_map_[BESTUTM_LOG_TYPE](data, read_timestamp_);
         break;
     }
     case BESTVEL_LOG_TYPE:
     {
         BinaryMessagePtr data(new Velocity);
         memcpy(data.get(), message, sizeof(Velocity));
-        if (callback_map_[BESTVEL_LOG_TYPE])
-            callback_map_[BESTVEL_LOG_TYPE](data, read_timestamp_);
+        if (binary_callback_map_[BESTVEL_LOG_TYPE])
+            binary_callback_map_[BESTVEL_LOG_TYPE](data, read_timestamp_);
         break;
     }
     case BESTXYZ_LOG_TYPE:
     {
         BinaryMessagePtr data(new PositionEcef);
         memcpy(data.get(), message, sizeof(PositionEcef));
-        if (callback_map_[BESTXYZ_LOG_TYPE])
-            callback_map_[BESTXYZ_LOG_TYPE](data, read_timestamp_);
+        if (binary_callback_map_[BESTXYZ_LOG_TYPE])
+            binary_callback_map_[BESTXYZ_LOG_TYPE](data, read_timestamp_);
         break;
     }
     case PSRDOP_LOG_TYPE:
@@ -1376,32 +1425,32 @@ void Novatel::ParseBinary(unsigned char* message, size_t length, BINARY_LOG_TYPE
         memcpy(ptr->prn, message + header_length + 28, (4 * ptr->number_of_prns));
         //Copy CRC
         memcpy(ptr->crc, message + header_length + payload_length, 4);
-        if (callback_map_[PSRDOP_LOG_TYPE])
-            callback_map_[PSRDOP_LOG_TYPE](data, read_timestamp_);
+        if (binary_callback_map_[PSRDOP_LOG_TYPE])
+            binary_callback_map_[PSRDOP_LOG_TYPE](data, read_timestamp_);
         break;
     }
     case RTKDOP_LOG_TYPE:
     {
         BinaryMessagePtr data(new Dop);
         memcpy(data.get(), message, sizeof(Dop));
-        if (callback_map_[RTKDOP_LOG_TYPE])
-            callback_map_[RTKDOP_LOG_TYPE](data, read_timestamp_);
+        if (binary_callback_map_[RTKDOP_LOG_TYPE])
+            binary_callback_map_[RTKDOP_LOG_TYPE](data, read_timestamp_);
         break;
     }
     case BSLNXYZ_LOG_TYPE:
     {
         BinaryMessagePtr data(new BaselineEcef);
         memcpy(data.get(), message, sizeof(BaselineEcef));
-        if (callback_map_[BSLNXYZ_LOG_TYPE])
-            callback_map_[BSLNXYZ_LOG_TYPE](data, read_timestamp_);
+        if (binary_callback_map_[BSLNXYZ_LOG_TYPE])
+            binary_callback_map_[BSLNXYZ_LOG_TYPE](data, read_timestamp_);
         break;
     }
     case IONUTC_LOG_TYPE:
     {
         BinaryMessagePtr data(new IonosphericModel);
         memcpy(data.get(), message, sizeof(IonosphericModel));
-        if (callback_map_[IONUTC_LOG_TYPE])
-            callback_map_[IONUTC_LOG_TYPE](data, read_timestamp_);
+        if (binary_callback_map_[IONUTC_LOG_TYPE])
+            binary_callback_map_[IONUTC_LOG_TYPE](data, read_timestamp_);
         break;
     }
     case RANGE_LOG_TYPE:
@@ -1424,8 +1473,8 @@ void Novatel::ParseBinary(unsigned char* message, size_t length, BINARY_LOG_TYPE
         memcpy(&ptr->crc,
             message + header_length + payload_length,
             4);
-        if (callback_map_[RANGE_LOG_TYPE])
-            callback_map_[RANGE_LOG_TYPE](data, read_timestamp_);
+        if (binary_callback_map_[RANGE_LOG_TYPE])
+            binary_callback_map_[RANGE_LOG_TYPE](data, read_timestamp_);
         break;
     }
     case RANGECMP_LOG_TYPE:
@@ -1452,24 +1501,24 @@ void Novatel::ParseBinary(unsigned char* message, size_t length, BINARY_LOG_TYPE
         memcpy(&ptr->crc,
             message + header_length + payload_length,
             4);
-        if (callback_map_[RANGECMP_LOG_TYPE])
-            callback_map_[RANGECMP_LOG_TYPE](data, read_timestamp_);
+        if (binary_callback_map_[RANGECMP_LOG_TYPE])
+            binary_callback_map_[RANGECMP_LOG_TYPE](data, read_timestamp_);
         break;
     }
     case GPSEPHEM_LOG_TYPE:
     {
         BinaryMessagePtr data(new GpsEphemeris);
         memcpy(data.get(), message, sizeof(GpsEphemeris));
-        if (callback_map_[GPSEPHEM_LOG_TYPE])
-            callback_map_[GPSEPHEM_LOG_TYPE](data, read_timestamp_);
+        if (binary_callback_map_[GPSEPHEM_LOG_TYPE])
+            binary_callback_map_[GPSEPHEM_LOG_TYPE](data, read_timestamp_);
         break;
     }
     case RAWEPHEM_LOG_TYPE:
     {
         BinaryMessagePtr data(new RawEphemeris);
         memcpy(data.get(), message, sizeof(RawEphemeris));
-        if (callback_map_[RAWEPHEM_LOG_TYPE])
-            callback_map_[RAWEPHEM_LOG_TYPE](data, read_timestamp_);
+        if (binary_callback_map_[RAWEPHEM_LOG_TYPE])
+            binary_callback_map_[RAWEPHEM_LOG_TYPE](data, read_timestamp_);
         break;
     }
     case RAWALM_LOG_TYPE:
@@ -1486,8 +1535,8 @@ void Novatel::ParseBinary(unsigned char* message, size_t length, BINARY_LOG_TYPE
         memcpy(&ptr->subframe_data, message + header_length + 12, (32 * ptr->num_of_subframes));
         // Copy the CRC
         memcpy(&ptr->crc, message + header_length + payload_length, 4);
-        if (callback_map_[RAWEPHEM_LOG_TYPE])
-            callback_map_[RAWEPHEM_LOG_TYPE](data, read_timestamp_);
+        if (binary_callback_map_[RAWEPHEM_LOG_TYPE])
+            binary_callback_map_[RAWEPHEM_LOG_TYPE](data, read_timestamp_);
         break;
     }
     case ALMANAC_LOG_TYPE:
@@ -1503,8 +1552,8 @@ void Novatel::ParseBinary(unsigned char* message, size_t length, BINARY_LOG_TYPE
         memcpy(&ptr->data, message + header_length + 4, (112 * ptr->number_of_prns));
         // Copy the CRC
         memcpy(&ptr->crc, message + header_length + payload_length, 4);
-        if (callback_map_[ALMANAC_LOG_TYPE])
-            callback_map_[ALMANAC_LOG_TYPE](data, read_timestamp_);
+        if (binary_callback_map_[ALMANAC_LOG_TYPE])
+            binary_callback_map_[ALMANAC_LOG_TYPE](data, read_timestamp_);
         break;
     }
     case SATXYZ2_LOG_TYPE:
@@ -1519,8 +1568,8 @@ void Novatel::ParseBinary(unsigned char* message, size_t length, BINARY_LOG_TYPE
         memcpy(ptr->data, message + header_length + 12, (68 * ptr->number_of_satellites));
         //Copy CRC
         memcpy(&ptr->crc, message + header_length + payload_length, 4);
-        if (callback_map_[SATXYZ2_LOG_TYPE])
-            callback_map_[SATXYZ2_LOG_TYPE](data, read_timestamp_);
+        if (binary_callback_map_[SATXYZ2_LOG_TYPE])
+            binary_callback_map_[SATXYZ2_LOG_TYPE](data, read_timestamp_);
         break;
     }
     case SATVIS_LOG_TYPE:
@@ -1535,16 +1584,16 @@ void Novatel::ParseBinary(unsigned char* message, size_t length, BINARY_LOG_TYPE
         memcpy(&ptr->data, message + header_length + 12, (40 * ptr->number_of_satellites));
         //Copy CRC
         memcpy(&ptr->crc, message + header_length + payload_length, 4);
-        if (callback_map_[SATVIS_LOG_TYPE])
-            callback_map_[SATVIS_LOG_TYPE](data, read_timestamp_);
+        if (binary_callback_map_[SATVIS_LOG_TYPE])
+            binary_callback_map_[SATVIS_LOG_TYPE](data, read_timestamp_);
         break;
     }
     case TIME_LOG_TYPE:
     {
         BinaryMessagePtr data(new TimeOffset);
         memcpy(data.get(), message, sizeof(TimeOffset));
-        if (callback_map_[TIME_LOG_TYPE])
-            callback_map_[TIME_LOG_TYPE](data, read_timestamp_);
+        if (binary_callback_map_[TIME_LOG_TYPE])
+            binary_callback_map_[TIME_LOG_TYPE](data, read_timestamp_);
         break;
     }
     case TRACKSTAT_LOG_TYPE:
@@ -1559,24 +1608,24 @@ void Novatel::ParseBinary(unsigned char* message, size_t length, BINARY_LOG_TYPE
         memcpy(&ptr->data, message + header_length + 12, (40 * ptr->number_of_channels));
         //Copy CRC
         memcpy(&ptr->crc, message + header_length + payload_length, 4);
-        if (callback_map_[TRACKSTAT_LOG_TYPE])
-            callback_map_[TRACKSTAT_LOG_TYPE](data, read_timestamp_);
+        if (binary_callback_map_[TRACKSTAT_LOG_TYPE])
+            binary_callback_map_[TRACKSTAT_LOG_TYPE](data, read_timestamp_);
         break;
     }
     case PSRPOS_LOG_TYPE:
     {
         BinaryMessagePtr data(new Position);
         memcpy(data.get(), message, sizeof(Position));
-        if (callback_map_[PSRPOS_LOG_TYPE])
-            callback_map_[PSRPOS_LOG_TYPE](data, read_timestamp_);
+        if (binary_callback_map_[PSRPOS_LOG_TYPE])
+            binary_callback_map_[PSRPOS_LOG_TYPE](data, read_timestamp_);
         break;
     }
     case RTKPOS_LOG_TYPE:
     {
         BinaryMessagePtr data(new Position);
         memcpy(data.get(), message, sizeof(Position));
-        if (callback_map_[RTKPOS_LOG_TYPE])
-            callback_map_[RTKPOS_LOG_TYPE](data, read_timestamp_);
+        if (binary_callback_map_[RTKPOS_LOG_TYPE])
+            binary_callback_map_[RTKPOS_LOG_TYPE](data, read_timestamp_);
         break;
     }
     default:
@@ -1592,8 +1641,8 @@ void Novatel::ParseBinary(unsigned char* message, size_t length, BINARY_LOG_TYPE
         memcpy(ptr->data.data(), message + header_length + 12, payload_length);
         //Copy CRC
         memcpy(&ptr->crc, message + header_length + payload_length, 4);
-        if (defaultCallback)
-            defaultCallback(data, read_timestamp_);
+        if (defaultBinaryCallback)
+            defaultBinaryCallback(data, read_timestamp_);
         break;
     }
     }
@@ -1609,10 +1658,18 @@ void Novatel::ParseBinary(unsigned char* message, size_t length)
     ParseBinary(message, length - sizeof(header) - sizeof(id), header.message_id);
 }
 
+void Novatel::ParseRtcm(unsigned char* message, size_t length)
+{
+    if(defaultRtcmCallback)
+    {
+        defaultRtcmCallback(message, length);
+    }
+}
+
 void Novatel::ParseAscii(unsigned char* message, size_t length)
 {
-    //TODO
-    std::cout << message << endl;
+    if (defaultAsciiCallback)
+        defaultAsciiCallback(std::string(message,message + length));
 }
 
 void Novatel::UnpackCompressedRangeData(const CompressedRangeData& cmp,
@@ -1642,59 +1699,10 @@ void Novatel::UnpackCompressedRangeData(const CompressedRangeData& cmp,
 
 double Novatel::UnpackCompressedPsrStd(const uint16_t& val) const
 {
-    switch (val)
-    {
-    case 0:
-        return (0.050);
-        break;
-    case 1:
-        return (0.075);
-        break;
-    case 2:
-        return (0.113);
-        break;
-    case 3:
-        return (0.169);
-        break;
-    case 4:
-        return (0.253);
-        break;
-    case 5:
-        return (0.380);
-        break;
-    case 6:
-        return (0.570);
-        break;
-    case 7:
-        return (0.854);
-        break;
-    case 8:
-        return (1.281);
-        break;
-    case 9:
-        return (2.375);
-        break;
-    case 10:
-        return (4.750);
-        break;
-    case 11:
-        return (9.500);
-        break;
-    case 12:
-        return (19.000);
-        break;
-    case 13:
-        return (38.000);
-        break;
-    case 14:
-        return (76.000);
-        break;
-    case 15:
-        return (152.000);
-        break;
-    default:
-        return (0);
-    }
+    if (val > 15)
+        return 0;
+    return std::vector<double>({ 0.050 ,0.075 ,0.113 ,0.169 ,0.253 ,0.380 ,0.570 ,0.854,
+    1.281 ,2.375 ,4.750 ,9.500 ,19.000 ,38.000 ,76.000 ,152.000 })[val];
 }
 
 double Novatel::UnpackCompressedAccumulatedDoppler(
@@ -1800,24 +1808,6 @@ double Novatel::UnpackCompressedAccumulatedDoppler(
     }
 
     return (scaled_adr - (CMP_MAX_VALUE * (int)adr_rolls));
-}
-
-/* --------------------------------------------------------------------------
-Calculate a CRC value to be used by CRC calculation functions.
--------------------------------------------------------------------------- */
-unsigned long Novatel::CRC32Value(int i)
-{
-    return crc32c::Crc32c((char*)&i, sizeof(i));
-}
-
-
-/* --------------------------------------------------------------------------
-Calculates the CRC-32 of a block of data all at once
--------------------------------------------------------------------------- */
-unsigned long Novatel::CalculateBlockCRC32(unsigned long ulCount, /* Number of bytes in the data block */
-                                           unsigned char* ucBuffer) /* Data block */
-{
-    return crc32c::Crc32c(ucBuffer, ulCount);
 }
 
 // this functions matches the conversion done by the Novatel receivers
