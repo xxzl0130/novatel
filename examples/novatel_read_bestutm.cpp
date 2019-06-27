@@ -13,8 +13,8 @@ void BestUtmHandler(UtmPosition& pos, double& timestamp)
 {
     std::cout << "[" << setprecision(2) << std::fixed << timestamp <<
         setprecision(std::cout.precision()) << "] BestUtm: " <<
-        pos.header.gps_week << ":" << pos.header.gps_millisecs <<
-        "   Type: " << pos.position_type << " Pos: (" << pos.easting <<
+        pos.header.gpsWeek << ":" << pos.header.gpsMillisecs <<
+        "   Type: " << pos.positionType << " Pos: (" << pos.easting <<
         "," << pos.northing << ")" << std::endl;
 }
 
@@ -22,9 +22,9 @@ void BestVelHandler(Velocity& vel, double& timestamp)
 {
     std::cout << "[" << setprecision(2) << std::fixed << timestamp <<
         setprecision(std::cout.precision()) << "] BestVel: " <<
-        vel.header.gps_week << ":" << vel.header.gps_millisecs <<
-        "   Horiz: " << vel.horizontal_speed << " Course: " <<
-        vel.track_over_ground << std::endl;
+        vel.header.gpsWeek << ":" << vel.header.gpsMillisecs <<
+        "   Horiz: " << vel.horizontalSpeed << " Course: " <<
+        vel.trackOverGround << std::endl;
 }
 
 void sighandler(int sig)

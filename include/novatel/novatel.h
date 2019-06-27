@@ -331,7 +331,7 @@ namespace novatel
         bool readingStatus; //!< True if the read thread is running, false otherwise.
 
         //////////////////////////////////////////////////////
-        // Diagnostic Callbacks
+        // Callbacks
         //////////////////////////////////////////////////////
         HandleAcknowledgementCallback handleAcknowledgement;
         LogMsgCallback logDebug;
@@ -341,20 +341,21 @@ namespace novatel
 
         GetTimeCallback timeHandler; //!< Function pointer to callback function for timestamping
 
-
-        //////////////////////////////////////////////////////
-        // New Data Callbacks
-        //////////////////////////////////////////////////////
         RawMsgCallback rawMsgCallback;
+
+        std::map<BINARY_LOG_TYPE, BinaryMessageCallback> binaryCallbackMap;
+        BinaryMessageCallback defaultBinaryCallback;
+        LogMsgCallback defaultAsciiCallback;
+        RawMsgCallback defaultRtcmCallback;
 
         //////////////////////////////////////////////////////
         // Incoming data buffers
         //////////////////////////////////////////////////////
         unsigned char dataBuffer[MAX_NOUT_SIZE]; //!< data currently being buffered to read
-        unsigned char* data_read_ = nullptr; //!< used only in BufferIncomingData - declared here for speed
-        size_t bufferIndex; //!< index into data_buffer_
-        double readTimestamp; //!< time stamp when last serial port read completed
-        double parseTimestamp; //!< time stamp when last parse began
+        unsigned char* dataRead = nullptr; //!< used only in BufferIncomingData - declared here for speed
+        size_t bufferIndex = 0; //!< index into data_buffer_
+        double readTimestamp = 0; //!< time stamp when last serial port read completed
+        double parseTimestamp = 0; //!< time stamp when last parse began
 
         //////////////////////////////////////////////////////
         // Mutex's
@@ -364,14 +365,9 @@ namespace novatel
         bool ackReceived; //!< true if an acknowledgement has been received from the GPS
         boost::condition_variable resetCondition;
         boost::mutex resetMutex;
-        bool waitingForResetComplete; //!< true if GPS has finished resetting and is ready for input
+        bool waitingForResetComplete = false; //!< true if GPS has finished resetting and is ready for input
 
-        bool isConnectedB; //!< indicates if a connection to the receiver has been established
-
-        std::map<BINARY_LOG_TYPE, BinaryMessageCallback> binaryCallbackMap;
-        BinaryMessageCallback defaultBinaryCallback;
-        LogMsgCallback defaultAsciiCallback;
-        RawMsgCallback defaultRtcmCallback;
+        bool isConnectedB = false; //!< indicates if a connection to the receiver has been established
 
         bool enableRaw = false;
     };

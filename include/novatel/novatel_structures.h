@@ -116,18 +116,18 @@ struct NOVATEL_EXPORT BinaryHeader
    uint8_t sync1; //!< start of packet first byte (0xAA)
    uint8_t sync2; //!< start of packet second byte (0x44)
    uint8_t sync3; //!< start of packet third  byte (0x12)
-   uint8_t header_length; //!< Length of the header in bytes ( From start of packet )
-   BINARY_LOG_TYPE message_id; //!< Message ID number
-   MessageType message_type; //!< Message type - binary, ascii, nmea, etc...
-   uint8_t port_address; //!< Address of the data port the log was received on
-   uint16_t message_length; //!< Message length (Not including header or CRC)
+   uint8_t headerLength; //!< Length of the header in bytes ( From start of packet )
+   BINARY_LOG_TYPE messageId; //!< Message ID number
+   MessageType messageType; //!< Message type - binary, ascii, nmea, etc...
+   uint8_t portAddress; //!< Address of the data port the log was received on
+   uint16_t messageLength; //!< Message length (Not including header or CRC)
    uint16_t sequence; //!< Counts down from N-1 to 0 for multiple related logs
    uint8_t idle; //!< Time the processor was idle in last sec between logs with same ID
-   uint8_t time_status; //!< Indicates the quality of the GPS time
-   uint16_t gps_week; //!< GPS Week number
-   uint32_t gps_millisecs; //!< Milliseconds into week
+   uint8_t timeStatus; //!< Indicates the quality of the GPS time
+   uint16_t gpsWeek; //!< GPS Week number
+   uint32_t gpsMillisecs; //!< Milliseconds into week
    uint32_t status; //!< Receiver status word
-   uint16_t Reserved; //!< Reserved for internal use
+   uint16_t reserved; //!< Reserved for internal use
    uint16_t version; //!< Receiver software build number (0-65535)
 });
 
@@ -161,27 +161,27 @@ struct NOVATEL_EXPORT BinaryMessageBase
 PACK(
 struct NOVATEL_EXPORT Position : BinaryMessageBase
 {
-	SolutionStatus solution_status; //!< Solution status
-	PositionType position_type; //!< Position type
+	SolutionStatus solutionStatus; //!< Solution status
+	PositionType positionType; //!< Position type
 	double latitude; //!< latitude (deg)
     double longitude; //!< longitude (deg)
 	double height; //!< height above mean sea level (m)
 	float undulation; //!< Undulation - the relationship between the geoid and the ellipsoid (m)
-	DatumID datum_id; //!< datum id number
-	float latitude_standard_deviation; //!< latitude standard deviation (m)
-	float longitude_standard_deviation; //!< longitude standard deviation (m)
-	float height_standard_deviation; //!< height standard deviation (m)
-	int8_t base_station_id[4]; //!< base station id
-	float differential_age; //!< differential position age (sec)
-	float solution_age; //!< solution age (sec)
-	uint8_t number_of_satellites; //!< number of satellites tracked
-	uint8_t number_of_satellites_in_solution; //!< number of satellites used in solution
-	uint8_t num_gps_plus_glonass_l1; //!< number of GPS plus GLONASS L1 satellites used in solution
-	uint8_t num_gps_plus_glonass_l2; //!< number of GPS plus GLONASS L2 satellites used in solution
+	DatumID datumId; //!< datum id number
+	float latitudeStandardDeviation; //!< latitude standard deviation (m)
+	float longitudeStandardDeviation; //!< longitude standard deviation (m)
+	float heightStandardDeviation; //!< height standard deviation (m)
+	uint8_t baseStationId[4]; //!< base station id
+	float differentialAge; //!< differential position age (sec)
+	float solutionAge; //!< solution age (sec)
+	uint8_t numberOfSatellites; //!< number of satellites tracked
+	uint8_t numberOfSatellitesInSolution; //!< number of satellites used in solution
+	uint8_t numGpsPlusGlonassL1; //!< number of GPS plus GLONASS L1 satellites used in solution
+	uint8_t numGpsPlusGlonassL2; //!< number of GPS plus GLONASS L2 satellites used in solution
 	uint8_t reserved; //!< reserved
-	uint8_t extended_solution_status; //!< extended solution status - OEMV and greater only
+	uint8_t extendedSolutionStatus; //!< extended solution status - OEMV and greater only
 	uint8_t reserved2; //!< reserved
-	uint8_t signals_used_mask; //!< signals used mask - OEMV and greater only
+	uint8_t signalsUsedMask; //!< signals used mask - OEMV and greater only
     uint8_t crc[4]; //!< 32-bit cyclic redundancy check (CRC)
 });
 
@@ -201,32 +201,32 @@ struct NOVATEL_EXPORT Position : BinaryMessageBase
 PACK(
 struct NOVATEL_EXPORT PositionEcef : BinaryMessageBase
 {
-    SolutionStatus solution_status; //!< Solution status
-    PositionType position_type; //!< Position type
-    double x_position; //!< x coordinate in ECEF (m)
-    double y_position; //!< x coordinate in ECEF (m)
-    double z_position; //!< x coordinate in ECEF (m)
-    float x_standard_deviation; //!< Standard deviation of x coordinate (m)
-    float y_standard_deviation; //!< Standard deviation of y coordinate (m)
-    float z_standard_deviation; //!< Standard deviation of z coordinate (m)
-    SolutionStatus velocity_status; //!< Velocity solution status
-    PositionType velocity_type; //!< Velocity solution type
-    double x_velocity; //Velocity in x (m/s)
-    double y_velocity; //Velocity in y (m/s)
-    double z_velocity; //Velocity in z (m/s)
-    float x_velocity_standard_deviation; //!< Standard deviation of velcoity in x (m/s)
-    float y_velocity_standard_deviation; //!< Standard deviation of velcoity in y (m/s)
-    float z_velocity_standard_deviation; //!< Standard deviation of velcoity in z (m/s)
-    int8_t base_station_id[4]; //!< Base station ID
-    float velocity_latency; //!< Latency in velocity time tag (s)
-    float differential_age; //!< differential position age (sec)
-    float solution_age; //!< solution age (sec)
-    uint8_t number_of_satellites; //!< number of satellites tracked
-    uint8_t number_of_satellites_in_solution; //!< number of satellites used in solution
+    SolutionStatus solutionStatus; //!< Solution status
+    PositionType positionType; //!< Position type
+    double xPosition; //!< x coordinate in ECEF (m)
+    double yPosition; //!< x coordinate in ECEF (m)
+    double zPosition; //!< x coordinate in ECEF (m)
+    float xStandardDeviation; //!< Standard deviation of x coordinate (m)
+    float yStandardDeviation; //!< Standard deviation of y coordinate (m)
+    float zStandardDeviation; //!< Standard deviation of z coordinate (m)
+    SolutionStatus velocityStatus; //!< Velocity solution status
+    PositionType velocityType; //!< Velocity solution type
+    double xVelocity; //Velocity in x (m/s)
+    double yVelocity; //Velocity in y (m/s)
+    double zVelocity; //Velocity in z (m/s)
+    float xVelocityStandardDeviation; //!< Standard deviation of velcoity in x (m/s)
+    float yVelocityStandardDeviation; //!< Standard deviation of velcoity in y (m/s)
+    float zVelocityStandardDeviation; //!< Standard deviation of velcoity in z (m/s)
+    uint8_t baseStationId[4]; //!< Base station ID
+    float velocityLatency; //!< Latency in velocity time tag (s)
+    float differentialAge; //!< differential position age (sec)
+    float solutionAge; //!< solution age (sec)
+    uint8_t numberOfSatellites; //!< number of satellites tracked
+    uint8_t numberOfSatellitesInSolution; //!< number of satellites used in solution
     uint8_t reserved[3]; //!< Reserved
-    uint8_t extended_solution_status; //!< extended solution status - OEMV and greater only
+    uint8_t extendedSolutionStatus; //!< extended solution status - OEMV and greater only
     uint8_t reserved2; //!< reserved
-    uint8_t signals_used_mask; //!< signals used mask - OEMV and greater only
+    uint8_t signalsUsedMask; //!< signals used mask - OEMV and greater only
     uint8_t crc[4]; //!< 32-bit cyclic redundancy check (CRC)
 });
 
@@ -249,13 +249,13 @@ struct NOVATEL_EXPORT PositionEcef : BinaryMessageBase
 PACK(
 struct NOVATEL_EXPORT Velocity : BinaryMessageBase
 {
-	SolutionStatus solution_status; //!< Solution status
-	PositionType position_type; //!< Position type
+	SolutionStatus solutionStatus; //!< Solution status
+	PositionType positionType; //!< Position type
 	float latency; //!< measure of the latency of the velocity time tag in seconds
 	float age; //!< differential age in seconds
-	double horizontal_speed; //!< horizontal speed in m/s
-	double track_over_ground; //!< direction of travel in degrees
-	double vertical_speed; //!< vertical speed in m/s
+	double horizontalSpeed; //!< horizontal speed in m/s
+	double trackOverGround; //!< direction of travel in degrees
+	double verticalSpeed; //!< vertical speed in m/s
 	float reserved;
     uint8_t crc[4]; //!< 32-bit cyclic redundancy check (CRC)
 });
@@ -279,13 +279,13 @@ struct NOVATEL_EXPORT Velocity : BinaryMessageBase
 PACK(
 struct NOVATEL_EXPORT Dop : BinaryMessageBase
 {
-    float geometric_dop; //!< Geometric DOP
-    float position_dop; //!< Position DOP
-    float horizontal_dop; //!< Horizontal DOP
-    float horizontal_position_time_dop; //!< Horizontal position and time DOP
-    float time_dop; //!< Time DOP
-    float elevation_cutoff_angle; //!< Elevation cutoff angle
-    int32_t number_of_prns; //!< Number of PRNs to follow
+    float geometricDop; //!< Geometric DOP
+    float positionDop; //!< Position DOP
+    float horizontalDop; //!< Horizontal DOP
+    float horizontalPositionTimeDop; //!< Horizontal position and time DOP
+    float timeDop; //!< Time DOP
+    float elevationCutoffAngle; //!< Elevation cutoff angle
+    int32_t numberOfPrns; //!< Number of PRNs to follow
     uint32_t prn[MAX_CHAN]; //!< PRNof each satellite used
     uint8_t crc[4]; //!< 32-bit cyclic redundancy check (CRC)
 });
@@ -304,23 +304,23 @@ struct NOVATEL_EXPORT Dop : BinaryMessageBase
 PACK(
 struct NOVATEL_EXPORT BaselineEcef : BinaryMessageBase
 {
-    SolutionStatus solution_status; //!< Solution status
-    PositionType position_type; //!< Position type
-    double x_baseline; //!< Baseline x coordinate (m)
-    double y_baseline; //!< Baseline y coordinate (m)
-    double z_baseline; //!< Baseline z coordinate (m)
-    float x_baseline_standard_deviation; //!< Standard deviation of baseline x coordinate (m)
-    float y_baseline_standard_deviation; //!< Standard deviation of baseline y coordinate (m)
-    float z_baseline_standard_deviation; //!< Standard deviation of baseline z coordinate (m)
-    int8_t base_station_id[4]; //!< Base station ID
-    uint8_t number_of_satellites; //!< number of satellites tracked
-    uint8_t number_of_satellites_in_solution; //!< number of satellites used in solution
-    uint8_t num_gps_plus_glonass_l1; //!< number of GPS plus GLONASS L1 satellites used in solution
-    uint8_t num_gps_plus_glonass_l2; //!< number of GPS plus GLONASS L2 satellites used in solution
+    SolutionStatus solutionStatus; //!< Solution status
+    PositionType positionType; //!< Position type
+    double xBaseline; //!< Baseline x coordinate (m)
+    double yBaseline; //!< Baseline y coordinate (m)
+    double zBaseline; //!< Baseline z coordinate (m)
+    float xBaselineStandardDeviation; //!< Standard deviation of baseline x coordinate (m)
+    float yBaselineStandardDeviation; //!< Standard deviation of baseline y coordinate (m)
+    float zBaselineStandardDeviation; //!< Standard deviation of baseline z coordinate (m)
+    uint8_t baseStationId[4]; //!< Base station ID
+    uint8_t numberOfSatellites; //!< number of satellites tracked
+    uint8_t numberOfSatellitesInSolution; //!< number of satellites used in solution
+    uint8_t numGpsPlusGlonassL1; //!< number of GPS plus GLONASS L1 satellites used in solution
+    uint8_t numGpsPlusGlonassL2; //!< number of GPS plus GLONASS L2 satellites used in solution
     uint8_t reserved; //!< reserved
-    uint8_t extended_solution_status; //!< extended solution status - OEMV and greater only
+    uint8_t extendedSolutionStatus; //!< extended solution status - OEMV and greater only
     uint8_t reserved2; //!< reserved
-    uint8_t signals_used_mask; //!< signals used mask - OEMV and greater only
+    uint8_t signalsUsedMask; //!< signals used mask - OEMV and greater only
     uint8_t crc[4]; //!< 32-bit cyclic redundancy check (CRC)
 });
 
@@ -340,29 +340,29 @@ struct NOVATEL_EXPORT BaselineEcef : BinaryMessageBase
 PACK(
 struct NOVATEL_EXPORT UtmPosition : BinaryMessageBase
 {
-    SolutionStatus solution_status; //!< Solution status
-    PositionType position_type; //!< Position type
-    uint32_t longitude_zone_number; //!< longitude utm zone number
-    uint32_t latitude_zone_letter; //!< latitude utm zone letter
+    SolutionStatus solutionStatus; //!< Solution status
+    PositionType positionType; //!< Position type
+    uint32_t longitudeZoneNumber; //!< longitude utm zone number
+    uint32_t latitudeZoneLetter; //!< latitude utm zone letter
     double northing; //!< northing (m)
     double easting; //!< easting (m)
     double height; //!< height above mean sea level (m)
     float undulation; //!< Undulation - the relationship between the geoid and the ellipsoid (m)
-    DatumID datum_id; //!< datum id number
-    float northing_standard_deviation; //!< northing standard deviation (m)
-    float easting_standard_deviation; //!< easting standard deviation (m)
-    float height_standard_deviation; //!< height standard deviation (m)
-    int8_t base_station_id[4]; //!< base station id
-    float differential_age; //!< differential position age (sec)
-    float solution_age; //!< solution age (sec)
-    uint8_t number_of_satellites; //!< number of satellites tracked
-    uint8_t number_of_satellites_in_solution; //!< number of satellites used in solution
-    uint8_t num_gps_plus_glonass_l1; //!< number of GPS plus GLONASS L1 satellites used in solution
-    uint8_t num_gps_plus_glonass_l2; //!< number of GPS plus GLONASS L2 satellites used in solution
+    DatumID datumId; //!< datum id number
+    float northingStandardDeviation; //!< northing standard deviation (m)
+    float eastingStandardDeviation; //!< easting standard deviation (m)
+    float heightStandardDeviation; //!< height standard deviation (m)
+    int8_t baseStationId[4]; //!< base station id
+    float differentialAge; //!< differential position age (sec)
+    float solutionAge; //!< solution age (sec)
+    uint8_t numberOfSatellites; //!< number of satellites tracked
+    uint8_t numberOfSatellitesInSolution; //!< number of satellites used in solution
+    uint8_t numGpsPlusGlonassL1; //!< number of GPS plus GLONASS L1 satellites used in solution
+    uint8_t numGpsPlusGlonassL2; //!< number of GPS plus GLONASS L2 satellites used in solution
     uint8_t reserved; //!< reserved
-    uint8_t extended_solution_status; //!< extended solution status - OEMV and greater only
+    uint8_t extendedSolutionStatus; //!< extended solution status - OEMV and greater only
     uint8_t reserved2; //!< reserved
-    uint8_t signals_used_mask; //!< signals used mask - OEMV and greater only
+    uint8_t signalsUsedMask; //!< signals used mask - OEMV and greater only
     uint8_t crc[4]; //!< 32-bit cyclic redundancy check (CRC)
 });
 
@@ -383,14 +383,14 @@ struct NOVATEL_EXPORT IonosphericModel : BinaryMessageBase
     double b1; //!< beta parameter 1st order term
     double b2; //!< beta parameter 2nd order term
     double b3; //!< beta parameter 3rd order term
-    uint32_t num_wk; //!< UTC reference week number
+    uint32_t numWk; //!< UTC reference week number
     uint32_t tot; //!< reference time of UTC parameters
     double A0; //!< UTC constant term
     double A1; //!< UTC 1st order term
-    uint32_t fut_wk; //!< future week number
-    uint32_t num_day; //!< day number
+    uint32_t futWk; //!< future week number
+    uint32_t numDay; //!< day number
     int32_t dells; //!< delta time due to leap seconds
-    int32_t fut_dells; //!< future delta time due to leap seconds
+    int32_t futDells; //!< future delta time due to leap seconds
     uint32_t delutc; //!< time difference
     uint8_t crc[4]; //!< 32-bit cyclic redundancy check (CRC)
 });
@@ -402,22 +402,22 @@ struct NOVATEL_EXPORT IonosphericModel : BinaryMessageBase
 PACK(
 struct NOVATEL_EXPORT ChannelStatus 
 {
-	unsigned int tracking_state : 5;
-	unsigned int sv_chan_num : 5;
-	unsigned int phase_lock_flag : 1;
-	unsigned int parity_known_flag : 1;
-	unsigned int code_locked_flag : 1;
-	unsigned int correlator_type : 3;
-	unsigned int satellite_sys : 3;
+	unsigned int trackingState : 5;
+	unsigned int svChanNum : 5;
+	unsigned int phaseLockFlag : 1;
+	unsigned int parityKnownFlag : 1;
+	unsigned int codeLockedFlag : 1;
+	unsigned int correlatorType : 3;
+	unsigned int satelliteSys : 3;
 	unsigned int reserved1 : 1;
 	unsigned int grouping : 1;
-	unsigned int signal_type : 5;
-	unsigned int forward_err_correction : 1;
-	unsigned int primary_L1_chan : 1;
-	unsigned int carrier_phase_meas : 1;
+	unsigned int signalType : 5;
+	unsigned int forwardErrCorrection : 1;
+	unsigned int primaryL1Chan : 1;
+	unsigned int carrierPhaseMeas : 1;
 	unsigned int reserved2 : 1;
-	unsigned int prn_lock_flag : 1;
-	unsigned int channel_assignment : 1;
+	unsigned int prnLockFlag : 1;
+	unsigned int channelAssignment : 1;
 });
 
 /*!
@@ -428,14 +428,14 @@ struct NOVATEL_EXPORT ChannelStatus
 PACK(
 struct NOVATEL_EXPORT RangeData 
 {
-    uint16_t satellite_prn; //!< SV PRN number
-    uint16_t glonass_frequency; //!< Frequency number of GLONASS SV (0 for GPS)
+    uint16_t satellitePrn; //!< SV PRN number
+    uint16_t glonassFrequency; //!< Frequency number of GLONASS SV (0 for GPS)
     double pseudorange; //!<  pseudorange [m]
-    float pseudorange_standard_deviation; //!< pseudorange standard deviation [m]
-    double accumulated_doppler; //!< accumulated doppler [cycles]
-    float accumulated_doppler_std_deviation; //!< accumulated doppler standard deviation [cycles]
+    float pseudorangeStandardDeviation; //!< pseudorange standard deviation [m]
+    double accumulatedDoppler; //!< accumulated doppler [cycles]
+    float accumulatedDopplerStdDeviation; //!< accumulated doppler standard deviation [cycles]
     float doppler; //!< Doppler frequency [Hz]
-    float carrier_to_noise; //!< Signal/Noise [dB-Hz]
+    float carrierToNoise; //!< Signal/Noise [dB-Hz]
     float locktime; //!< Number of seconds of continuous tracking [sec]
     ChannelStatus channel_status; //!< channel tracking status
 });
@@ -451,8 +451,8 @@ struct NOVATEL_EXPORT RangeData
 PACK(
 struct NOVATEL_EXPORT RangeMeasurements : BinaryMessageBase
 {
-    int32_t number_of_observations; //!< Number of ranges observations in the following message
-    RangeData range_data[MAX_CHAN]; //!< Range data for each available channel
+    int32_t numberOfObservations; //!< Number of ranges observations in the following message
+    RangeData rangeData[MAX_CHAN]; //!< Range data for each available channel
     uint8_t crc[4]; //!< 32-bit cyclic redundancy check (CRC)
 });
 
@@ -467,12 +467,12 @@ struct NOVATEL_EXPORT CompressedRangeRecord
 {
     int64_t doppler:28; //!< Doppler frequency [Hz]; SF = 1/256
     uint64_t pseudorange:36; //!<  pseudorange [m]; SF = 1/128
-    int32_t accumulated_doppler:32; //!< accumulated doppler [cycles]; SF = 1/256
-    uint16_t pseudorange_standard_deviation:4; //!< pseudorange standard deviation [m]
-    uint16_t accumulated_doppler_std_deviation:4; //!< accumulated doppler standard deviation [cycles]
-    uint16_t satellite_prn:8; //!< SV PRN number
+    int32_t accumulatedDoppler:32; //!< accumulated doppler [cycles]; SF = 1/256
+    uint16_t pseudorangeStandardDeviation:4; //!< pseudorange standard deviation [m]
+    uint16_t accumulatedDopplerStdDeviation:4; //!< accumulated doppler standard deviation [cycles]
+    uint16_t satellitePrn:8; //!< SV PRN number
     uint32_t locktime:21; //!< Number of seconds of continuous tracking [sec]
-    uint32_t carrier_to_noise:5; //!< Signal/Noise [dB-Hz]
+    uint32_t carrierToNoise:5; //!< Signal/Noise [dB-Hz]
     uint32_t reserved:6;
     uint16_t reservedb:16;
 } //;
@@ -481,8 +481,8 @@ struct NOVATEL_EXPORT CompressedRangeRecord
 PACK(
 struct NOVATEL_EXPORT CompressedRangeData 
 {
-    ChannelStatus channel_status; //!< channel tracking status
-    CompressedRangeRecord range_record;
+    ChannelStatus channelStatus; //!< channel tracking status
+    CompressedRangeRecord rangeRecord;
 } //;
 );
 
@@ -493,8 +493,8 @@ struct NOVATEL_EXPORT CompressedRangeData
 PACK(
 struct NOVATEL_EXPORT CompressedRangeMeasurements : BinaryMessageBase
 {
-    int32_t number_of_observations; //!< Number of ranges observations in the following message
-    CompressedRangeData range_data[MAX_CHAN]; //!< Range data for each available channel
+    int32_t numberOfObservations; //!< Number of ranges observations in the following message
+    CompressedRangeData rangeData[MAX_CHAN]; //!< Range data for each available channel
     uint8_t crc[4]; //!< 32-bit cyclic redundancy check (CRC)
 });
 
@@ -512,37 +512,37 @@ PACK(
 struct NOVATEL_EXPORT GpsEphemeris : BinaryMessageBase
 {
     uint32_t prn; //!< PRN number
-    double time_of_week; //!< time stamp of subframe 0 (s)
+    double timeOfWeek; //!< time stamp of subframe 0 (s)
     uint32_t health; //!< health status, defined in ICD-GPS-200
-    uint32_t issue_of_ephemeris_1; //!< issue of ephemeris data 1
-    uint32_t issue_of_ephemeris_2; //!< issue of ephemeris data 2
-    uint32_t gps_week; //!< GPS week number
-    uint32_t z_count_week; //!< z count week number
-    double time_of_ephemeris; //!< reference time for ephemeris (s)
-    double semi_major_axis; //!< semi major axis (m)
-    double mean_motion_difference; //!< Mean motion difference (rad/s)
-    double anomoly_reference_time; //!< mean anomoly reference time (rad)
+    uint32_t issueOfEphemeris1; //!< issue of ephemeris data 1
+    uint32_t issueOfEphemeris2; //!< issue of ephemeris data 2
+    uint32_t gpsWeek; //!< GPS week number
+    uint32_t zCountWeek; //!< z count week number
+    double timeOfEphemeris; //!< reference time for ephemeris (s)
+    double semiMajorAxis; //!< semi major axis (m)
+    double meanMotionDifference; //!< Mean motion difference (rad/s)
+    double anomolyReferenceTime; //!< mean anomoly reference time (rad)
     double eccentricity; //!< eccentricity
     double omega; //!< arguement of perigee (rad)
-    double latitude_cosine; //!< arugument of latitude - cos (rad)
-    double latitude_sine; //!< argument of latitude - sine (rad)
-    double orbit_radius_cosine; //!< orbit radius - cos (rad)
-    double orbit_radius_sine; //!< orbit radius - sine (rad)
-    double inclination_cosine; //!< inclination - cos (rad)
-    double inclination_sine; //!< inclination - sine (rad)
-    double inclination_angle; //!< inclination angle (rad)
-    double inclination_angle_rate; //!< rate of inclination angle (rad/s)
-    double right_ascension; //!< right ascension (rad)
-    double right_ascension_rate; //!< rate of right ascension (rad/s)
-    uint32_t issue_of_data_clock; //!< issue of data clock
-    double sv_clock_correction; //!< SV clock correction term (s)
-    double group_delay_difference; //!< estimated group delay difference
-    double clock_aligning_param_0; //!< clock aging parameter 0
-    double clock_aligning_param_1; //!< clock aging parameter 1
-    double clock_aligning_param_2; //!< clock aging parameter 2
-    yes_no anti_spoofing; //!< anti spoofing on
-    double corrected_mean_motion; //!< corrected mean motion
-    double range_accuracy_variance; //!< user range accuracy variance
+    double latitudeCosine; //!< arugument of latitude - cos (rad)
+    double latitudeSine; //!< argument of latitude - sine (rad)
+    double orbitRadiusCosine; //!< orbit radius - cos (rad)
+    double orbitRadiusSine; //!< orbit radius - sine (rad)
+    double inclinationCosine; //!< inclination - cos (rad)
+    double inclinationSine; //!< inclination - sine (rad)
+    double inclinationAngle; //!< inclination angle (rad)
+    double inclinationAngleRate; //!< rate of inclination angle (rad/s)
+    double rightAscension; //!< right ascension (rad)
+    double rightAscensionRate; //!< rate of right ascension (rad/s)
+    uint32_t issueOfDataClock; //!< issue of data clock
+    double svClockCorrection; //!< SV clock correction term (s)
+    double groupDelayDifference; //!< estimated group delay difference
+    double clockAligningParam0; //!< clock aging parameter 0
+    double clockAligningParam1; //!< clock aging parameter 1
+    double clockAligningParam2; //!< clock aging parameter 2
+    yes_no antiSpoofing; //!< anti spoofing on
+    double correctedMeanMotion; //!< corrected mean motion
+    double rangeAccuracyVariance; //!< user range accuracy variance
     uint8_t crc[4]; //!< 32-bit cyclic redundancy check (CRC)
 });
 
@@ -556,8 +556,8 @@ PACK(
 struct NOVATEL_EXPORT RawEphemeris : BinaryMessageBase
 {
     uint32_t prn; //!< Satellite PRN number
-    uint32_t ephem_reference_week_num; //!< Ephemeris reference week number
-    uint32_t ephem_reference_seconds; //!< Ephemeris reference time [sec]
+    uint32_t ephemReferenceWeekNum; //!< Ephemeris reference week number
+    uint32_t ephemReferenceSeconds; //!< Ephemeris reference time [sec]
     uint8_t subframe1[30]; //!< Subframe 1 data
     uint8_t subframe2[30]; //!< Subframe 2 data
     uint8_t subframe3[30]; //!< Subframe 3 data
@@ -584,10 +584,10 @@ struct NOVATEL_EXPORT RawAlmanacData
 PACK(
 struct NOVATEL_EXPORT RawAlmanac : BinaryMessageBase
 {
-	uint32_t ref_week;
-	uint32_t ref_time; // [sec]
-	uint32_t num_of_subframes; // numbers of subframes to follow
-	RawAlmanacData subframe_data;
+	uint32_t refWeek;
+	uint32_t refTime; // [sec]
+	uint32_t numOfSubframes; // numbers of subframes to follow
+	RawAlmanacData subframeData;
 	uint8_t crc[4];
 });
 
@@ -600,28 +600,28 @@ PACK(
 struct NOVATEL_EXPORT AlmanacData 
 {
 	uint32_t prn;
-	uint32_t ref_week;
-	double ref_time; //!< [sec]
+	uint32_t refWeek;
+	double refTime; //!< [sec]
 	double eccentricity;
-	double right_ascension_rate; //!< [rad/sec]
-	double right_ascension; //!< [rad]
+	double rightAscensionRate; //!< [rad/sec]
+	double rightAscension; //!< [rad]
 	double perigee; //!< [rad]
-	double mean_anomoly_of_ref_time; //!< [rad]
-	double clock_aging_param_0; //!< [sec]
-	double clock_aging_param_1; //!< [sec/sec]
-	double corrected_mean_motion; //!< [rad/sec]
-	double semi_major_axis; //!< [m]
-	double inclination_angle; //!< [rad] Angle of inclination relative to .3*pi
-	uint32_t sv_configuration; //!< 
-	uint32_t sv_health; //!< (6 bits) From Page 25 of subframe 4 or 5
-	uint32_t sv_health_from_almanac; //!< (8 bits) 
-	true_false anti_spoofing; //!< 
+	double meanAnomolyOfRefTime; //!< [rad]
+	double clockAgingParam0; //!< [sec]
+	double clockAgingParam1; //!< [sec/sec]
+	double correctedMeanMotion; //!< [rad/sec]
+	double semiMajorAxis; //!< [m]
+	double inclinationAngle; //!< [rad] Angle of inclination relative to .3*pi
+	uint32_t svConfiguration; //!< 
+	uint32_t svHealth; //!< (6 bits) From Page 25 of subframe 4 or 5
+	uint32_t svHealthFromAlmanac; //!< (8 bits) 
+	true_false antiSpoofing; //!< 
 });
 
 PACK(
 struct NOVATEL_EXPORT Almanac : BinaryMessageBase
 {
-	int32_t number_of_prns;
+	int32_t numberOfPrns;
 	AlmanacData data[MAX_NUM_SAT];
 	uint8_t crc[4];
 });
@@ -635,13 +635,13 @@ struct NOVATEL_EXPORT Almanac : BinaryMessageBase
 PACK(
 struct NOVATEL_EXPORT SatellitePositionData 
 {
-    uint32_t satellite_prn; //!< SV PRN number
-    double x_position; //!< SV X coordinate [m]
-    double y_position; //!< SV Y coordinate [m]
-    double z_position; //!< SV Z coordinate [m]
-    double clock_correction; //!< SV clock correction [m]
-    double ionospheric_correction; //!< ionospheric correction [m]
-    double tropospheric_correction; //!< tropospheric correction [m]
+    uint32_t satellitePrn; //!< SV PRN number
+    double xPosition; //!< SV X coordinate [m]
+    double yPosition; //!< SV Y coordinate [m]
+    double zPosition; //!< SV Z coordinate [m]
+    double clockCorrection; //!< SV clock correction [m]
+    double ionosphericCorrection; //!< ionospheric correction [m]
+    double troposphericCorrection; //!< tropospheric correction [m]
     double dReserved1; //!< reserved
     double dReserved2; //!< reserved
 });
@@ -657,7 +657,7 @@ PACK(
 struct NOVATEL_EXPORT SatellitePositions : BinaryMessageBase
 {
     double dReserved1; //!< Reserved
-    uint32_t number_of_satellites; //!< Number of satellites in following message
+    uint32_t numberOfSatellites; //!< Number of satellites in following message
     SatellitePositionData data[MAX_CHAN]; //!< Position data for each satellite
     uint8_t crc[4]; //!< 32-bit cyclic redundancy check (CRC)
 });
@@ -675,20 +675,20 @@ struct NOVATEL_EXPORT SatelliteVisibilityData
     //!< GPS 1-32
     //!< SBAS 120-138
     //!< GLONASS
-    int16_t glonass_frequency; //!< GLONASS frequency +7
+    int16_t glonassFrequency; //!< GLONASS frequency +7
     uint32_t health; //!< Satellite Health
     double elevation; //!< SV elevation [deg]
     double azimuth; //!< SV azimuth [deg]
-    double theoretical_doppler; //!< Theoretical Doppler frequency of SV [Hz]
-    double apparent_doppler; //!< Theoretical Doppler with clock drift correction added [Hz]
+    double theoreticalDoppler; //!< Theoretical Doppler frequency of SV [Hz]
+    double apparentDoppler; //!< Theoretical Doppler with clock drift correction added [Hz]
 });
 
 PACK(
 struct NOVATEL_EXPORT SatelliteVisibility : BinaryMessageBase
 {
-    true_false sat_vis; //!< Reserved
-    true_false complete_almanac_used; //!< Was Complete almanac used
-    uint32_t number_of_satellites; //!< Number of satellites in following message
+    true_false satVis; //!< Reserved
+    true_false completeAlmanacUsed; //!< Was Complete almanac used
+    uint32_t numberOfSatellites; //!< Number of satellites in following message
     SatelliteVisibilityData data[MAX_CHAN]; //!< Position data for each satellite
     uint8_t crc[4]; //!< 32-bit cyclic redundancy check (CRC)
 });
@@ -708,17 +708,17 @@ struct NOVATEL_EXPORT SatelliteVisibility : BinaryMessageBase
 PACK(
 struct NOVATEL_EXPORT TimeOffset : BinaryMessageBase
 {
-    uint32_t clock_model_status; //!< ClockModelStatus
+    uint32_t clockModelStatus; //!< ClockModelStatus
     double offset; //!< Receiver Offset in seconds from GPS time
-    double offset_standard_deviation; //!< Instantaneous Standard Deviation of Receiver Clock Offset
-    double gps_to_utc_offset; //!< Offset in seconds of GPS time from UTC time
-    int32_t utc_year; //!< UTC Year
-    uint8_t utc_month; //!< UTC Month
-    uint8_t utc_day; //!< UTC Day
-    uint8_t utc_hour; //!< UTC Hour
-    uint8_t utc_minute; //!< UTC Minutes
-    int32_t utc_millisecond; //!< UTC Milliseconds
-    int32_t utc_status; //!< UTC Status
+    double offsetStandardDeviation; //!< Instantaneous Standard Deviation of Receiver Clock Offset
+    double gpsToUtcOffset; //!< Offset in seconds of GPS time from UTC time
+    int32_t utcYear; //!< UTC Year
+    uint8_t utcMonth; //!< UTC Month
+    uint8_t utcDay; //!< UTC Day
+    uint8_t utcHour; //!< UTC Hour
+    uint8_t utcMinute; //!< UTC Minutes
+    int32_t utcMillisecond; //!< UTC Milliseconds
+    int32_t utcStatus; //!< UTC Status
     uint8_t crc[4]; //!< 32-bit cyclic redundancy check (CRC)
 });
 
@@ -730,23 +730,23 @@ struct NOVATEL_EXPORT TimeOffset : BinaryMessageBase
 struct NOVATEL_EXPORT TrackStatusData
 {
     uint16_t prn; //!< SV prn
-    int16_t glonass_frequency; //!< GLONASS frequency +7
-    ChannelStatus channel_track_status; //!< Channel tracking status
+    int16_t glonassFrequency; //!< GLONASS frequency +7
+    ChannelStatus channelTrackStatus; //!< Channel tracking status
     double pseudorange; //!< Pseudorange
-    float doppler_frequency; //!< Doppler frequency [Hz]
-    float cno_ratio; //!< Carrier to noise density ratio [dB-Hz]
-    float lock_time; //!< Number of seconds of continuous tracking (no cycle slips)
-    float pseudorange_residual; //!< Pseudorange residual from pseudorange filter [m]
-    RangeRejectCode range_reject_code; //!< Range reject code from pseudorange filter
-    float pseudorange_weight; //!< Pseudorange filter weighting
+    float dopplerFrequency; //!< Doppler frequency [Hz]
+    float cnr; //!< Carrier to noise density ratio [dB-Hz]
+    float lockTime; //!< Number of seconds of continuous tracking (no cycle slips)
+    float pseudorangeResidual; //!< Pseudorange residual from pseudorange filter [m]
+    RangeRejectCode rangeRejectCode; //!< Range reject code from pseudorange filter
+    float pseudorangeWeight; //!< Pseudorange filter weighting
 };
 
 struct NOVATEL_EXPORT TrackStatus : BinaryMessageBase
 {
-    SolutionStatus solution_status; //!< Solution status
-    PositionType position_type; //!< Position type
-    float elevation_cutoff_angle; //!< Tracking elevation cutoff angle
-    int32_t number_of_channels; //!< Number of channels with information following
+    SolutionStatus solutionStatus; //!< Solution status
+    PositionType positionType; //!< Position type
+    float elevationCutoffAngle; //!< Tracking elevation cutoff angle
+    int32_t numberOfChannels; //!< Number of channels with information following
     TrackStatusData data[MAX_CHAN]; //!< Tracking Status data repeated per channe
     uint8_t crc[4];
 };
@@ -763,13 +763,13 @@ PACK(
 struct NOVATEL_EXPORT rtkdatab_header 
 {
     uint32_t rtkinfo; //RTK information
-    uint8_t num_obs; //Number of observations tracked
-    uint8_t gps_l1_ranges; // Number of GPS L1 ranges used
-    uint8_t gps_l1_mask_ranges; // Number of GPS L1 ranges above the RTK mask angle used
-    uint8_t gps_l2_mask_ranges; // Number of GPS L2 ranges above the RTK mask angle used
+    uint8_t numObs; //Number of observations tracked
+    uint8_t gpsL1Ranges; // Number of GPS L1 ranges used
+    uint8_t gpsL1MaskRanges; // Number of GPS L1 ranges above the RTK mask angle used
+    uint8_t gpsL2MaskRanges; // Number of GPS L2 ranges above the RTK mask angle used
     uint8_t reserved[4];
-    SEARCHER_TYPE searcher_type; // Searcher type
-    uint32_t num_lane_combs; // Number of possible lane combinations
+    SEARCHER_TYPE searcherType; // Searcher type
+    uint32_t numLaneCombs; // Number of possible lane combinations
     float Cxx; // ECEF position covariance matrix
     float Cxy;
     float Cxz;
@@ -779,21 +779,21 @@ struct NOVATEL_EXPORT rtkdatab_header
     float Czx;
     float Czy;
     float Czz;
-    double delta_x; // Float solution baseline in ECEF - x
-    double delta_y; // Float solution baseline in ECEF - y
-    double delta_z; // Float solution baseline in ECEF - z
-    float sd_x; // Standard deviation of float solution baseline in ECEF - x
-    float sd_y; // Standard deviation of float solution baseline in ECEF - y
-    float sd_z; // Standard deviation of float solution baseline in ECEF - z
-    uint32_t ref_prn; // Reference PRN
-    int32_t num_svs; // The number of SVs in data portion
+    double deltaX; // Float solution baseline in ECEF - x
+    double deltaY; // Float solution baseline in ECEF - y
+    double deltaZ; // Float solution baseline in ECEF - z
+    float sdX; // Standard deviation of float solution baseline in ECEF - x
+    float sdY; // Standard deviation of float solution baseline in ECEF - y
+    float sdZ; // Standard deviation of float solution baseline in ECEF - z
+    uint32_t refPrn; // Reference PRN
+    int32_t numSvs; // The number of SVs in data portion
 });
 
 PACK(
 struct NOVATEL_EXPORT rtkdatab_data 
 {
     uint32_t prn; // GPS satellite PRN
-    AMBIGUITY_TYPE ambiguity_type; // Type of ambiguity
+    AMBIGUITY_TYPE ambiguityType; // Type of ambiguity
     float residual; // Satellite health
 });
 
@@ -871,7 +871,7 @@ struct NOVATEL_EXPORT rtcadataobsb_header
 {
     uint8_t des; //Novatel designator
     uint8_t subtype; //RTCA message subtype
-    double min_psr; //minimum pseudorange
+    double minPsr; //minimum pseudorange
     float sec; //seconds into GPS week
     int8_t reserved[4];
     uint32_t num_ids; //Number of transmitter ids with info to follow
@@ -880,14 +880,14 @@ struct NOVATEL_EXPORT rtcadataobsb_header
 PACK(
 struct NOVATEL_EXPORT rtcadataobsb_data //Structure for RTCADATAEPHEM message
 {
-    uint8_t transID; //Transmitter ID
-    uint8_t L1lock; //L1 lock flag
-    uint8_t L2lock; //L2 lock flag
-    double L1psr; //L1 pseudorange offset
-    double L2psr; //L2 pseudorange offset
-    float L1adr; //L1 carrier phase offset, accumulated doppler range
-    float L2adr; //L2 carrier phase offset, accumulated doppler range
-    yes_no L2encrypt; //If L2 is encrypted
+    uint8_t transId; //Transmitter ID
+    uint8_t l1Lock; //L1 lock flag
+    uint8_t l2Lock; //L2 lock flag
+    double l1Psr; //L1 pseudorange offset
+    double l2Psr; //L2 pseudorange offset
+    float l1Adr; //L1 carrier phase offset, accumulated doppler range
+    float l2Adr; //L2 carrier phase offset, accumulated doppler range
+    yes_no l2Encrypt; //If L2 is encrypted
     int8_t reserved[4];
 });
 

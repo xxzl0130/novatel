@@ -15,12 +15,12 @@ void RangeMeasurementsHandler(novatel::RangeMeasurements& range,
     std::cout << "[" << std::setprecision(2) << std::fixed << timestamp
         << std::setprecision(std::cout.precision())
         << "] RANGE: "
-        << range.header.gps_week << ":" << range.header.gps_millisecs
+        << range.header.gpsWeek << ":" << range.header.gpsMillisecs
         << "\tNumber of observations: "
-        << range.number_of_observations
+        << range.numberOfObservations
         << std::endl;
 
-    for (size_t kk = 0; kk < range.number_of_observations; ++kk)
+    for (size_t kk = 0; kk < range.numberOfObservations; ++kk)
     {
         /*    std::cout << "\tPRN: " << range.range_data[kk].satellite_prn <<
                 "\tC/N0: " << range.range_data[kk].carrier_to_noise <<
@@ -31,9 +31,9 @@ void RangeMeasurementsHandler(novatel::RangeMeasurements& range,
                 "\tC/N0: " << range.range_data[kk].carrier_to_noise <<
                 "\tADR " << range.range_data[kk].accumulated_doppler << std::endl;*/
 
-        std::cout << "PRN: " << range.range_data[kk].satellite_prn
-            << "\tSat: " << range.range_data[kk].channel_status.satellite_sys
-            << "\tSig: " << range.range_data[kk].channel_status.signal_type
+        std::cout << "PRN: " << range.rangeData[kk].satellitePrn
+            << "\tSat: " << range.rangeData[kk].channel_status.satelliteSys
+            << "\tSig: " << range.rangeData[kk].channel_status.signalType
             << std::endl;
     }
 };
@@ -45,17 +45,17 @@ void CompressedRangeMeasurementsHandler(
     std::cout << "[" << std::setprecision(2) << std::fixed << timestamp
         << std::setprecision(std::cout.precision())
         << "] RANGECMP: "
-        << range.header.gps_week << ":" << range.header.gps_millisecs
+        << range.header.gpsWeek << ":" << range.header.gpsMillisecs
         << "\tNumber of observations: "
-        << range.number_of_observations
+        << range.numberOfObservations
         << std::endl;
 
-    for (size_t kk = 0; kk < range.number_of_observations; ++kk)
+    for (size_t kk = 0; kk < range.numberOfObservations; ++kk)
     {
-        std::cout << "\tPRN: " << range.range_data[kk].range_record.satellite_prn
+        std::cout << "\tPRN: " << range.rangeData[kk].rangeRecord.satellitePrn
             << "\tC/N0: "
-            << range.range_data[kk].range_record.carrier_to_noise
-            << "\tPSR: " << range.range_data[kk].range_record.pseudorange
+            << range.rangeData[kk].rangeRecord.carrierToNoise
+            << "\tPSR: " << range.rangeData[kk].rangeRecord.pseudorange
             << std::endl;
     }
 };
@@ -65,13 +65,13 @@ void PositionEcefHandler(novatel::PositionEcef& pos, double& timestamp)
     std::cout << "[" << std::setprecision(2) << std::fixed << timestamp
         << std::setprecision(std::cout.precision())
         << "] BESTXYZ: "
-        << pos.header.gps_week << ":" << pos.header.gps_millisecs
-        << "   Type: " << pos.position_type
+        << pos.header.gpsWeek << ":" << pos.header.gpsMillisecs
+        << "   Type: " << pos.positionType
         << std::endl;
 
-    std::cout << "\tPos: (" << pos.x_position << ","
-        << pos.y_position << ","
-        << pos.z_position << ")" << std::endl;
+    std::cout << "\tPos: (" << pos.xPosition << ","
+        << pos.yPosition << ","
+        << pos.zPosition << ")" << std::endl;
 };
 
 

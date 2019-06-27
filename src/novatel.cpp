@@ -43,7 +43,7 @@ uint32_t CalculateBlockCRC24Q(unsigned long size,unsigned char *buf)
     const static unsigned long CRC24BIT =  0x01000000L;
 
     uint32_t crc = 0x00L;
-    for(auto i = 0;i < size;++i)
+    for(auto i = 0u;i < size;++i)
     {
         crc ^= buf[i] << 16;
         for (i = 0; i < 8; i++) {
@@ -141,15 +141,15 @@ inline void DefaultErrorMsgCallback(const std::string& msg)
 inline void DefaultBestPositionCallback(BinaryMessagePtr data, double time_stamp)
 {
     auto best_position = *(Position*)data.get();
-    std::cout << "BESTPOS: \nGPS Week: " << best_position.header.gps_week <<
-        "  GPS milliseconds: " << best_position.header.gps_millisecs << std::endl <<
+    std::cout << "BESTPOS: \nGPS Week: " << best_position.header.gpsWeek <<
+        "  GPS milliseconds: " << best_position.header.gpsMillisecs << std::endl <<
         "  Latitude: " << best_position.latitude << std::endl <<
         "  Longitude: " << best_position.longitude << std::endl <<
         "  Height: " << best_position.height << std::endl << std::endl <<
-        "  Solution status: " << best_position.solution_status << std::endl <<
-        "  position type: " << best_position.position_type << std::endl <<
-        "  number of svs tracked: " << (double)best_position.number_of_satellites << std::endl <<
-        "  number of svs used: " << (double)best_position.number_of_satellites_in_solution << std::endl;
+        "  Solution status: " << best_position.solutionStatus << std::endl <<
+        "  position type: " << best_position.positionType << std::endl <<
+        "  number of svs tracked: " << (double)best_position.numberOfSatellites << std::endl <<
+        "  number of svs used: " << (double)best_position.numberOfSatellitesInSolution << std::endl;
 }
 
 inline void DefaultRawEphemCallback(RawEphemeris ephemeris, double time_stamp)
@@ -694,18 +694,18 @@ bool Novatel::injectAlmanac(Almanac almanac)
         almanac.header.sync1 = NOVATEL_SYNC_BYTE_1;
         almanac.header.sync2 = NOVATEL_SYNC_BYTE_2;
         almanac.header.sync3 = NOVATEL_SYNC_BYTE_3;
-        almanac.header.header_length = HEADER_SIZE;
-        almanac.header.message_id = ALMANAC_LOG_TYPE;
-        almanac.header.message_type = type;
-        almanac.header.port_address = THISPORT;
-        almanac.header.message_length = 4 + almanac.number_of_prns * 112;
+        almanac.header.headerLength = HEADER_SIZE;
+        almanac.header.messageId = ALMANAC_LOG_TYPE;
+        almanac.header.messageType = type;
+        almanac.header.portAddress = THISPORT;
+        almanac.header.messageLength = 4 + almanac.numberOfPrns * 112;
         almanac.header.sequence = 0;
         almanac.header.idle = 0; //!< ignored on input
-        almanac.header.time_status = 0; //!< ignored on input
-        almanac.header.gps_week = 0; //!< ignored on input
-        almanac.header.gps_millisecs = 0; //!< ignored on input
+        almanac.header.timeStatus = 0; //!< ignored on input
+        almanac.header.gpsWeek = 0; //!< ignored on input
+        almanac.header.gpsMillisecs = 0; //!< ignored on input
         almanac.header.status = 0; //!< ignored on input
-        almanac.header.Reserved = 0; //!< ignored on input
+        almanac.header.reserved = 0; //!< ignored on input
         almanac.header.version = 0; //!< ignored on input
 
         logInfo(std::string("SIZEOF: ") + std::to_string(sizeof(almanac)));
@@ -1239,11 +1239,11 @@ void Novatel::stopReading()
 
 void Novatel::readSerialPort()
 {
-    if(data_read_)
+    if(dataRead)
     {
-        delete[] data_read_;
+        delete[] dataRead;
     }
-    data_read_ = new unsigned char[MAX_NOUT_SIZE];
+    dataRead = new unsigned char[MAX_NOUT_SIZE];
     size_t len;
     logInfo("Started read thread.");
 
@@ -1253,7 +1253,7 @@ void Novatel::readSerialPort()
         try
         {
             // read data
-            len = serialPort->read(data_read_, MAX_NOUT_SIZE);
+            len = serialPort->read(dataRead, MAX_NOUT_SIZE);
         }
         catch (std::exception& e)
         {
@@ -1270,10 +1270,10 @@ void Novatel::readSerialPort()
 
         //std::cout << read_timestamp_ <<  "  bytes: " << len << std::endl;
         // add data to the buffer to be parsed
-        bufferIncomingData(data_read_, len);
+        bufferIncomingData(dataRead, len);
     }
-    delete[] data_read_;
-    data_read_ = nullptr;
+    delete[] dataRead;
+    dataRead = nullptr;
 }
 
 void Novatel::readFromFile(unsigned char* buffer, unsigned int length)
@@ -1350,9 +1350,9 @@ bool Novatel::checkBinaryFormat(unsigned char* msg, size_t length)
         return false;
     BinaryHeader header;
     memcpy(&header, msg, sizeof(header));
-    if (length < header.message_length + sizeof(BinaryHeader))
+    if (length < header.messageLength + sizeof(BinaryHeader))
         return false;
-    length = sizeof(BinaryHeader) + header.message_length;
+    length = sizeof(BinaryHeader) + header.messageLength;
     int32_t crcRes = crc32c::Crc32c(msg, length), crc;
     memcpy(&crc, msg + length, 4);
     return crcRes == crc;
@@ -1376,7 +1376,7 @@ bool Novatel::checkRtcmFormat(unsigned char* msg, size_t length)
     if (length < 6)
         return false;
     //check Preamble
-    if (msg[0] != RTCM_SYNC_BYTE_1 || msg[1] & RTCM_SYNC_BYTE_1 != 0)
+    if (msg[0] != RTCM_SYNC_BYTE_1 || (msg[1] & RTCM_SYNC_BYTE_1 != 0))
         return false;
     RTCM3Header header;
     memcpy(&header, msg, sizeof header);
@@ -1463,7 +1463,7 @@ void Novatel::parseBinary(unsigned char* message, size_t length, BINARY_LOG_TYPE
         // Copy header and unrepeated fields
         memcpy(ptr, message, header_length + 24);
         //Copy repeated fields
-        memcpy(ptr->prn, message + header_length + 28, (4 * ptr->number_of_prns));
+        memcpy(ptr->prn, message + header_length + 28, (4 * ptr->numberOfPrns));
         //Copy CRC
         memcpy(ptr->crc, message + header_length + payload_length, 4);
         if (binaryCallbackMap[PSRDOP_LOG_TYPE])
@@ -1506,9 +1506,9 @@ void Novatel::parseBinary(unsigned char* message, size_t length, BINARY_LOG_TYPE
         memcpy(ptr, message, header_length + 4);
 
         //Copy repeated fields
-        memcpy(ptr->range_data,
+        memcpy(ptr->rangeData,
             message + header_length + 4,
-            (44 * ptr->number_of_observations));
+            (44 * ptr->numberOfObservations));
 
         //Copy CRC
         memcpy(&ptr->crc,
@@ -1529,14 +1529,14 @@ void Novatel::parseBinary(unsigned char* message, size_t length, BINARY_LOG_TYPE
 
         //Copy header and unrepeated message block
         memcpy(ptr, message, header_length);
-        memcpy(&ptr->number_of_observations,
+        memcpy(&ptr->numberOfObservations,
             message + header_length,
             4);
 
         // Copy Repeated portion of message block)
-        memcpy(&ptr->range_data,
+        memcpy(&ptr->rangeData,
             message + header_length + 4,
-            (24 * ptr->number_of_observations));
+            (24 * ptr->numberOfObservations));
 
         // Copy the CRC
         memcpy(&ptr->crc,
@@ -1573,7 +1573,7 @@ void Novatel::parseBinary(unsigned char* message, size_t length, BINARY_LOG_TYPE
         //Copy header and unrepeated message block
         memcpy(ptr, message, header_length + 12);
         // Copy Repeated portion of message block)
-        memcpy(&ptr->subframe_data, message + header_length + 12, (32 * ptr->num_of_subframes));
+        memcpy(&ptr->subframeData, message + header_length + 12, (32 * ptr->numOfSubframes));
         // Copy the CRC
         memcpy(&ptr->crc, message + header_length + payload_length, 4);
         if (binaryCallbackMap[RAWEPHEM_LOG_TYPE])
@@ -1590,7 +1590,7 @@ void Novatel::parseBinary(unsigned char* message, size_t length, BINARY_LOG_TYPE
         //Copy header and unrepeated message block
         memcpy(ptr, message, header_length + 4);
         // Copy Repeated portion of message block)
-        memcpy(&ptr->data, message + header_length + 4, (112 * ptr->number_of_prns));
+        memcpy(&ptr->data, message + header_length + 4, (112 * ptr->numberOfPrns));
         // Copy the CRC
         memcpy(&ptr->crc, message + header_length + payload_length, 4);
         if (binaryCallbackMap[ALMANAC_LOG_TYPE])
@@ -1606,7 +1606,7 @@ void Novatel::parseBinary(unsigned char* message, size_t length, BINARY_LOG_TYPE
 
         memcpy(ptr, message, header_length + 12);
         //Copy repeated fields
-        memcpy(ptr->data, message + header_length + 12, (68 * ptr->number_of_satellites));
+        memcpy(ptr->data, message + header_length + 12, (68 * ptr->numberOfSatellites));
         //Copy CRC
         memcpy(&ptr->crc, message + header_length + payload_length, 4);
         if (binaryCallbackMap[SATXYZ2_LOG_TYPE])
@@ -1622,7 +1622,7 @@ void Novatel::parseBinary(unsigned char* message, size_t length, BINARY_LOG_TYPE
 
         memcpy(ptr, message, header_length + 12);
         //Copy repeated fields
-        memcpy(&ptr->data, message + header_length + 12, (40 * ptr->number_of_satellites));
+        memcpy(&ptr->data, message + header_length + 12, (40 * ptr->numberOfSatellites));
         //Copy CRC
         memcpy(&ptr->crc, message + header_length + payload_length, 4);
         if (binaryCallbackMap[SATVIS_LOG_TYPE])
@@ -1646,7 +1646,7 @@ void Novatel::parseBinary(unsigned char* message, size_t length, BINARY_LOG_TYPE
 
         memcpy(ptr, message, header_length + 12);
         //Copy repeated fields
-        memcpy(&ptr->data, message + header_length + 12, (40 * ptr->number_of_channels));
+        memcpy(&ptr->data, message + header_length + 12, (40 * ptr->numberOfChannels));
         //Copy CRC
         memcpy(&ptr->crc, message + header_length + payload_length, 4);
         if (binaryCallbackMap[TRACKSTAT_LOG_TYPE])
@@ -1696,7 +1696,7 @@ void Novatel::parseBinary(unsigned char* message, size_t length)
     int32_t id;
     memcpy(&header, message, sizeof(header));
     memcpy(&id, message + sizeof(header), sizeof(id));
-    parseBinary(message, length - sizeof(header) - sizeof(id), header.message_id);
+    parseBinary(message, length - sizeof(header) - sizeof(id), header.messageId);
 }
 
 void Novatel::parseRtcm(unsigned char* message, size_t length)
@@ -1716,26 +1716,26 @@ void Novatel::parseAscii(unsigned char* message, size_t length)
 void Novatel::unpackCompressedRangeData(const CompressedRangeData& cmp,
                                         RangeData& rng)
 {
-    rng.satellite_prn = cmp.range_record.satellite_prn;
+    rng.satellitePrn = cmp.rangeRecord.satellitePrn;
 
-    rng.channel_status = cmp.channel_status;
+    rng.channel_status = cmp.channelStatus;
 
-    rng.pseudorange = double(cmp.range_record.pseudorange) / 128.0;
+    rng.pseudorange = double(cmp.rangeRecord.pseudorange) / 128.0;
 
-    rng.pseudorange_standard_deviation =
-        unpackCompressedPsrStd(cmp.range_record.pseudorange_standard_deviation);
+    rng.pseudorangeStandardDeviation =
+        unpackCompressedPsrStd(cmp.rangeRecord.pseudorangeStandardDeviation);
 
-    rng.accumulated_doppler =
+    rng.accumulatedDoppler =
         unpackCompressedAccumulatedDoppler(cmp, rng.pseudorange);
 
-    rng.accumulated_doppler_std_deviation =
-        (cmp.range_record.accumulated_doppler_std_deviation + 1.0) / 512.0;
+    rng.accumulatedDopplerStdDeviation =
+        (cmp.rangeRecord.accumulatedDopplerStdDeviation + 1.0) / 512.0;
 
-    rng.doppler = cmp.range_record.doppler / 256.0;
+    rng.doppler = cmp.rangeRecord.doppler / 256.0;
 
-    rng.locktime = cmp.range_record.locktime / 32.0;
+    rng.locktime = cmp.rangeRecord.locktime / 32.0;
 
-    rng.carrier_to_noise = (float)(cmp.range_record.carrier_to_noise + 20);
+    rng.carrierToNoise = (float)(cmp.rangeRecord.carrierToNoise + 20);
 }
 
 double Novatel::unpackCompressedPsrStd(const uint16_t& val) const
@@ -1750,22 +1750,22 @@ double Novatel::unpackCompressedAccumulatedDoppler(
     const CompressedRangeData& cmp,
     const double& uncmpPsr) const
 {
-    double scaled_adr = (double)cmp.range_record.accumulated_doppler / 256.0;
+    double scaled_adr = (double)cmp.rangeRecord.accumulatedDoppler / 256.0;
 
     double adr_rolls = uncmpPsr;
 
 
-    switch (cmp.channel_status.satellite_sys)
+    switch (cmp.channelStatus.satelliteSys)
     {
     case 0: // GPS
 
-        if (cmp.channel_status.signal_type == 0) // L1
+        if (cmp.channelStatus.signalType == 0) // L1
         {
             adr_rolls /= CMP_GPS_WAVELENGTH_L1;
         }
-        else if ((cmp.channel_status.signal_type == 5) || // L2 P
-            (cmp.channel_status.signal_type == 9) || // L2 P codeless
-            (cmp.channel_status.signal_type == 17)) // L2C
+        else if ((cmp.channelStatus.signalType == 5) || // L2 P
+            (cmp.channelStatus.signalType == 9) || // L2 P codeless
+            (cmp.channelStatus.signalType == 17)) // L2C
         {
             adr_rolls /= CMP_GPS_WAVELENGTH_L2;
         }
@@ -1785,11 +1785,11 @@ double Novatel::unpackCompressedAccumulatedDoppler(
 
     case 1: // GLO
         // TODO: Need to compute actual wavelengths here, this is incorrect
-        if (cmp.channel_status.signal_type == 0) // L1
+        if (cmp.channelStatus.signalType == 0) // L1
         {
             adr_rolls /= CMP_GPS_WAVELENGTH_L1;
         }
-        else if (cmp.channel_status.signal_type == 5) // L2 P
+        else if (cmp.channelStatus.signalType == 5) // L2 P
         {
             adr_rolls /= CMP_GPS_WAVELENGTH_L2;
         }
@@ -1807,7 +1807,7 @@ double Novatel::unpackCompressedAccumulatedDoppler(
         break;
 
     case 2: // WAAS
-        if (cmp.channel_status.signal_type == 1) // L1
+        if (cmp.channelStatus.signalType == 1) // L1
         {
             adr_rolls /= CMP_GPS_WAVELENGTH_L1;
         }
