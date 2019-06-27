@@ -114,7 +114,7 @@ int main(int argc, char* argv[])
     //rx1.set_best_position_ecef_callback(&PositionEcefHandler);
 
     // Pass the binary data to the parser
-    rx1.ReadFromFile(buff, sizeof(buff));
+    rx1.readFromFile(buff, sizeof(buff));
 
     // Alternatively, pass in single bytes
     //for (unsigned int kk=0; kk<sizeof(buff); ++kk)

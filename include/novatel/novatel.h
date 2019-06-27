@@ -94,15 +94,15 @@ namespace novatel
          * @throws ConnectionFailedException connection attempt failed.
          * @throws UnknownErrorCodeException unknown error code returned.
          */
-        bool Connect(const std::string&  port, int baudrate = 115200, bool search = true);
+        bool connect(const std::string&  port, int baudrate = 115200, bool search = true);
 
         /*!
          * Disconnects from the serial port
          */
-        void Disconnect();
+        void disconnect();
 
         //! Indicates if a connection to the receiver has been established.
-        bool IsConnected() { return is_connected_; }
+        bool isConnected();
 
         /*!
       
@@ -110,30 +110,21 @@ namespace novatel
            *
            * This method sends a ping to the GPS and waits for a response.
            *
-           * @param num_attempts The number of times to ping the device
+           * @param numAttempts The number of times to ping the device
            * before giving up
            *
            * @return True if the GPS was found, false if it was not.
            */
-        bool Ping(int num_attempts = 5);
+        bool ping(int numAttempts = 5);
 
+        void setTimeHandler(const GetTimeCallback& timeHandler);
 
-        /*!
-         * Pings the GPS to determine if it is properly connected
-         *
-         * This method sends a ping to the GPS and waits for a response.
-         *
-         * @return True if the GPS was found, false if it was not.
-         */
-        void set_time_handler(GetTimeCallback time_handler)
-        {
-            this->time_handler_ = time_handler;
-        }
+        //callbacks
 
-        void setLogDebugCallback(LogMsgCallback debug_callback) { log_debug_ = debug_callback; };
-        void setLogInfoCallback(LogMsgCallback info_callback) { log_info_ = info_callback; };
-        void setLogWarningCallback(LogMsgCallback warning_callback) { log_warning_ = warning_callback; };
-        void setLogErrorCallback(LogMsgCallback error_callback) { log_error_ = error_callback; };
+        void setLogDebugCallback(const LogMsgCallback& debugCallback);;
+        void setLogInfoCallback(const LogMsgCallback& infoCallback);;
+        void setLogWarningCallback(const LogMsgCallback& warningCallback);;
+        void setLogErrorCallback(const LogMsgCallback& errorCallback);;
 
         /*!
          * Request the given list of logs from the receiver.
@@ -143,22 +134,22 @@ namespace novatel
          *               . [empty]=Abreviated ASCII
          * log_string format: "BESTUTMB ONTIME 1.0; BESTVELB ONTIME 1.0"
          */
-        void ConfigureLogs(const std::string& log_string);
-        void Unlog(const std::string& log); //!< Stop logging a specified log
-        void UnlogAll(); //!< Stop logging all logs that aren't set with HOLD parameter
+        void configureLogs(const std::string& logString);
+        void unlog(const std::string& log); //!< Stop logging a specified log
+        void unlogAll(); //!< Stop logging all logs that aren't set with HOLD parameter
 
         /*!
          * SaveConfiguration() saves the current receiver configuration
          * in nonvolatile memory
          */
-        void SaveConfiguration();
+        void saveConfiguration();
 
-        void ConfigureInterfaceMode(const std::string& com_port,
-            const std::string& rx_mode, const std::string& tx_mode);
+        void configureInterfaceMode(const std::string& comPort,
+            const std::string& rxMode, const std::string& txNode);
 
-        void ConfigureBaudRate(const std::string& com_port, int baudrate);
+        void configureBaudRate(const std::string& comPort, int baudrate);
 
-        bool SendCommand(const std::string& cmd_msg, bool wait_for_ack = true);
+        bool sendCommand(const std::string& cmdMsg, bool waitForAck = true);
         //bool SendMessage(uint8_t* msg_ptr, size_t length);
 
         /*!
@@ -169,16 +160,16 @@ namespace novatel
          * recommended except in specific situations
          * (Angle = +-90 deg)
          */
-        bool SetSvElevationAngleCutoff(float angle);
+        bool setSvElevationAngleCutoff(float angle);
 
         /*!
          * Pseudrange/Delta-Phase filter (PDPFILTER)- smooths positions
          * and bridges gaps in GPS coverage. Enabled by default on
          * OEMStar receiver.
          */
-        void PDPFilterDisable();
-        void PDPFilterEnable();
-        void PDPFilterReset();
+        void setPDPFilterDisable();
+        void setPDPFilterEnable();
+        void setPDPFilterReset();
         void PDPModeConfigure(PDPMode mode, PDPDynamics dynamics);
 
         /*!
@@ -186,11 +177,11 @@ namespace novatel
          * position calculation. In position logs, the position_type field
          * is set to NONE when this timeout expires (0 - 86400 sec)
          */
-        void SetPositionTimeout(uint32_t seconds);
+        void setPositionTimeout(uint32_t seconds);
 
-        bool SetInitialPosition(double latitude, double longitude, double height);
-        bool SetInitialTime(uint32_t gps_week, double gps_seconds);
-        bool InjectAlmanac(Almanac almanac);
+        bool setInitialPosition(double latitude, double longitude, double height);
+        bool setInitialTime(uint32_t gpsWeek, double gpsSeconds);
+        bool injectAlmanac(Almanac almanac);
         /*!
          * SetL1CarrierSmoothing sets the amount of smoothing to be performed on
          * code measurements. L2 smoothing is available in OEMV receivers, but
@@ -198,29 +189,29 @@ namespace novatel
          *      l1_time_constant : 2<= time constant <= 2000 [sec]
          *      l2_time_constant : 5<= time constant <= 2000 [sec] (firmware default = 100)
          */
-        bool SetCarrierSmoothing(uint32_t l1_time_constant, uint32_t l2_time_constant);
+        bool setCarrierSmoothing(uint32_t l1TimeConstant, uint32_t l2TimeConstant);
 
-        bool HardwareReset();
+        bool hardwareReset();
         /*!
          * HotStartReset
          * Restarts the GPS receiver, initialized with
          * Ephemeris, Almanac, Position, Time, etc.
          */
-        bool HotStartReset();
+        bool hotStartReset();
         /*!
          * WarmStartReset
          * Restarts the GPS receiver, initialized with
          * Ephemeris, Almanac, NOT Position and Time info
          */
-        bool WarmStartReset();
+        bool warmStartReset();
         /*!
          * ColdStartReset
          * Restarts the GPS receiver, initialized without
          * any initial or aiding data.
          */
-        bool ColdStartReset();
+        bool coldStartReset();
 
-        void SendRawEphemeridesToReceiver(const RawEphemerides& raw_ephemerides);
+        void sendRawEphemeridesToReceiver(const RawEphemerides& rawEphemerides);
 
         /*!
          * Requests version information from the receiver
@@ -230,46 +221,27 @@ namespace novatel
          *
          * @return True if the GPS was found, false if it was not.
          */
-        bool UpdateVersion();
+        bool updateVersion();
 
-        bool ConvertLLaUTM(double Lat, double Long, double* northing, double* easting, int* zone, bool* north);
+        bool convertLLaUtm(double lat, double Long, double* northing, double* easting, int* zone, bool* north);
 
-        void ReadFromFile(unsigned char* buffer, unsigned int length);
+        void readFromFile(unsigned char* buffer, unsigned int length);
 
-        void set_raw_msg_callback(RawMsgCallback handler)
-        {
-            raw_msg_callback_ = handler;
-        }
+        void setRawMsgCallback(RawMsgCallback handler);
 
-        void setCallback(BINARY_LOG_TYPE typeId, const BinaryMessageCallback& callback)
-        {
-            binary_callback_map_[typeId] = callback;
-        }
-        void setDefaultBinaryCallback(const BinaryMessageCallback& callback)
-        {
-            defaultBinaryCallback = callback;
-        }
-        void setDefaultAsciiCallback(const LogMsgCallback& callback)
-        {
-            defaultAsciiCallback = callback;
-        }
-        void setDefaultRtcmCallback(const RawMsgCallback& callback)
-        {
-            defaultRtcmCallback = callback;
-        }
+        void setCallback(BINARY_LOG_TYPE typeId, const BinaryMessageCallback& callback);
 
-        RawEphemerides test_ephems_;
+        void setDefaultBinaryCallback(const BinaryMessageCallback& callback);
+
+        void setDefaultAsciiCallback(const LogMsgCallback& callback);
+
+        void setDefaultRtcmCallback(const RawMsgCallback& callback);
+
+        RawEphemerides testEphems;
 
         void setTimeOut(uint32_t ms);
 
-        void setEnableRawOutput(bool en = true)
-        {
-            enableRaw = en;
-        }
-    private:
-
-        bool Connect_(const std::string& port, int baudrate);
-
+        void setEnableRawOutput(bool en = true);
 
         /*!
          * Starts a thread to continuously read from the serial port.
@@ -280,14 +252,33 @@ namespace novatel
          *
          * @see xbow440::DataCallback, xbow440::XBOW440::ReadSerialPort, xbow440::XBOW440::StopReading
          */
-        void StartReading();
+        void startReading();
 
         /*!
          * Starts the thread that reads from the serial port
          *
          * @see xbow440::XBOW440::ReadSerialPort, xbow440::XBOW440::StartReading
          */
-        void StopReading();
+        void stopReading();
+
+
+        //////////////////////////////////////////////////////
+        // Receiver information and capabilities
+        //////////////////////////////////////////////////////
+        std::string protocolVersion; //!< Receiver version, OEM4, OEMV, OEM6, or UNKNOWN
+        std::string serialNumber; //!< Receiver serial number
+        std::string hardwareVersion; //!< Receiver hardware version
+        std::string softwareVersion; //!< Receiver software version
+        std::string model; //!< Receiver model number
+
+        bool l2Capable; //!< Can the receiver handle L1 and L2 or just L1?
+        bool rawCapable; //!< Can the receiver output raw measurements?
+        bool rtkCapable; //!< Can the receiver compute RT2 and/or RT20 positions?
+        bool glonassCapable; //!< Can the receiver receive GLONASS frequencies?
+        bool spanCapable; //!< Is the receiver a SPAN unit?
+    private:
+
+        bool connect_(const std::string& port, int baudrate);
 
         /*!
          * Method run in a seperate thread that continuously reads from the
@@ -296,107 +287,88 @@ namespace novatel
          *
          * @see xbow440::XBOW440::Parse, xbow440::XBOW440::StartReading, xbow440::XBOW440::StopReading
          */
-        void ReadSerialPort();
+        void readSerialPort();
 
-        void BufferIncomingData(unsigned char* message, unsigned int length);
-        bool CheckBinaryFormat(unsigned char* msg, unsigned int length);
-        bool CheckAsciiFormat(unsigned char* msg, unsigned int length);
-        bool CheckRtcmFormat(unsigned char* msg, unsigned int length);
-        bool CheckAbbreviatedFormat(unsigned char* msg, unsigned int length);
-        bool CheckACK(unsigned char* msg, unsigned int length);
-        bool CheckReset(unsigned char* msg, unsigned int length);
+        void bufferIncomingData(unsigned char* message, size_t length);
+        bool checkBinaryFormat(unsigned char* msg, size_t length);
+        bool checkAsciiFormat(unsigned char* msg, size_t length);
+        bool checkRtcmFormat(unsigned char* msg, size_t length);
+        bool checkAbbreviatedFormat(unsigned char* msg, size_t length);
+        bool checkAck(unsigned char* msg, size_t length);
+        bool checkReset(unsigned char* msg, size_t length);
 
         /*!
          * Parses a packet of data from the GPS. 
          */
-        void ParseBinary(unsigned char* message, size_t length, BINARY_LOG_TYPE message_id);
+        void parseBinary(unsigned char* message, size_t length, BINARY_LOG_TYPE messageId);
         /*
          * Parses a packet of data from the GPS including header [and CRC32].
          */
-        void ParseBinary(unsigned char* message, size_t length);
-        void ParseAscii(unsigned char* message, size_t length);
-        void ParseRtcm(unsigned char* message, size_t length);
+        void parseBinary(unsigned char* message, size_t length);
+        void parseAscii(unsigned char* message, size_t length);
+        void parseRtcm(unsigned char* message, size_t length);
 
-        bool ParseVersion(std::string packet);
+        bool parseVersion(std::string packet);
 
-        void UnpackCompressedRangeData(const CompressedRangeData& cmp,
+        void unpackCompressedRangeData(const CompressedRangeData& cmp,
                                        RangeData& rng);
 
-        double UnpackCompressedPsrStd(const uint16_t& val) const;
+        double unpackCompressedPsrStd(const uint16_t& val) const;
 
-        double UnpackCompressedAccumulatedDoppler(
+        double unpackCompressedAccumulatedDoppler(
             const CompressedRangeData& cmp,
             const double& uncmpPsr) const;
 
-        bool SendBinaryDataToReceiver(uint8_t* msg_ptr, size_t length);
+        bool sendBinaryDataToReceiver(uint8_t* msgPtr, size_t length);
 
         //////////////////////////////////////////////////////
         // Serial port reading members
         //////////////////////////////////////////////////////
         //! Serial port object for communicating with sensor
-        serial::Serial* serial_port_;
+        serial::Serial* serialPort;
         //! shared pointer to Boost thread for listening for data from novatel
-        boost::shared_ptr<boost::thread> read_thread_ptr_;
-        bool reading_status_; //!< True if the read thread is running, false otherwise.
+        boost::shared_ptr<boost::thread> readThreadPtr;
+        bool readingStatus; //!< True if the read thread is running, false otherwise.
 
         //////////////////////////////////////////////////////
         // Diagnostic Callbacks
         //////////////////////////////////////////////////////
-        HandleAcknowledgementCallback handle_acknowledgement_;
-        LogMsgCallback log_debug_;
-        LogMsgCallback log_info_;
-        LogMsgCallback log_warning_;
-        LogMsgCallback log_error_;
+        HandleAcknowledgementCallback handleAcknowledgement;
+        LogMsgCallback logDebug;
+        LogMsgCallback logInfo;
+        LogMsgCallback logWarning;
+        LogMsgCallback logError;
 
-        GetTimeCallback time_handler_; //!< Function pointer to callback function for timestamping
+        GetTimeCallback timeHandler; //!< Function pointer to callback function for timestamping
 
 
         //////////////////////////////////////////////////////
         // New Data Callbacks
         //////////////////////////////////////////////////////
-        RawMsgCallback raw_msg_callback_;
+        RawMsgCallback rawMsgCallback;
 
         //////////////////////////////////////////////////////
         // Incoming data buffers
         //////////////////////////////////////////////////////
-        unsigned char data_buffer_[MAX_NOUT_SIZE]; //!< data currently being buffered to read
-        unsigned char* data_read_; //!< used only in BufferIncomingData - declared here for speed
-        size_t bytes_remaining_; //!< bytes remaining to be read in the current message
-        size_t buffer_index_; //!< index into data_buffer_
-        size_t header_length_; //!< length of the current header being read
-        bool reading_acknowledgement_; //!< true if an acknowledgement is being received
-        bool reading_reset_complete_; //!< true if an {COM#} message confirming receiver reset if complete
-        double read_timestamp_; //!< time stamp when last serial port read completed
-        double parse_timestamp_; //!< time stamp when last parse began
-        BINARY_LOG_TYPE message_id_; //!< message id of message currently being buffered
+        unsigned char dataBuffer[MAX_NOUT_SIZE]; //!< data currently being buffered to read
+        unsigned char* data_read_ = nullptr; //!< used only in BufferIncomingData - declared here for speed
+        size_t bufferIndex; //!< index into data_buffer_
+        double readTimestamp; //!< time stamp when last serial port read completed
+        double parseTimestamp; //!< time stamp when last parse began
 
         //////////////////////////////////////////////////////
         // Mutex's
         //////////////////////////////////////////////////////
-        boost::condition_variable ack_condition_;
-        boost::mutex ack_mutex_;
-        bool ack_received_; //!< true if an acknowledgement has been received from the GPS
-        boost::condition_variable reset_condition_;
-        boost::mutex reset_mutex_;
-        bool waiting_for_reset_complete_; //!< true if GPS has finished resetting and is ready for input
+        boost::condition_variable ackCondition;
+        boost::mutex ackMutex;
+        bool ackReceived; //!< true if an acknowledgement has been received from the GPS
+        boost::condition_variable resetCondition;
+        boost::mutex resetMutex;
+        bool waitingForResetComplete; //!< true if GPS has finished resetting and is ready for input
 
-        bool is_connected_; //!< indicates if a connection to the receiver has been established
-        //////////////////////////////////////////////////////
-        // Receiver information and capabilities
-        //////////////////////////////////////////////////////
-        std::string protocol_version_; //!< Receiver version, OEM4, OEMV, OEM6, or UNKNOWN
-        std::string serial_number_; //!< Receiver serial number
-        std::string hardware_version_; //!< Receiver hardware version
-        std::string software_version_; //!< Receiver software version
-        std::string model_; //!< Receiver model number
+        bool isConnectedB; //!< indicates if a connection to the receiver has been established
 
-        bool l2_capable_; //!< Can the receiver handle L1 and L2 or just L1?
-        bool raw_capable_; //!< Can the receiver output raw measurements?
-        bool rtk_capable_; //!< Can the receiver compute RT2 and/or RT20 positions?
-        bool glonass_capable_; //!< Can the receiver receive GLONASS frequencies?
-        bool span_capable_; //!< Is the receiver a SPAN unit?
-
-        std::map<BINARY_LOG_TYPE, BinaryMessageCallback> binary_callback_map_;
+        std::map<BINARY_LOG_TYPE, BinaryMessageCallback> binaryCallbackMap;
         BinaryMessageCallback defaultBinaryCallback;
         LogMsgCallback defaultAsciiCallback;
         RawMsgCallback defaultRtcmCallback;

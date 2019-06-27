@@ -49,7 +49,7 @@ int main(int argc, char** argv)
 
 
     Novatel my_gps;
-    bool result = my_gps.Connect(port, baudrate);
+    bool result = my_gps.connect(port, baudrate);
 
     if (result)
     {
@@ -63,14 +63,14 @@ int main(int argc, char** argv)
 
     my_gps.set_best_utm_position_callback(&BestUtmHandler);
     my_gps.set_best_velocity_callback(&BestVelHandler);
-    my_gps.ConfigureLogs("BESTUTMB ONTIME 0.1;BESTVELB ONTIME 0.1");
+    my_gps.configureLogs("BESTUTMB ONTIME 0.1;BESTVELB ONTIME 0.1");
 
     while (1)
     {
         boost::this_thread::sleep(boost::posix_time::milliseconds(10000));
     }
 
-    my_gps.Disconnect();
+    my_gps.disconnect();
 
     return 0;
 }

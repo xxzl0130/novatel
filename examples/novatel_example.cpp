@@ -26,7 +26,7 @@ int main(int argc, char** argv)
 
 
     Novatel my_gps;
-    bool result = my_gps.Connect(port, baudrate);
+    bool result = my_gps.connect(port, baudrate);
 
     if (result)
     {
@@ -38,7 +38,7 @@ int main(int argc, char** argv)
         return 0;
     }
     my_gps.setTimeOut(200);
-    my_gps.Ping();
+    my_gps.ping();
     //    my_gps.UnlogAll();
     //    sleep(2);
     //my_gps.ConfigureLogs("ALMANACB ONCE");
