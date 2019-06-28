@@ -104,7 +104,7 @@ namespace novatel
 */
 PACK(
 struct NOVATEL_EXPORT MessageType {
-    unsigned source:5;
+    uint8_t source:5;
     MessageFormat format:2;
     ResponseBit response:1;
 });

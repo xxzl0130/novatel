@@ -18,10 +18,10 @@ namespace novatel
     // USER-DEFINED ENUMS
     //*******************************************************************************
 
-    enum true_false
+    enum true_false : uint8_t
     {
-        FALSE = 0,
-        TRUE = 1
+        FALSE_FLAG = 0,
+        TRUE_FLAG = 1
     };
 
     enum return_type
@@ -36,7 +36,7 @@ namespace novatel
         dynamic
     };
 
-    enum yes_no
+    enum yes_no : uint8_t
     {
         no,
         yes
@@ -56,7 +56,7 @@ namespace novatel
     // NOVATEL ENUMS
     //*******************************************************************************
 
-    enum RangeRejectCode
+    enum RangeRejectCode : uint32_t
     {
         //!< Used in TRACKSTAT
         GOOD = 0,
@@ -151,7 +151,7 @@ namespace novatel
     };
 
 
-    enum SolutionStatus
+    enum SolutionStatus : uint32_t
     {
         SOL_COMPUTED,
         //!< solution computed
@@ -194,7 +194,7 @@ namespace novatel
         UNAUTHORIZED
     };
 
-    enum MessageFormat //!< Bits 5-6 of MessageType struct
+    enum MessageFormat : uint8_t //!< Bits 5-6 of MessageType struct
     {
         BINARY = 0b00,
         ASCII = 0b01,
@@ -202,13 +202,13 @@ namespace novatel
         NMEA = 0b11,
     };
 
-    enum ResponseBit //!< Last bit (7) of MessageType struct
+    enum ResponseBit : uint8_t //!< Last bit (7) of MessageType struct
     {
         ORIGINAL_MESSAGE = 0b0,
         RESPONSE_MESSAGE = 0b1,
     };
 
-    enum PositionType
+    enum PositionType : uint32_t
     {
         NONE = 0,
         FIXEDPOS = 1,
@@ -240,7 +240,7 @@ namespace novatel
         CDGPS = 66,
     };
 
-    enum DatumID
+    enum DatumID : uint32_t
     {
         ADIND=1,
         ARC50,
@@ -328,19 +328,6 @@ namespace novatel
         OHID,
         TIL,
         TOYM
-    };
-
-
-    enum InsStatus
-    {
-        INS_STATUS_INACTIVE,
-        INS_STATUS_ALIGNING,
-        INS_SOLUTION_NOT_GOOD,
-        INS_SOLUTION_GOOD,
-        INS_TEST_ALIGNING,
-        INS_TEST_SOLUTION_GOOD,
-        INS_BAD_GPS_AGREEMENT,
-        INS_ALIGNMENT_COMPLETE
     };
 
     enum StatusWord
