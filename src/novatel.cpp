@@ -199,9 +199,9 @@ Novatel::~Novatel()
     disconnect();
 }
 
-bool Novatel::connect(const std::string& port, int baudrate, bool search)
+bool Novatel::connect(const std::string& port, int baudrate, bool search, bool check)
 {
-    bool connected = connect_(port, baudrate);
+    bool connected = connect_(port, baudrate, check);
 
     if (!connected && search)
     {
@@ -214,7 +214,7 @@ bool Novatel::connect(const std::string& port, int baudrate, bool search)
             std::stringstream search_msg;
             search_msg << "Searching for receiver with baudrate: " << bauds_to_search[ii];
             logInfo(search_msg.str());
-            if (connect_(port, bauds_to_search[ii]))
+            if (connect_(port, bauds_to_search[ii], check))
             {
                 found = true;
                 break;
@@ -273,7 +273,7 @@ void Novatel::setEnableRawOutput(bool en)
     enableRaw = en;
 }
 
-bool Novatel::connect_(const std::string& port, int baudrate = 115200)
+bool Novatel::connect_(const std::string& port, int baudrate = 115200, bool doPing)
 {
     try
     {
@@ -310,7 +310,7 @@ bool Novatel::connect_(const std::string& port, int baudrate = 115200)
 
         // look for GPS by sending ping and waiting for response
         
-        if (!ping())
+        if (doPing && !ping())
         {
             std::stringstream output;
             output << "Novatel GPS not found on port: " << port << " at baudrate " << baudrate << std::endl;
@@ -1444,6 +1444,14 @@ void Novatel::parseBinary(unsigned char* message, size_t length, BINARY_LOG_TYPE
         memcpy(data.get(), message, sizeof(Position));
         if (binaryCallbackMap[BESTPOS_LOG_TYPE])
             binaryCallbackMap[BESTPOS_LOG_TYPE](data, readTimestamp);
+        break;
+    }
+    case HEADING_LOG_TYPE:
+    {
+        BinaryMessagePtr data(new Heading);
+        memcpy(data.get(), message, sizeof(Heading));
+        if (binaryCallbackMap[HEADING_LOG_TYPE])
+            binaryCallbackMap[HEADING_LOG_TYPE](data, readTimestamp);
         break;
     }
     case BESTUTM_LOG_TYPE:

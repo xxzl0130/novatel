@@ -147,6 +147,48 @@ struct NOVATEL_EXPORT BinaryMessageBase
 // GENERIC GPS STRUCTURES
 //*******************************************************************************
 
+PACK(
+struct NOVATEL_EXPORT BESTPOS_GalileoBeiDouSignalUsed
+{
+    uint8_t galileoE1 : 1;
+    uint8_t reserved1 : 3;
+    uint8_t beidouB1 : 1;
+    uint8_t beidouB2 : 1;
+    uint8_t reserved2 : 2;
+});
+
+PACK(
+struct NOVATEL_EXPORT BESTPOS_GPS_GLONASS_SignalUsed
+{
+    uint8_t gpsL1 : 1;
+    uint8_t gpsL2 : 1;
+    uint8_t gpsL5 : 1;
+    uint8_t reserved1 : 1;
+    uint8_t glonassL1 : 1;
+    uint8_t glonassL2 : 1;
+    uint8_t reserved2 : 2;
+});
+
+PACK(
+struct NOVATEL_EXPORT SoultionSource
+{
+    uint8_t reserved : 2;
+    uint8_t sourceAntenna : 2;
+    uint8_t reserved2 : 4;
+};
+);
+
+PACK(
+struct NOVATEL_EXPORT ExSoultionStatus
+{
+    uint8_t bit0 : 1;
+    PseudorangeCorrection correction : 3;
+    uint8_t reserved : 1;
+    uint8_t antennaWarning : 1;
+    uint8_t reserved2 : 2;
+});
+
+
 /*!
 * Position Message Structure
 * This log contains the a position received from the receiver
@@ -179,9 +221,32 @@ struct NOVATEL_EXPORT Position : BinaryMessageBase
 	uint8_t numGpsPlusGlonassL1; //!< number of GPS plus GLONASS L1 satellites used in solution
 	uint8_t numGpsPlusGlonassL2; //!< number of GPS plus GLONASS L2 satellites used in solution
 	uint8_t reserved; //!< reserved
-	uint8_t extendedSolutionStatus; //!< extended solution status - OEMV and greater only
-	uint8_t reserved2; //!< reserved
-	uint8_t signalsUsedMask; //!< signals used mask - OEMV and greater only
+    ExSoultionStatus extendedSolutionStatus; //!< extended solution status - OEMV and greater only
+    BESTPOS_GalileoBeiDouSignalUsed signalsUsedMask1; //!< Galileo and BeiDou signals used mask
+    BESTPOS_GPS_GLONASS_SignalUsed signalsUsedMask2; //!< GPS and GLONASS signals used mask
+    uint8_t crc[4]; //!< 32-bit cyclic redundancy check (CRC)
+});
+
+PACK(
+struct NOVATEL_EXPORT Heading : BinaryMessageBase
+{
+	SolutionStatus solutionStatus; //!< Solution status
+	PositionType positionType; //!< Position type
+	float length; //!< Baseline length (0 to 3000 m)
+    float heading; //!< Heading in degrees (0 to 360.0 degrees)
+	float pitch; //!< Pitch (90 degrees)
+	float reserved; 
+	float headingStandardDeviation; //!< heading standard deviation (deg)
+	float pitchStandardDeviation; //!< pitch standard deviation (deg)
+	uint8_t baseStationId[4]; //!< base station id
+	uint8_t numberOfSatellites; //!< number of satellites tracked
+	uint8_t numberOfSatellitesInSolution; //!< number of satellites used in solution
+	uint8_t numAboveMask; //!< Number of satellites above the elevation mask angle
+	uint8_t numAboveMaskL2; //!< Number of satellites above the mask angle with L2
+    SoultionSource source;
+    ExSoultionStatus exSolutionStatus;
+    BESTPOS_GalileoBeiDouSignalUsed signalsUsedMask1; //!< Galileo and BeiDou signals used mask
+    BESTPOS_GPS_GLONASS_SignalUsed signalsUsedMask2; //!< GPS and GLONASS signals used mask
     uint8_t crc[4]; //!< 32-bit cyclic redundancy check (CRC)
 });
 

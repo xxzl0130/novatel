@@ -94,7 +94,7 @@ namespace novatel
          * @throws ConnectionFailedException connection attempt failed.
          * @throws UnknownErrorCodeException unknown error code returned.
          */
-        bool connect(const std::string&  port, int baudrate = 115200, bool search = true);
+        bool connect(const std::string&  port, int baudrate = 115200, bool search = true, bool check = true);
 
         /*!
          * Disconnects from the serial port
@@ -278,7 +278,7 @@ namespace novatel
         bool spanCapable; //!< Is the receiver a SPAN unit?
     private:
 
-        bool connect_(const std::string& port, int baudrate);
+        bool connect_(const std::string& port, int baudrate, bool doPing = true);
 
         /*!
          * Method run in a seperate thread that continuously reads from the

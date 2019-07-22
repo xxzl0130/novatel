@@ -202,6 +202,17 @@ namespace novatel
         NMEA = 0b11,
     };
 
+
+    enum PseudorangeCorrection : uint8_t
+    {
+        UNKNOWN_Correction = 0,
+        KLOBUCHAR_Correction = 1,
+        SBAS_Correction = 2,
+        MULTI_FREQUENCY_Correction = 3,
+        PSRDIFF_Correction = 4,
+        BLENDED_IONO_VALUE_Correction = 5
+    };
+
     enum ResponseBit : uint8_t //!< Last bit (7) of MessageType struct
     {
         ORIGINAL_MESSAGE = 0b0,
