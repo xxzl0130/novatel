@@ -45,7 +45,7 @@
 #include <map>
 #include <memory>
 
-// Structure definition headers
+ // Structure definition headers
 #include "novatel/novatel_enums.h"
 #include "novatel/novatel_structures.h"
 // Boost Headers
@@ -60,13 +60,13 @@
 namespace novatel
 {
     // used to convert lat and long to UTM coordinates
-    #define GRAD_A_RAD(g) ((g)*0.0174532925199433)
-    #define CRC32_POLYNOMIAL 0xEDB88320L
+#define GRAD_A_RAD(g) ((g)*0.0174532925199433)
+#define CRC32_POLYNOMIAL 0xEDB88320L
 
-    // Constants for unpacking RANGECMP
-    #define CMP_MAX_VALUE         8388608.0
-    #define CMP_GPS_WAVELENGTH_L1 0.1902936727984
-    #define CMP_GPS_WAVELENGTH_L2 0.2442102134246
+// Constants for unpacking RANGECMP
+#define CMP_MAX_VALUE         8388608.0
+#define CMP_GPS_WAVELENGTH_L1 0.1902936727984
+#define CMP_GPS_WAVELENGTH_L2 0.2442102134246
 
     typedef boost::function<double()> GetTimeCallback;
     typedef boost::function<void()> HandleAcknowledgementCallback;
@@ -105,7 +105,7 @@ namespace novatel
         bool isConnected();
 
         /*!
-      
+
            * Pings the GPS to determine if it is properly connected
            *
            * This method sends a ping to the GPS and waits for a response.
@@ -290,15 +290,18 @@ namespace novatel
         void readSerialPort();
 
         void bufferIncomingData(unsigned char* message, size_t length);
-        bool checkBinaryFormat(unsigned char* msg, size_t length);
-        bool checkAsciiFormat(unsigned char* msg, size_t length);
-        bool checkRtcmFormat(unsigned char* msg, size_t length);
-        bool checkAbbreviatedFormat(unsigned char* msg, size_t length);
-        bool checkAck(unsigned char* msg, size_t length);
-        bool checkReset(unsigned char* msg, size_t length);
 
+    public:
+        static bool checkBinaryFormat(unsigned char* msg, size_t length);
+        static bool checkAsciiFormat(unsigned char* msg, size_t length);
+        static bool checkRtcmFormat(unsigned char* msg, size_t length);
+        static bool checkAbbreviatedFormat(unsigned char* msg, size_t length);
+        static bool checkAck(unsigned char* msg, size_t length);
+        static bool checkReset(unsigned char* msg, size_t length);
+
+    private:
         /*!
-         * Parses a packet of data from the GPS. 
+         * Parses a packet of data from the GPS.
          */
         void parseBinary(unsigned char* message, size_t length, BINARY_LOG_TYPE messageId);
         /*
@@ -311,7 +314,7 @@ namespace novatel
         bool parseVersion(std::string packet);
 
         void unpackCompressedRangeData(const CompressedRangeData& cmp,
-                                       RangeData& rng);
+            RangeData& rng);
 
         double unpackCompressedPsrStd(const uint16_t& val) const;
 

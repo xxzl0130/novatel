@@ -40,7 +40,7 @@ unsigned long CRC32Value(int i)
 Calculates the CRC-32 of a block of data all at once
 -------------------------------------------------------------------------- */
 unsigned long CalculateBlockCRC32(unsigned long ulCount, /* Number of bytes in the data block */
-                                  unsigned char* ucBuffer) /* Data block */
+    unsigned char* ucBuffer) /* Data block */
 {
     unsigned long ulTemp1;
     unsigned long ulTemp2;
@@ -54,17 +54,17 @@ unsigned long CalculateBlockCRC32(unsigned long ulCount, /* Number of bytes in t
     return(ulCRC);
 }
 
-uint32_t CalculateBlockCRC24Q(unsigned long size,unsigned char *buf)
+uint32_t CalculateBlockCRC24Q(unsigned long size, unsigned char *buf)
 {
     const static unsigned long CRC24POLY = 0x01864CFBL;
     const static unsigned long CRC24MASK = 0x00FFFFFFL;
-    const static unsigned long CRC24BIT =  0x01000000L;
+    const static unsigned long CRC24BIT = 0x01000000L;
 
     uint32_t crc = 0x00L;
-    for(auto i = 0u;i < size;++i)
+    for (auto i = 0u; i < size; ++i)
     {
         crc ^= buf[i] << 16;
-        for (i = 0; i < 8; i++) {
+        for (auto j = 0; j < 8; j++) {
             crc <<= 1;
             if (crc & CRC24BIT) {
                 crc ^= CRC24POLY;
@@ -207,7 +207,7 @@ bool Novatel::connect(const std::string& port, int baudrate, bool search, bool c
     {
         // search additional baud rates
 
-        int bauds_to_search[9] = {1200, 2400, 4800, 9600, 19200, 38400, 57600, 115200, 230400};
+        int bauds_to_search[9] = { 1200, 2400, 4800, 9600, 19200, 38400, 57600, 115200, 230400 };
         bool found = false;
         for (int ii = 0; ii < 9; ii++)
         {
@@ -309,7 +309,7 @@ bool Novatel::connect_(const std::string& port, int baudrate = 115200, bool doPi
         serialPort->flush();
 
         // look for GPS by sending ping and waiting for response
-        
+
         if (doPing && !ping())
         {
             std::stringstream output;
@@ -320,7 +320,7 @@ bool Novatel::connect_(const std::string& port, int baudrate = 115200, bool doPi
             isConnectedB = false;
             return false;
         }
-        
+
     }
     catch (std::exception& e)
     {
@@ -1257,7 +1257,7 @@ void Novatel::stopReading()
 
 void Novatel::readSerialPort()
 {
-    if(dataRead)
+    if (dataRead)
     {
         delete[] dataRead;
     }
@@ -1288,7 +1288,7 @@ void Novatel::readSerialPort()
 
         //std::cout << read_timestamp_ <<  "  bytes: " << len << std::endl;
         // add data to the buffer to be parsed
-        if(len)
+        if (len)
             bufferIncomingData(dataRead, len);
     }
     delete[] dataRead;
@@ -1303,22 +1303,22 @@ void Novatel::readFromFile(unsigned char* buffer, unsigned int length)
 void Novatel::bufferIncomingData(unsigned char* message, size_t length)
 {
     // add incoming data to buffer
-    if(bufferIndex + length >= MAX_NOUT_SIZE)
+    if (bufferIndex + length >= MAX_NOUT_SIZE)
     {
         memset(dataBuffer, 0, sizeof(dataBuffer));
         logWarning("Overflowed receive buffer. Buffer cleared.");
         bufferIndex = 0;
     }
-    if(enableRaw && rawMsgCallback)
+    if (enableRaw && rawMsgCallback)
     {
         // new data callback
         rawMsgCallback(message, length);
     }
     memcpy(dataBuffer + bufferIndex, message, length);
     bufferIndex += length;
-    for(auto i = 0;i < bufferIndex;++i)
+    for (auto i = 0; i < bufferIndex; ++i)
     {
-        if(checkBinaryFormat(dataBuffer + i, bufferIndex - i))
+        if (checkBinaryFormat(dataBuffer + i, bufferIndex - i))
         {
             parseBinary(dataBuffer + i, bufferIndex - i);
             memset(dataBuffer, 0, sizeof(dataBuffer));
@@ -1339,7 +1339,7 @@ void Novatel::bufferIncomingData(unsigned char* message, size_t length)
             bufferIndex = 0;
             return;
         }
-        if(checkAck(message + i, bufferIndex - i))
+        if (checkAck(message + i, bufferIndex - i))
         {
             memset(dataBuffer, 0, sizeof(dataBuffer));
             bufferIndex = 0;
@@ -1351,7 +1351,7 @@ void Novatel::bufferIncomingData(unsigned char* message, size_t length)
             handleAcknowledgement();
             return;
         }
-        if(checkReset(message + i,bufferIndex - i))
+        if (checkReset(message + i, bufferIndex - i))
         {
             boost::lock_guard<boost::mutex> lock(resetMutex);
             waitingForResetComplete = false;
@@ -1365,7 +1365,7 @@ bool Novatel::checkBinaryFormat(unsigned char* msg, size_t length)
 {
     if (length < sizeof(BinaryHeader))
         return false;
-    if(msg[0] != SYNC_BYTE_1 || msg[1] != SYNC_BYTE_2 || msg[2] != SYNC_BYTE_3)
+    if (msg[0] != SYNC_BYTE_1 || msg[1] != SYNC_BYTE_2 || msg[2] != SYNC_BYTE_3)
         return false;
     BinaryHeader header;
     memcpy(&header, msg, sizeof(header));
@@ -1394,7 +1394,7 @@ bool Novatel::checkRtcmFormat(unsigned char* msg, size_t length)
     if (length < 6)
         return false;
     //check Preamble
-    if (msg[0] != RTCM_SYNC_BYTE_1 || (msg[1] & RTCM_SYNC_BYTE_1) != 0)
+    if (msg[0] != RTCM_SYNC_BYTE_1)
         return false;
     RTCM3Header header;
     memcpy(&header, msg, sizeof header);
@@ -1727,7 +1727,7 @@ void Novatel::parseBinary(unsigned char* message, size_t length)
 
 void Novatel::parseRtcm(unsigned char* message, size_t length)
 {
-    if(defaultRtcmCallback)
+    if (defaultRtcmCallback)
     {
         defaultRtcmCallback(message, length);
     }
@@ -1736,11 +1736,11 @@ void Novatel::parseRtcm(unsigned char* message, size_t length)
 void Novatel::parseAscii(unsigned char* message, size_t length)
 {
     if (defaultAsciiCallback)
-        defaultAsciiCallback(std::string(message,message + length));
+        defaultAsciiCallback(std::string(message, message + length));
 }
 
 void Novatel::unpackCompressedRangeData(const CompressedRangeData& cmp,
-                                        RangeData& rng)
+    RangeData& rng)
 {
     rng.satellitePrn = cmp.rangeRecord.satellitePrn;
 
@@ -1909,7 +1909,7 @@ bool Novatel::convertLLaUtm(double lat, double Long, double* northing, double* e
         else if (LongTemp >= 33.0 && LongTemp < 42.0)
             *zone = 37;
     }
-    LongOriginRad = GRAD_A_RAD((*zone-1)*6 - 180 + 3);
+    LongOriginRad = GRAD_A_RAD((*zone - 1) * 6 - 180 + 3);
 
     N = a / sqrt(1 - ee * sin(LatRad) * sin(LatRad));
     T = tan(LatRad) * tan(LatRad);
